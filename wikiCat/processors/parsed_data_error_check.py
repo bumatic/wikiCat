@@ -114,11 +114,7 @@ class ParsedDataErrorCheck(SparkProcessorParsed):
             missing_titles_all_df.write.format('com.databricks.spark.csv').option('header', 'false').option('delimiter', '\t').save(error_data_file)
             self.handle_spark_results(self.error_path, error_data_filename)
             self.register_results('error', error_data=[error_data_filename], error_type='missing_info_titles_data')
-
             #missing_titles = missing_titles_df.collect()
             #self.write_list(error_file, missing_titles_df)
-
-
-
         return
 

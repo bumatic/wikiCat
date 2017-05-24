@@ -93,6 +93,7 @@ class GraphDataGenerator(SparkProcessorParsed):
             edges_df.write.format('com.databricks.spark.csv').option('header', 'false').option('delimiter', '\t')\
                 .save(edges_results_file)
             del edges_df
+            self.assemble_spark_results(edges_results_file)
 
             # 3. GENERATE AND SAVE NODE LIST
             nodes_df = spark.sql("SELECT CONCAT(source, target) as id FROM data").distinct()
@@ -105,6 +106,7 @@ class GraphDataGenerator(SparkProcessorParsed):
             nodes_df.write.format('com.databricks.spark.csv').option('header', 'false').option('delimiter', '\t')\
                 .save(nodes_results_file)
             del nodes_df
+            self.assemble_spark_results(nodes_results_file)
 
             # 4. CREATE TABLE WITH ALL REVISIONS OF A SOURCE PAGE
             page_revisions_df = spark.sql('SELECT source, revision FROM data').distinct()
@@ -170,12 +172,14 @@ class GraphDataGenerator(SparkProcessorParsed):
             events_df = events_df #.coalesce(1)
             events_df.write.format('com.databricks.spark.csv').option('header', 'false').option('delimiter', '\t')\
                 .save(events_results_file)
+            del events_df
+            self.assemble_spark_results(events_results_file)
 
             # coalesce(1) # This option can be added after write to coalesce all results in one file.
             # NEEDS MUCH MEMORY!!!
 
-            #self.register_results('graph', nodes=nodes_results, edges=edges_results, events=events_results,
-            #                      fixed=self.fixed, errors=self.errors, override=override)
+            self.register_results('graph', nodes=nodes_results, edges=edges_results, events=events_results,
+                                  fixed=self.fixed, errors=self.errors, override=override)
         return
 
 
