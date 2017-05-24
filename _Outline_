@@ -1,0 +1,96 @@
+
+
+#Folder structure:
+...
+ |_ home
+     |_ 01_logs
+     |
+     |_ 02_data
+     |    |_ 00_testdata
+     |    |_ 01_dump
+     |    |_ 02_parsed
+     |    |_ 03_graph
+     |
+     |_ 03_results
+
+
+wikiproject initializes data object
+                        data object can load project data at different stages
+                            > dump
+                            > parsed
+                            > postprocessed ... (kann wahrscheinlich über SPARK geregelt werden)
+                                    > cleaning
+                                    > assembling
+                                    > resolving
+                                    > reconfiguring
+                            > graph
+
+postprocessing
+
+data_files = {}
+data_files['page_info'] = [LIST OF FILES]
+data_files['revision_info'] = [LIST OF FILES]
+data_files['cat_data'] = [LIST OF FILES]
+data_files['link_data'] = [LIST OF FILES]
+
+evtl.
+data_files['corr_list'] = [LIST OF FILES] #Diese müsste noch erzeugt werden.
+
+def status =
+
+
+
+
+
+
+#wikiCat
+
+info
+    title
+    home
+    status
+
+class Project:
+
+def load ():
+    > info = load infofile into dict
+
+    if info["title"] exists:
+        self.title = info["title"]
+    if info["home"] exists:
+        self.home = info["home"]
+    if info["status"] exists:
+        self.status = info["status"]
+    check if folder structure exists:
+        check home/
+        check home/logs/
+        check home/data/
+        check home/results/
+
+    check if data in folders is consistent with status (CAN BE DONE LATER)
+
+def save ():
+
+def create (take all variables):
+    self.title =
+    self.home =
+    self.
+
+# List of project statuses
+# 001 Project created
+# ...
+
+
+
+Folder structure
+
+
+
+
+
+
+
+
+
+
+
