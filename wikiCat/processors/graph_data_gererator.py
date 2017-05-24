@@ -164,7 +164,7 @@ class GraphDataGenerator(SparkProcessorParsed):
             # 10. RESOLVE REVISION_ID TO TIMES, SORT BY TIME, AND STORE
 
             events_df = spark.sql('SELECT r.rev_date as revision, e.source, e.target, e.event '
-                                  'FROM events e JOIN revisions r ON e.revision = r.rev_id').sort('revision')
+                                  'FROM events e JOIN revision r ON e.revision = r.rev_id').sort('revision')
             # events_results = events_df.collect()
             # self.write_list(events_results_file, events_results)
             events_df = events_df.coalesce(1)
