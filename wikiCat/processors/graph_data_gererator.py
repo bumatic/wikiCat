@@ -107,13 +107,13 @@ class GraphDataGenerator(SparkProcessorParsed):
             del nodes_df
 
             # 4. CREATE TABLE WITH ALL REVISIONS OF A SOURCE PAGE
-            page_revisions_df = spark.sql('SELECT source_id, rev_id FROM data').distinct()
+            page_revisions_df = spark.sql('SELECT source, revision FROM data').distinct()
             page_revisions_df.createOrReplaceTempView('page_revisions')
 
             # 4. CREATE TABLE WITH ALL POSSIBLE COMBINATIONS of SOURCE & REV with TARGETS
-            all_possibilities_df = spark.sql('SELECT p.source_id, p.rev_id, d.target_title '
+            all_possibilities_df = spark.sql('SELECT p.source, p.revision, d.target '
                                              'FROM page_revisions p JOIN data d '
-                                             'ON p.source_id = d.source_id').distinct()
+                                             'ON p.source = d.source').distinct()
 
             # 5. CREATE TABLE WITH ENTRIES FOR WHEN A EDGE DID NOT EXIST AT THE TIME OF A REVISION
             # BY SUBTRACTING EXISTING EDGES FROM ALL_POSSIBILITIES
@@ -177,4 +177,7 @@ class GraphDataGenerator(SparkProcessorParsed):
             #self.register_results('graph', nodes=nodes_results, edges=edges_results, events=events_results,
             #                      fixed=self.fixed, errors=self.errors, override=override)
         return
+
+
+
 
