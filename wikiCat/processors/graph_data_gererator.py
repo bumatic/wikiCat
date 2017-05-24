@@ -89,7 +89,7 @@ class GraphDataGenerator(SparkProcessorParsed):
             edges_df = edges_df.withColumn('type', lit(self.edge_type))
             #edges_results = edges_df.collect()
             #self.write_list(edges_results_file, edges_results)
-            edges_df = edges_df.coalesce(1)
+            edges_df = edges_df #.coalesce(1)
             edges_df.write.format('com.databricks.spark.csv').option('header', 'false').option('delimiter', '\t')\
                 .save(edges_results_file)
             del edges_df
@@ -101,7 +101,7 @@ class GraphDataGenerator(SparkProcessorParsed):
             nodes_df = spark.sql('SELECT n.id, i.page_title, i.page_ns FROM nodes n JOIN info i ON n.id=i.page_id')
             # nodes_results = nodes_df.collect()
             # self.write_list(nodes_results_file, nodes_results)
-            nodes_df = nodes_df.coalesce(1)
+            nodes_df = nodes_df #.coalesce(1)
             nodes_df.write.format('com.databricks.spark.csv').option('header', 'false').option('delimiter', '\t')\
                 .save(nodes_results_file)
             del nodes_df
@@ -167,13 +167,14 @@ class GraphDataGenerator(SparkProcessorParsed):
                                   'FROM events e JOIN revision r ON e.revision = r.rev_id').sort('revision')
             # events_results = events_df.collect()
             # self.write_list(events_results_file, events_results)
-            events_df = events_df.coalesce(1)
+            events_df = events_df #.coalesce(1)
             events_df.write.format('com.databricks.spark.csv').option('header', 'false').option('delimiter', '\t')\
                 .save(events_results_file)
 
             # coalesce(1) # This option can be added after write to coalesce all results in one file.
             # NEEDS MUCH MEMORY!!!
-            self.register_results('graph', nodes=nodes_results, edges=edges_results, events=events_results,
-                                  fixed=self.fixed, errors=self.errors, override=override)
+
+            #self.register_results('graph', nodes=nodes_results, edges=edges_results, events=events_results,
+            #                      fixed=self.fixed, errors=self.errors, override=override)
         return
 
