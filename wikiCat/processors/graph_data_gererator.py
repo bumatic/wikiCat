@@ -50,10 +50,13 @@ class GraphDataGenerator(SparkProcessorParsed):
             counter = counter + 1
 
             # Results files
+            edges_results_path = os.path.join(self.results_path, self.results_basename + str(counter) + '_edges/')
             edges_results_file = os.path.join(self.results_path, self.results_basename + str(counter) + '_edges.csv')
             edges_results.append(edges_results_file)
+            nodes_results_path = os.path.join(self.results_path, self.results_basename + str(counter) + '_nodes/')
             nodes_results_file = os.path.join(self.results_path, self.results_basename + str(counter) + '_nodes.csv')
             nodes_results.append(nodes_results_file)
+            events_results_path = os.path.join(self.results_path, self.results_basename + str(counter) + '_events/')
             events_results_file = os.path.join(self.results_path, self.results_basename + str(counter) + '_events.csv')
             events_results.append(events_results_file)
 
@@ -93,7 +96,7 @@ class GraphDataGenerator(SparkProcessorParsed):
             edges_df.write.format('com.databricks.spark.csv').option('header', 'false').option('delimiter', '\t')\
                 .save(edges_results_file)
             del edges_df
-            self.assemble_spark_results(edges_results_file)
+            self.assemble_spark_results(edges_results_path, edges_results_file)
 
             # 3. GENERATE AND SAVE NODE LIST
             nodes_df = spark.sql("SELECT CONCAT(source, target) as id FROM data").distinct()
@@ -106,7 +109,7 @@ class GraphDataGenerator(SparkProcessorParsed):
             nodes_df.write.format('com.databricks.spark.csv').option('header', 'false').option('delimiter', '\t')\
                 .save(nodes_results_file)
             del nodes_df
-            self.assemble_spark_results(nodes_results_file)
+            self.assemble_spark_results(nodes_results_path, nodes_results_file)
 
             # 4. CREATE TABLE WITH ALL REVISIONS OF A SOURCE PAGE
             page_revisions_df = spark.sql('SELECT source, revision FROM data').distinct()
@@ -173,7 +176,7 @@ class GraphDataGenerator(SparkProcessorParsed):
             events_df.write.format('com.databricks.spark.csv').option('header', 'false').option('delimiter', '\t')\
                 .save(events_results_file)
             del events_df
-            self.assemble_spark_results(events_results_file)
+            self.assemble_spark_results(events_results_path, events_results_file)
 
             # coalesce(1) # This option can be added after write to coalesce all results in one file.
             # NEEDS MUCH MEMORY!!!

@@ -46,20 +46,19 @@ class SparkProcessorParsed(Processor):
                 shutil.rmtree(spark_path)
                 os.rename(os.path.join(path, filename), os.path.join(path, file))
 
-    def assemble_spark_results(self, results_file):
-        spark_path = results_file+'/'
-        for file in next(os.walk(spark_path))[2]:
+    def assemble_spark_results(self, path, results_file):
+        for file in next(os.walk(path))[2]:
             if file[0] != '.':
                 with open(results_file, 'a') as out:
-                    with open(spark_path + file, 'r') as infile:
+                    with open(path + file, 'r') as infile:
                         try:
                             for line in infile.readlines():
                                 fields = line.split('\t')
-                                for field in fields:
-                                    if field == '':
-                                        field = 'NaN'
+                                for i in range(len(fields)):
+                                    if fields[i] == '':
+                                        fields[i] = 'NaN'
                                 new_line = '\t'.join(map(str, fields))
                                 out.write(new_line)  # +'\n')
                         except:
                             pass
-        shutil.rmtree(spark_path)
+        shutil.rmtree(path)

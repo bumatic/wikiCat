@@ -6,7 +6,6 @@ import os
 class PandasProcessorGraph(Processor):
     def __init__(self, project, fixed='fixed_none', errors='errors_removed'):
         Processor.__init__(self, project, 'graph')
-
         self.project = self.project
         self.fixed = fixed
         self.errors = errors
@@ -19,13 +18,16 @@ class PandasProcessorGraph(Processor):
         self.edges = pd.DataFrame()
 
     def load_events(self, columns=[]):
+        # Default events columns: ['source', 'target', 'revision' 'event']
         self.events = pd.read_csv(os.path.join(self.path, self.events_file), header=None, delimiter='\t',
                                   names=columns)
 
     def load_edges(self, columns=[]):
+        # Default edge columns ['source', 'target', 'type', ('cscore')]
         self.edges = pd.read_csv(os.path.join(self.path, self.edges_file), header=None, delimiter='\t',
                                  names=columns)
 
     def load_nodes(self, columns=[]):
+        # Default node columns ['id', 'title', 'ns', ('cscore')]
         self.nodes = pd.read_csv(os.path.join(self.path, self.nodes_file), header=None, delimiter='\t',
                                  names=columns)
