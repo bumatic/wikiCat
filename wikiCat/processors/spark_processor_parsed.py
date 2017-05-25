@@ -47,10 +47,10 @@ class SparkProcessorParsed(Processor):
                 os.rename(os.path.join(path, filename), os.path.join(path, file))
 
     def assemble_spark_results(self, path, results_file):
-        for file in next(os.walk(path))[2]:
+        for file in next(os.walk(os.getcwd()+path))[2]:
             if file[0] != '.':
-                with open(results_file, 'a') as out:
-                    with open(path + file, 'r') as infile:
+                with open(os.getcwd()+results_file, 'a') as out:
+                    with open(os.getcwd()+path + file, 'r') as infile:
                         try:
                             for line in infile.readlines():
                                 fields = line.split('\t')
@@ -61,4 +61,4 @@ class SparkProcessorParsed(Processor):
                                 out.write(new_line)  # +'\n')
                         except:
                             pass
-        shutil.rmtree(path)
+        shutil.rmtree(os.getcwd()+path)

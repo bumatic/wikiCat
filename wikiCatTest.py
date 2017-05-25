@@ -2,6 +2,7 @@ from wikiCat.wikiproject import Project
 import pprint
 from wikiCat.processors.parsed_data_error_check import ParsedDataErrorCheck
 from wikiCat.processors.graph_data_gererator import GraphDataGenerator
+from wikiCat.processors.spark_processor_parsed import SparkProcessorParsed
 
 
 pp = pprint.PrettyPrinter(indent=4)
@@ -9,12 +10,16 @@ pp = pprint.PrettyPrinter(indent=4)
 mp = Project('project')
 mp.load_project()
 
-pp.pprint(mp.pinfo)
+#pp.pprint(mp.pinfo)
 
 #ParsedDataErrorCheck(mp, 'cat_data').missing_info_source_ids()
 #ParsedDataErrorCheck(mp, 'cat_data').find_unresolvable_target_titles()
 
 GraphDataGenerator(mp, 'cat_data').generate_graph_data()
+
+#cat_data_fixed_none_errors_removed_1_edge
+
+
 
 pp.pprint(mp.pinfo)
 '''

@@ -94,7 +94,7 @@ class GraphDataGenerator(SparkProcessorParsed):
             #self.write_list(edges_results_file, edges_results)
             edges_df = edges_df #.coalesce(1)
             edges_df.write.format('com.databricks.spark.csv').option('header', 'false').option('delimiter', '\t')\
-                .save(edges_results_file)
+                .save(edges_results_path)
             del edges_df
             self.assemble_spark_results(edges_results_path, edges_results_file)
 
@@ -107,7 +107,7 @@ class GraphDataGenerator(SparkProcessorParsed):
             # self.write_list(nodes_results_file, nodes_results)
             nodes_df = nodes_df #.coalesce(1)
             nodes_df.write.format('com.databricks.spark.csv').option('header', 'false').option('delimiter', '\t')\
-                .save(nodes_results_file)
+                .save(nodes_results_path)
             del nodes_df
             self.assemble_spark_results(nodes_results_path, nodes_results_file)
 
@@ -174,7 +174,7 @@ class GraphDataGenerator(SparkProcessorParsed):
             # self.write_list(events_results_file, events_results)
             events_df = events_df #.coalesce(1)
             events_df.write.format('com.databricks.spark.csv').option('header', 'false').option('delimiter', '\t')\
-                .save(events_results_file)
+                .save(events_results_path)
             del events_df
             self.assemble_spark_results(events_results_path, events_results_file)
 
