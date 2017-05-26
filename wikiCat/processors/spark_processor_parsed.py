@@ -6,6 +6,7 @@ from pyspark.sql import Row
 import shutil
 import os
 
+
 class SparkProcessorParsed(Processor):
     def __init__(self, project):
         Processor.__init__(self, project, 'parsed')
@@ -36,6 +37,7 @@ class SparkProcessorParsed(Processor):
         fields = line.split('\t')
         rev_id = int(fields[1])
         rev_date = parser.parse(fields[2])
+        rev_date = rev_date.timestamp()
         return Row(rev_id=rev_id, rev_date=rev_date)
 
     def handle_spark_results(self, path, file):

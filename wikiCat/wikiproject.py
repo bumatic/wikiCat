@@ -23,23 +23,23 @@ class Project:
         self.data_desc = {}
 
     def create_project(self, title='New WikiCat Project', description='This is a WikiCat Project'):
-        if not os.path.exists(self.pinfo_file):
-            if not os.path.isdir(self.log_path):
-                os.makedirs(self.log_path)
-            if not os.path.isdir(self.data_path):
-                os.makedirs(self.data_path)
-            if not os.path.isdir(self.test_data_path):
-                os.makedirs(self.test_data_path)
-            if not os.path.isdir(self.dump_data_path):
-                os.makedirs(self.dump_data_path)
-            if not os.path.isdir(self.parsed_data_path):
-                os.makedirs(self.parsed_data_path)
-            if not os.path.isdir(self.graph_data_path):
-                os.makedirs(self.graph_data_path)
-            if not os.path.isdir(self.error_data_path):
-                os.makedirs(self.error_data_path)
-            if not os.path.isdir(self.results_path):
-                os.makedirs(self.results_path)
+        if not os.path.exists(os.path.join(os.getcwd(), self.pinfo_file)):
+            if not os.path.isdir(os.path.join(os.getcwd(), self.log_path)):
+                os.makedirs(os.path.join(os.getcwd(), self.log_path))
+            if not os.path.isdir(os.path.join(os.getcwd(), self.data_path)):
+                os.makedirs(os.path.join(os.getcwd(), self.data_path))
+            if not os.path.isdir(os.path.join(os.getcwd(), self.test_data_path)):
+                os.makedirs(os.path.join(os.getcwd(), self.test_data_path))
+            if not os.path.isdir(os.path.join(os.getcwd(), self.dump_data_path)):
+                os.makedirs(os.path.join(os.getcwd(), self.dump_data_path))
+            if not os.path.isdir(os.path.join(os.getcwd(), self.parsed_data_path)):
+                os.makedirs(os.path.join(os.getcwd(), self.parsed_data_path))
+            if not os.path.isdir(os.path.join(os.getcwd(), self.graph_data_path)):
+                os.makedirs(os.path.join(os.getcwd(), self.graph_data_path))
+            if not os.path.isdir(os.path.join(os.getcwd(), self.error_data_path)):
+                os.makedirs(os.path.join(os.getcwd(), self.error_data_path))
+            if not os.path.isdir(os.path.join(os.getcwd(), self.results_path)):
+                os.makedirs(os.path.join(os.getcwd(), self.results_path))
 
             self.project_title = title
             self.project_description = description
@@ -52,9 +52,9 @@ class Project:
         return
 
     def load_project(self):
-        if os.path.exists(self.pinfo_file):
+        if os.path.exists(os.path.join(os.getcwd(), self.pinfo_file)):
             with open(self.pinfo_file, 'r') as info_file:
-                self.pinfo = json.load(info_file)
+                self.pinfo = json.load(os.path.join(os.getcwd(), info_file))
             info_file.close()
             if 'dump' in self.pinfo['data'].keys():
                 print('LOADING DUMP DATA FROM PROJECT FILE NEEDS TO BE IMPLEMENTED')

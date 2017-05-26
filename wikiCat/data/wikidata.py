@@ -88,7 +88,7 @@ class WikiData:
     def check_files(self, file_list):
         exists = True
         for f in file_list:
-            print(os.path.join(self.data_path,f))
+            print(os.path.join(self.data_path, f))
             if not os.path.exists(os.path.join(self.data_path, f)):
                 exists = False
         return exists
