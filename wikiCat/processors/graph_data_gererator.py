@@ -99,13 +99,19 @@ class GraphDataGenerator(SparkProcessorParsed):
             self.assemble_spark_results(edges_results_path, edges_results_file)
 
             # 3. GENERATE AND SAVE NODE LIST
-            nodes_df = spark.sql("SELECT CONCAT(source, target) as id FROM data").distinct()
+            source_df = spark.sql("SELECT source as id FROM data").distinct()
+            target_df = spark.sql("SELECT target as id FROM data").distinct()
+            nodes_df = source_df.union(target_df)
+
+            #nodes_df = spark.sql("SELECT CONCAT(source, target) as id FROM data").distinct()
+            print('nodes count union: '+str(nodes_df.count()))
             nodes_df.createOrReplaceTempView('nodes')
 
-            nodes_df = spark.sql('SELECT n.id, i.page_title, i.page_ns FROM nodes n JOIN info i ON n.id=i.page_id')
+            nodes_df = spark.sql('SELECT n.id, i.page_title, i.page_ns FROM nodes n LEFT OUTER JOIN info i ON n.id=i.page_id').distinct()
+            print('nodes count joined: ' + str(nodes_df.count()))
             # nodes_results = nodes_df.collect()
             # self.write_list(nodes_results_file, nodes_results)
-            nodes_df = nodes_df #.coalesce(1)
+            # nodes_df = nodes_df #.coalesce(1)
             nodes_df.write.format('com.databricks.spark.csv').option('header', 'false').option('delimiter', '\t')\
                 .save(nodes_results_path)
             del nodes_df
