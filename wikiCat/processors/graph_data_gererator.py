@@ -77,7 +77,7 @@ class GraphDataGenerator(SparkProcessorParsed):
 
             resolved_titles_df = spark.sql(
                 'SELECT d.source_id as source, i.page_id as target, d.target_title, d.rev_id as revision '
-                'FROM data d LEFT OUTER JOIN cat_info i ON UPPER(d.target_title) = UPPER(i.page_title')
+                'FROM data d LEFT OUTER JOIN cat_info i ON UPPER(d.target_title) = UPPER(i.page_title)')
 
             # resolved_titles_df = spark.createDataFrame(resolved_titles).cache()
             resolved_titles_df.createOrReplaceTempView('resolved')
