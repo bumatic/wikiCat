@@ -53,8 +53,8 @@ class Project:
 
     def load_project(self):
         if os.path.exists(os.path.join(os.getcwd(), self.pinfo_file)):
-            with open(self.pinfo_file, 'r') as info_file:
-                self.pinfo = json.load(os.path.join(os.getcwd(), info_file))
+            with open(os.path.join(os.getcwd(), self.pinfo_file), 'r') as info_file:
+                self.pinfo = json.load(info_file)
             info_file.close()
             if 'dump' in self.pinfo['data'].keys():
                 print('LOADING DUMP DATA FROM PROJECT FILE NEEDS TO BE IMPLEMENTED')

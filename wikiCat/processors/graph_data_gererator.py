@@ -52,13 +52,11 @@ class GraphDataGenerator(SparkProcessorParsed):
             # Results files
             edges_results_path = os.path.join(self.results_path, self.results_basename + str(counter) + '_edges/')
             edges_results_file = os.path.join(self.results_path, self.results_basename + str(counter) + '_edges.csv')
-            edges_results.append(edges_results_file)
             nodes_results_path = os.path.join(self.results_path, self.results_basename + str(counter) + '_nodes/')
             nodes_results_file = os.path.join(self.results_path, self.results_basename + str(counter) + '_nodes.csv')
-            nodes_results.append(nodes_results_file)
             events_results_path = os.path.join(self.results_path, self.results_basename + str(counter) + '_events/')
             events_results_file = os.path.join(self.results_path, self.results_basename + str(counter) + '_events.csv')
-            events_results.append(events_results_file)
+
 
             # Infer the schema, and register the DataFrames as tables.
             page_data_source = spark.sparkContext.textFile(os.path.join(self.data_path, file[0]))
@@ -79,7 +77,7 @@ class GraphDataGenerator(SparkProcessorParsed):
 
             resolved_titles_df = spark.sql(
                 'SELECT d.source_id as source, i.page_id as target, d.target_title, d.rev_id as revision '
-                'FROM data d LEFT OUTER JOIN cat_info i ON d.target_title = i.page_title')
+                'FROM data d LEFT OUTER JOIN cat_info i ON UPPER(d.target_title) = UPPER(i.page_title')
 
             # resolved_titles_df = spark.createDataFrame(resolved_titles).cache()
             resolved_titles_df.createOrReplaceTempView('resolved')
@@ -101,7 +99,7 @@ class GraphDataGenerator(SparkProcessorParsed):
             # 3. GENERATE AND SAVE NODE LIST
             source_df = spark.sql("SELECT source as id FROM data").distinct()
             target_df = spark.sql("SELECT target as id FROM data").distinct()
-            nodes_df = source_df.union(target_df)
+            nodes_df = source_df.union(target_df).distinct()
 
             #nodes_df = spark.sql("SELECT CONCAT(source, target) as id FROM data").distinct()
             print('nodes count union: '+str(nodes_df.count()))
@@ -169,13 +167,13 @@ class GraphDataGenerator(SparkProcessorParsed):
 
             # 9. COMBINE THE TABLES START_EVENTS AND END_EVENTS, SORT BY REVISION
 
-            events_df = start_events_df.union(end_events_df)
+            events_df = start_events_df.union(end_events_df).distinct()
             events_df.createOrReplaceTempView("events")
 
             # 10. RESOLVE REVISION_ID TO TIMES, SORT BY TIME, AND STORE
 
             events_df = spark.sql('SELECT r.rev_date as revision, e.source, e.target, e.event '
-                                  'FROM events e JOIN revision r ON e.revision = r.rev_id').sort('revision')
+                                  'FROM events e JOIN revision r ON e.revision = r.rev_id').distinct().sort('revision')
             # events_results = events_df.collect()
             # self.write_list(events_results_file, events_results)
             events_df = events_df #.coalesce(1)
@@ -184,11 +182,17 @@ class GraphDataGenerator(SparkProcessorParsed):
             del events_df
             self.assemble_spark_results(events_results_path, events_results_file)
 
-            # coalesce(1) # This option can be added after write to coalesce all results in one file.
-            # NEEDS MUCH MEMORY!!!
+            path, nodes_results_file = os.path.split(nodes_results_file)
+            nodes_results.append(nodes_results_file)
+            path, edges_results_file = os.path.split(edges_results_file)
+            edges_results.append(edges_results_file)
+            path, events_results_file = os.path.split(events_results_file)
+            events_results.append(events_results_file)
 
-            self.register_results('graph', nodes=nodes_results, edges=edges_results, events=events_results,
-                                  fixed=self.fixed, errors=self.errors, override=override)
+
+
+        self.register_results('graph', nodes=nodes_results, edges=edges_results, events=events_results,
+                              fixed=self.fixed, errors=self.errors, override=override)
         return
 
 
