@@ -34,6 +34,11 @@ class GraphDataGenerator(SparkProcessorParsed):
         page_info_df = spark.createDataFrame(page_info).cache()
         page_info_df.createOrReplaceTempView("info")
 
+        # Create DF with only cat_info
+        # needs to be replaced/removed  when cat_data file has been fixed
+        cat_info_df = spark.sql("SELECT * FROM info WHERE page_ns=14")
+        cat_info_df.createOrReplaceTempView("cat_info")
+
         # Infer the schema, and register the DataFrames as tables.
         revision_info_source = spark.sparkContext.textFile(os.path.join(self.data_path, self.revision_info))
         revision_info = revision_info_source.map(self.mapper_revisions)
@@ -72,25 +77,25 @@ class GraphDataGenerator(SparkProcessorParsed):
             # Cat data > Hier müsste Category: am Titel dran bleiben. Wenn dies gelöst, dann oben im mapper der page info auch das removal von
             # "Category:" entfernen
 
-            cat_info_df = spark.sql("SELECT * FROM info WHERE page_ns=14")
-            cat_info_df.createOrReplaceTempView("cat_info")
-
             resolved_titles_df = spark.sql(
                 'SELECT d.source_id as source, i.page_id as target, d.target_title, d.rev_id as revision '
                 'FROM data d LEFT OUTER JOIN cat_info i ON UPPER(d.target_title) = UPPER(i.page_title)')
-
-            # resolved_titles_df = spark.createDataFrame(resolved_titles).cache()
+            print('resolved Titles:')
+            print(resolved_titles_df.count())
+            resolved_titles_df.show()
             resolved_titles_df.createOrReplaceTempView('resolved')
 
+
             page_data_df = spark.sql('SELECT r.source, r.target, r.revision FROM resolved r WHERE r.target IS NOT NULL')
+            print('page_data_df assigned with resolved titles')
+            print(page_data_df.count())
+            page_data_df.show()
             page_data_df.createOrReplaceTempView('data')
 
             # 2. GENERATE, ADD EDGE TYPE AND SAVE EDGE LIST
             edges_df = spark.sql('SELECT source, target FROM data').distinct()
             edges_df = edges_df.withColumn('type', lit(self.edge_type))
-            #edges_results = edges_df.collect()
-            #self.write_list(edges_results_file, edges_results)
-            edges_df = edges_df #.coalesce(1)
+            edges_df = edges_df
             edges_df.write.format('com.databricks.spark.csv').option('header', 'false').option('delimiter', '\t')\
                 .save(edges_results_path)
             del edges_df
@@ -100,16 +105,10 @@ class GraphDataGenerator(SparkProcessorParsed):
             source_df = spark.sql("SELECT source as id FROM data").distinct()
             target_df = spark.sql("SELECT target as id FROM data").distinct()
             nodes_df = source_df.union(target_df).distinct()
-
-            #nodes_df = spark.sql("SELECT CONCAT(source, target) as id FROM data").distinct()
-            print('nodes count union: '+str(nodes_df.count()))
             nodes_df.createOrReplaceTempView('nodes')
 
-            nodes_df = spark.sql('SELECT n.id, i.page_title, i.page_ns FROM nodes n LEFT OUTER JOIN info i ON n.id=i.page_id').distinct()
-            print('nodes count joined: ' + str(nodes_df.count()))
-            # nodes_results = nodes_df.collect()
-            # self.write_list(nodes_results_file, nodes_results)
-            # nodes_df = nodes_df #.coalesce(1)
+            nodes_df = spark.sql('SELECT n.id, i.page_title, i.page_ns FROM nodes n LEFT OUTER JOIN info i '
+                                 'ON n.id=i.page_id').distinct()
             nodes_df.write.format('com.databricks.spark.csv').option('header', 'false').option('delimiter', '\t')\
                 .save(nodes_results_path)
             del nodes_df
@@ -120,14 +119,19 @@ class GraphDataGenerator(SparkProcessorParsed):
             page_revisions_df.createOrReplaceTempView('page_revisions')
 
             # 4. CREATE TABLE WITH ALL POSSIBLE COMBINATIONS of SOURCE & REV with TARGETS
-            all_possibilities_df = spark.sql('SELECT p.source, p.revision, d.target '
+            all_possibilities_df = spark.sql('SELECT p.source, d.target, p.revision '
                                              'FROM page_revisions p JOIN data d '
                                              'ON p.source = d.source').distinct()
 
             # 5. CREATE TABLE WITH ENTRIES FOR WHEN A EDGE DID NOT EXIST AT THE TIME OF A REVISION
             # BY SUBTRACTING EXISTING EDGES FROM ALL_POSSIBILITIES
             negative_edges_df = all_possibilities_df.subtract(page_data_df).sort('source', 'revision')
+
+            print('negative edges:')
+            print(negative_edges_df.count())
+            negative_edges_df.show()
             negative_edges_df.createOrReplaceTempView('negative_edges')
+
 
             # 6.1 FIRST STEP TO CREATE DURATION RESULTS BY MAKING A LEFT OUTER JOIN OF DATA WITH NEGATIVE EDGES
             # ON SOURCE = TARGET AND DATA.REVISION < NEGATIVE_EDGES.REVISION
@@ -136,26 +140,44 @@ class GraphDataGenerator(SparkProcessorParsed):
             durations_df = spark.sql('SELECT d.source, d.target, d.revision as start, n.revision as end '
                                      'FROM data d LEFT OUTER JOIN negative_edges n '
                                      'ON d.source = n.source AND d.target = n.target AND d.revision < n.revision')
+            print('durations all with wrong dates')
+            print('number: ' + str(durations_df.count()))
+            durations_df.show()
             durations_df.createOrReplaceTempView("durations")
+
+
 
             # 6.2 SECOND STEP TO CREATE DURATION RESULTS BY KEEPING ONLY MIN END TIMES
             # FOR GROUPS OF SOURCE, TARGET, START
             durations_df = spark.sql('SELECT source, target, start, min(end) as end FROM durations '
                                      'GROUP BY source, target, start')
+            print('min end')
+            print(durations_df.count())
+            durations_df.show()
             durations_df.createOrReplaceTempView("durations")
 
             # 6.3 THIRD STEP TO CREATE DURATION RESULTS BY KEEPING ONLY MIN START TIMES
             # FOR GROUPS OF SOURCE, TARGET, END
             durations_df = spark.sql('SELECT source, target, min(start) as start, end FROM durations '
-                                     'GROUP BY source, target, end')
+                                     'GROUP BY source, target, end').distinct()
+            print('DURATIONS DF Min Start')
+            print(durations_df.count())
+            durations_df.show()
             durations_df.createOrReplaceTempView("durations")
 
             # 7.1 CREATE START COLUMN
             durations_df = durations_df.withColumn('event_start', lit('start'))
+            print('column start added')
+            print(durations_df.count())
+            durations_df.show()
+
             durations_df.createOrReplaceTempView("durations")
 
             # 7.2 CREATE END COLUMN
             durations_df = durations_df.withColumn('event_end', lit('end'))
+            print('column end added')
+            print(durations_df.count())
+            durations_df.show()
             durations_df.createOrReplaceTempView("durations")
 
             # 8. CREATE TABLES FOR START EVENTS AND END EVENTS
@@ -174,9 +196,6 @@ class GraphDataGenerator(SparkProcessorParsed):
 
             events_df = spark.sql('SELECT r.rev_date as revision, e.source, e.target, e.event '
                                   'FROM events e JOIN revision r ON e.revision = r.rev_id').distinct().sort('revision')
-            # events_results = events_df.collect()
-            # self.write_list(events_results_file, events_results)
-            events_df = events_df #.coalesce(1)
             events_df.write.format('com.databricks.spark.csv').option('header', 'false').option('delimiter', '\t')\
                 .save(events_results_path)
             del events_df
@@ -188,8 +207,6 @@ class GraphDataGenerator(SparkProcessorParsed):
             edges_results.append(edges_results_file)
             path, events_results_file = os.path.split(events_results_file)
             events_results.append(events_results_file)
-
-
 
         self.register_results('graph', nodes=nodes_results, edges=edges_results, events=events_results,
                               fixed=self.fixed, errors=self.errors, override=override)

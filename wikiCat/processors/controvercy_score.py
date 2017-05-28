@@ -40,6 +40,7 @@ class ControvercyScore(PandasProcessorGraph):
                     cscore = self.cscore(past_revision, revision, cscore=past_cscore)
                 else:
                     cscore = -0.9
+                print(cscore)
                 curr[key] = [cscore, revision]
                 curr_results = pd.DataFrame([[revision, source, target, event, cscore]], columns=('revision', 'source', 'target', 'event', 'cscore'))
                 results = results.append(curr_results, ignore_index=True)
@@ -62,7 +63,6 @@ class ControvercyScore(PandasProcessorGraph):
                 title = row[1]
                 ns = row[2]
                 cscore = curr[id][0]/curr[id][1]
-                print
                 curr_results = pd.DataFrame([[id, title, ns, cscore]], columns=('id', 'title', 'ns', 'cscore'))
                 results = results.append(curr_results, ignore_index=True)
             results.to_csv(file + '_test', sep='\t', index=False, header=False, mode='w')

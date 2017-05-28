@@ -20,12 +20,12 @@ GraphDataGenerator(mp, 'cat_data').generate_graph_data(override=True)
 
 #cat_data_fixed_none_errors_removed_1_edge
 
-cs = ControvercyScore(mp)
-cs.calculate_edge_score()
-cs.caculate_node_score()
+#cs = ControvercyScore(mp)
+#cs.calculate_edge_score()
+#cs.caculate_node_score()
 
 
-pp.pprint(mp.pinfo)
+#pp.pprint(mp.pinfo)
 '''
 # CODE FOR PROJECT CREATION:
 mp = Project('project')
