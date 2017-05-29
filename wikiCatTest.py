@@ -4,6 +4,7 @@ from wikiCat.processors.parsed_data_error_check import ParsedDataErrorCheck
 from wikiCat.processors.graph_data_gererator import GraphDataGenerator
 from wikiCat.processors.spark_processor_parsed import SparkProcessorParsed
 from wikiCat.processors.controvercy_score import ControvercyScore
+from wikiCat.processors.oldest_revision import OldestRevision
 
 
 pp = pprint.PrettyPrinter(indent=4)
@@ -11,12 +12,20 @@ pp = pprint.PrettyPrinter(indent=4)
 mp = Project('project')
 mp.load_project()
 
+print(mp.get_title())
+print(mp.get_status())
+print(mp.get_description())
+print(mp.get_start_date())
 #pp.pprint(mp.pinfo)
 
 #ParsedDataErrorCheck(mp, 'cat_data').missing_info_source_ids()
 #ParsedDataErrorCheck(mp, 'cat_data').find_unresolvable_target_titles()
 
-GraphDataGenerator(mp, 'cat_data').generate_graph_data(override=True)
+#mp.find_oldest_revision()
+
+#OldestRevision(mp).get()
+
+#GraphDataGenerator(mp, 'cat_data').generate_graph_data(override=True)
 
 #cat_data_fixed_none_errors_removed_1_edge
 

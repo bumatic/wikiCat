@@ -1,6 +1,8 @@
 import os
 import json
 from wikiCat.data.wikidata import WikiData
+from wikiCat.processors.oldest_revision import OldestRevision
+from dateutil import parser
 
 class Project:
     def __init__(self, path):
@@ -21,8 +23,10 @@ class Project:
         self.results_path = os.path.join(self.path, '03_results')
         self.data_objs = {}
         self.data_desc = {}
+        self.start_date = None
+        self.dump_date = None
 
-    def create_project(self, title='New WikiCat Project', description='This is a WikiCat Project'):
+    def create_project(self, title='New WikiCat Project', description='This is a WikiCat Project', dump_date=None):
         if not os.path.exists(os.path.join(os.getcwd(), self.pinfo_file)):
             if not os.path.isdir(os.path.join(os.getcwd(), self.log_path)):
                 os.makedirs(os.path.join(os.getcwd(), self.log_path))
@@ -44,6 +48,8 @@ class Project:
             self.project_title = title
             self.project_description = description
             self.project_status = '001'
+            if dump_date is not None:
+                self.dump_date = parser.parse(dump_date).timestamp()
             self.save_project()
 
             print('A new Project has been created.')
@@ -56,6 +62,32 @@ class Project:
             with open(os.path.join(os.getcwd(), self.pinfo_file), 'r') as info_file:
                 self.pinfo = json.load(info_file)
             info_file.close()
+            if 'title' in self.pinfo.keys():
+                self.project_title = self.pinfo['title']
+            else:
+                pass
+            if 'description' in self.pinfo.keys():
+                self.project_description = self.pinfo['description']
+            else:
+                pass
+            if 'status' in self.pinfo.keys():
+                self.project_status = self.pinfo['status']
+            else:
+                pass
+            if 'path' in self.pinfo.keys():
+                self.path = self.pinfo['path']
+            else:
+                pass
+            if 'start_date' in self.pinfo.keys():
+                self.start_date = parser.parse(self.pinfo['start_date'])
+                pass
+            else:
+                pass
+            if 'dump_date' in self.pinfo.keys():
+                self.dump_date = parser.parse(self.pinfo['dump_date'])
+                pass
+            else:
+                pass
             if 'dump' in self.pinfo['data'].keys():
                 print('LOADING DUMP DATA FROM PROJECT FILE NEEDS TO BE IMPLEMENTED')
             else:
@@ -79,6 +111,7 @@ class Project:
             else:
                 pass
 
+
             '''
             data_types = ['raw', 'parsed', 'graph', 'error']
 
@@ -100,6 +133,11 @@ class Project:
         self.pinfo['status'] = self.project_status
         self.pinfo['path'] = self.path
         self.pinfo['data'] = self.data_desc
+        if self.start_date is not None:
+            self.pinfo['start_date'] = self.start_date
+        if self.dump_date is not None:
+            self.pinfo['dump_date'] = self.dump_date
+
         with open(self.pinfo_file, 'w') as info_file:
             json.dump(self.pinfo, info_file, sort_keys=True, indent=4)
         return
@@ -144,6 +182,11 @@ class Project:
             print('Please enter a valid type: dump, parsed, cleaned, graph, error')
         return
 
+    def find_oldest_revision(self):
+        #TODO: This needs some testing. Probably an array is returned and the vorrect value needs to be accessed.
+        self.start_date = OldestRevision(self).get()
+        self.save_project()
+
     def get_title(self):
         return self.project_title
 
@@ -152,6 +195,18 @@ class Project:
 
     def get_status(self):
         return self.project_status
+
+    def get_start_date(self):
+        if self.start_date is not None:
+            return self.start_date
+        else:
+            return 'No start date has been calculated yet. Use the method find_oldest_revision(self).'
+
+    def get_dump_date(self):
+        if self.dump_date is not None:
+            return self.dump_date
+        else:
+            return 'No start date has been calculated yet. Use the method find_oldest_revision(self).'
 
     def set_title(self, title):
         self.title = title
@@ -163,6 +218,10 @@ class Project:
 
     def set_status(self, status):
         self.project_status = status
+        self.save_project()
+
+    def set_dump_date(self, date):
+        self.dump_date = parser.parse(date)
         self.save_project()
 
     def update_data_desc(self, data_type, info):
