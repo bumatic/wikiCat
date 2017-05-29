@@ -80,16 +80,10 @@ class GraphDataGenerator(SparkProcessorParsed):
             resolved_titles_df = spark.sql(
                 'SELECT d.source_id as source, i.page_id as target, d.target_title, d.rev_id as revision '
                 'FROM data d LEFT OUTER JOIN cat_info i ON UPPER(d.target_title) = UPPER(i.page_title)')
-            print('resolved Titles:')
-            print(resolved_titles_df.count())
-            resolved_titles_df.show()
             resolved_titles_df.createOrReplaceTempView('resolved')
 
 
             page_data_df = spark.sql('SELECT r.source, r.target, r.revision FROM resolved r WHERE r.target IS NOT NULL')
-            print('page_data_df assigned with resolved titles')
-            print(page_data_df.count())
-            page_data_df.show()
             page_data_df.createOrReplaceTempView('data')
 
             # 2. GENERATE, ADD EDGE TYPE AND SAVE EDGE LIST
@@ -126,10 +120,6 @@ class GraphDataGenerator(SparkProcessorParsed):
             # 5. CREATE TABLE WITH ENTRIES FOR WHEN A EDGE DID NOT EXIST AT THE TIME OF A REVISION
             # BY SUBTRACTING EXISTING EDGES FROM ALL_POSSIBILITIES
             negative_edges_df = all_possibilities_df.subtract(page_data_df).sort('source', 'revision')
-
-            print('negative edges:')
-            print(negative_edges_df.count())
-            negative_edges_df.show()
             negative_edges_df.createOrReplaceTempView('negative_edges')
 
 
@@ -140,9 +130,6 @@ class GraphDataGenerator(SparkProcessorParsed):
             durations_df = spark.sql('SELECT d.source, d.target, d.revision as start, n.revision as end '
                                      'FROM data d LEFT OUTER JOIN negative_edges n '
                                      'ON d.source = n.source AND d.target = n.target AND d.revision < n.revision')
-            print('durations all with wrong dates')
-            print('number: ' + str(durations_df.count()))
-            durations_df.show()
             durations_df.createOrReplaceTempView("durations")
 
 
@@ -151,33 +138,20 @@ class GraphDataGenerator(SparkProcessorParsed):
             # FOR GROUPS OF SOURCE, TARGET, START
             durations_df = spark.sql('SELECT source, target, start, min(end) as end FROM durations '
                                      'GROUP BY source, target, start')
-            print('min end')
-            print(durations_df.count())
-            durations_df.show()
             durations_df.createOrReplaceTempView("durations")
 
             # 6.3 THIRD STEP TO CREATE DURATION RESULTS BY KEEPING ONLY MIN START TIMES
             # FOR GROUPS OF SOURCE, TARGET, END
             durations_df = spark.sql('SELECT source, target, min(start) as start, end FROM durations '
                                      'GROUP BY source, target, end').distinct()
-            print('DURATIONS DF Min Start')
-            print(durations_df.count())
-            durations_df.show()
             durations_df.createOrReplaceTempView("durations")
 
             # 7.1 CREATE START COLUMN
             durations_df = durations_df.withColumn('event_start', lit('start'))
-            print('column start added')
-            print(durations_df.count())
-            durations_df.show()
-
             durations_df.createOrReplaceTempView("durations")
 
             # 7.2 CREATE END COLUMN
             durations_df = durations_df.withColumn('event_end', lit('end'))
-            print('column end added')
-            print(durations_df.count())
-            durations_df.show()
             durations_df.createOrReplaceTempView("durations")
 
             # 8. CREATE TABLES FOR START EVENTS AND END EVENTS
