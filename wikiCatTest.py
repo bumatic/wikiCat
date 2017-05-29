@@ -12,10 +12,6 @@ pp = pprint.PrettyPrinter(indent=4)
 mp = Project('project')
 mp.load_project()
 
-print(mp.get_title())
-print(mp.get_status())
-print(mp.get_description())
-print(mp.get_start_date())
 #pp.pprint(mp.pinfo)
 
 #ParsedDataErrorCheck(mp, 'cat_data').missing_info_source_ids()
@@ -26,6 +22,9 @@ print(mp.get_start_date())
 #OldestRevision(mp).get()
 
 #GraphDataGenerator(mp, 'cat_data').generate_graph_data(override=True)
+
+
+ControvercyScore(mp).calculate_edge_score_spark()
 
 #cat_data_fixed_none_errors_removed_1_edge
 
