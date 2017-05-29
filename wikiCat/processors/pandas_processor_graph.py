@@ -32,7 +32,8 @@ class PandasProcessorGraph(Processor):
             print('No graph_tool gt file available')
 
     def load_events(self, file, columns=[]):
-        # Default events columns: ['source', 'target', 'revision' 'event']
+        # Default events columns: ['source', 'target', 'revision' 'event', ('cscore)]
+        # TODO Implement cscore Handling
         self.events = pd.read_csv(os.path.join(self.path, file), header=None, delimiter='\t',
                                   names=columns)
 

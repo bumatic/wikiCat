@@ -49,7 +49,7 @@ class ControvercyScore(PandasProcessorGraph):
         if len(fields) == 4:
             revision = float(fields[0])
             source = fields[1]
-            target = fields [2]
+            target = fields[2]
             event = fields[3]
             return Row(revision=revision, source=source, target=target, event=event)
         elif len(fields) == 5:
@@ -79,18 +79,23 @@ class ControvercyScore(PandasProcessorGraph):
             events = events_source.map(self.mapper_events)
             events_df = spark.createDataFrame(events).cache()
             events_df.createOrReplaceTempView("events")
-            events_grouped_df = events_df.groupBy('source', 'target').agg(collect_list('revision').alias('revision'))
-            events_grouped_df.createOrReplaceTempView("events_grouped")
 
-            #events_grouped_df = spark.sql('SELECT e.source, e.target, e.event, g.revision FROM '
-            #                              'events e JOIN events_grouped g ON e.source = g.source '
-            #                              'AND e.target = g.target')
+            events_grouped_df = events_df.groupBy('source', 'target').agg(collect_list('revision').alias('revision'))
+
+
 
             #TODO Auflösung von Resultaten
             edge_events = events_grouped_df.rdd.map(self.process_spark_list).collect()
+            edge_events_df = spark.createDataFrame(edge_events, ['revision', 'source', 'target', 'cscore']).cache()
+            edge_events_df.createOrReplaceTempView("edge_events")
+            edge_events_df = spark.sql('SELECT e.revision, e.source, e.target, e.event, c.cscore FROM '
+                                       'events e JOIN edge_events c ON e.source = c.source '
+                                       'AND e.target = c.target AND e.revision = c.revision')
+
+            edge_events_results = edge_events_df.collect()
 
             with open(os.path.join(self.path, tmp_results_file), 'w', newline='') as outfile:
-                for edge in edge_events:
+                for edge in edge_events_results:
                     for event in edge:
                         outfile.write(str(event[0]) + '\t' + str(event[1]) + '\t' + str(event[2]) + '\t' +str(event[3]) + '\t' + str(event[4]) + '\n')
 
@@ -104,8 +109,7 @@ class ControvercyScore(PandasProcessorGraph):
     def process_spark_list(self, row):
         source = row[0]
         target = row[1]
-        event = row[2]
-        ts_list = row[3]
+        ts_list = row[2]
         results = []
         for i in range(len(ts_list)):
             if i == 0:
@@ -113,7 +117,7 @@ class ControvercyScore(PandasProcessorGraph):
             else:
                 delta = ts_list[i] - ts_list[i-1]
                 cscore = cscore * math.exp(-1 * self.decay_rate * delta) + self.growth_rate
-            results.append([ts_list[i], source, target, event, cscore])
+            results.append([ts_list[i], source, target, cscore])
         return results
 
     def calculate_node_score_spark(self):
@@ -253,7 +257,7 @@ class ControvercyScore(PandasProcessorGraph):
                 cscore = curr[id][0]/curr[id][1]
                 curr_results = pd.DataFrame([[id, title, ns, cscore]], columns=('id', 'title', 'ns', 'cscore'))
                 results = results.append(curr_results, ignore_index=True)
-            results.to_csv(file + '_test', sep='\t', index=False, header=False, mode='w')
+            results.to_csv(file + '_tmp', sep='\t', index=False, header=False, mode='w')
 
     '''
     def cscore_test(self):
