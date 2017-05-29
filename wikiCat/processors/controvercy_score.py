@@ -25,26 +25,30 @@ class ControvercyScore(PandasProcessorGraph):
 
     def calculate_edge_score(self):
         curr = {}
-        results = pd.DataFrame(columns=('revision', 'source', 'target', 'event', 'cscore'))
         for file in self.events_files:
-            self.load_events(file, columns=['revision', 'source', 'target', 'event'])
-            for key, row in self.events.iterrows():
-                revision = row['revision']
-                source = row['source']
-                target = row['target']
-                key = str(source)+'|'+str(target)
-                event = row['event']
-                if key in curr.keys():
-                    past_cscore = curr[key][0]
-                    past_revision = curr[key][1]
-                    cscore = self.cscore(past_revision, revision, cscore=past_cscore)
-                else:
-                    cscore = -0.9
-                print(cscore)
-                curr[key] = [cscore, revision]
-                curr_results = pd.DataFrame([[revision, source, target, event, cscore]], columns=('revision', 'source', 'target', 'event', 'cscore'))
-                results = results.append(curr_results, ignore_index=True)
-            results.to_csv(file+'_test', sep='\t', index=False, header=False, mode='w')
+            chunksize = 10 ** 6
+            for chunk in pd.read_csv(os.path.join(self.path, file), delimiter='\t',
+                                     names=['revision', 'source', 'target', 'event', 'cscore'],
+                                     chunksize=chunksize):
+                results = pd.DataFrame(columns=('revision', 'source', 'target', 'event', 'cscore'))
+                for key, row in chunk.iterrows():
+                    revision = row['revision']
+                    source = row['source']
+                    target = row['target']
+                    key = str(source)+'|'+str(target)
+                    event = row['event']
+                    if key in curr.keys():
+                        past_cscore = curr[key][0]
+                        past_revision = curr[key][1]
+                        cscore = self.cscore(past_revision, revision, cscore=past_cscore)
+                    else:
+                        cscore = -0.9
+                    print(cscore)
+                    curr[key] = [cscore, revision]
+                    curr_results = pd.DataFrame([[revision, source, target, event, cscore]], columns=('revision', 'source', 'target', 'event', 'cscore'))
+                    results = results.append(curr_results, ignore_index=True)
+                #TODO ONCE TEST WORKED: WRITING RESULTS TO FILE AND REPLACING ORIGINAL FILE WITH RESULTS
+                results.to_csv(file+'_test', sep='\t', index=False, header=False, mode='a')
 
     def calculate_node_score(self):
         curr={}
