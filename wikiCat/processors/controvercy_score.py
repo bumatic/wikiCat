@@ -1,5 +1,6 @@
 import findspark
 findspark.init()
+from pyspark import SparkConf, SparkContext
 from pyspark.sql import Row
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import collect_list, avg
@@ -70,7 +71,9 @@ class ControvercyScore(PandasProcessorGraph):
         # Create a SparkSession
         # Note: In case its run on Windows and generates errors use (tmp Folder mus exist):
         # spark = SparkSession.builder.config("spark.sql.warehouse.dir", "file:///C:/temp").appName("Postprocessing").getOrCreate()
-        spark = SparkSession.builder.appName("Calculate_Controvercy_Score_Edges").getOrCreate()
+        conf = SparkConf().setMaster("local[*]").setAppName("Test")
+        sc = SparkContext(conf=conf)
+        spark = SparkSession(sc).builder.appName("Calculate_Controvercy_Score_Edges").getOrCreate()
 
         for file in self.events_files:
             results = pd.DataFrame(columns=('revision', 'source', 'target', 'event', 'cscore'))
@@ -81,13 +84,53 @@ class ControvercyScore(PandasProcessorGraph):
             events_df.createOrReplaceTempView("events")
 
             events_grouped_df = events_df.groupBy('source', 'target').agg(collect_list('revision').alias('revision'))
+            edge_events = events_grouped_df.rdd.map(self.process_spark_list).collect()
+            edge_events = [item for sublist in edge_events for item in sublist]
 
+            # keine lust mehr: Machen wir doch die doofe lösung: Speichern der liste in eine csv
+            # und dann wieder einlesen als df, was eleganteres fällt mir nicht ein, da die cscore werte beim toDF auf Null gesetzt werden
+            # ist wohl ein spark problem
+
+            x = edge_events[11][3]
+
+            edge_events_rdd = sc.parallelize(edge_events)
+            #edge_events_rdd.collect()
+
+            edge_events_rows = edge_events_rdd.map(lambda x: Row(**x))
+            edge_events_df = spark.createDataFrame(edge_events_rows)
+            #edge_events_df = spark.createDataFrame(edge_events_rdd, ['revision', 'source', 'target', 'cscore']).cache()  # , ['revision', 'source', 'target', 'cscore']
+            edge_events_df.show()
+
+            #edge_events_df = edge_events.toDF('revision', 'source', 'target' 'cscore')
+            #edge_events_df.show()
+            #edge_events_df
+            #print(hasattr(edge_events, "toDF"))
+
+            #edge_events.show()
 
 
             #TODO Auflösung von Resultaten
-            edge_events = events_grouped_df.rdd.map(self.process_spark_list).collect()
-            edge_events_df = spark.createDataFrame(edge_events, ['revision', 'source', 'target', 'cscore']).cache()
-            edge_events_df.createOrReplaceTempView("edge_events")
+            #edge_events = events_grouped_df.rdd.map(self.process_spark_list).collect()
+            # print(edge_events)
+            # tmp_edge_events = []
+
+            '''
+            for edge in edge_events:
+                for event in edge:
+                    tmp_edge_events.append([[event[1], event[2], event[3] ]])
+                    outfile.write(
+                        str(event[0]) + '\t' + str(event[1]) + '\t' + str(event[2]) + '\t' + str(event[3]) + '\t' + str(
+                            event[4]) + '\n')
+
+            '''
+
+            #edge_events_df = spark.createDataFrame(edge_events).cache() #, ['revision', 'source', 'target', 'cscore']
+            #edge_events_df.show()
+            #edge_events_df.createOrReplaceTempView("edge_events")
+
+            #edge_events_df.show()
+
+            '''
             edge_events_df = spark.sql('SELECT e.revision, e.source, e.target, e.event, c.cscore FROM '
                                        'events e JOIN edge_events c ON e.source = c.source '
                                        'AND e.target = c.target AND e.revision = c.revision')
@@ -105,11 +148,12 @@ class ControvercyScore(PandasProcessorGraph):
                 #    print(event[0])
                 #    print(event[1])
             #results.to_csv(os.path.join(self.path, tmp_results_file), sep='\t', index=False, header=False, mode='w')
-
+            '''
     def process_spark_list(self, row):
         source = row[0]
         target = row[1]
         ts_list = row[2]
+        ts_list.sort()
         results = []
         for i in range(len(ts_list)):
             if i == 0:
