@@ -31,8 +31,23 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
         fields = line.split('\t')
         id = fields[0]
         title = fields[1]
-        ns = fields[3]
+        ns = fields[2]
         return Row(id=id, title=title, ns=ns)
+
+    def mapper_edges(self, line):
+        fields = line.split('\t')
+        source = fields[0]
+        target = fields[1]
+        etype = fields[2]
+        return Row(source=source, target=target, etype=etype)
+
+    def mapper_tmp_cscore_events(self, line):
+        fields = line.split('\t')
+        revision = fields[0]
+        source = fields[1]
+        target = fields[2]
+        cscore = fields[3]
+        return Row(revision=revision, source=source, target=target, cscore=cscore)
 
     def mapper_events(self, line):
         fields = line.split('\t')
@@ -53,94 +68,6 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
             print('Error while mapping events')
             return
 
-    def calculate_edge_score_spark(self):
-        print(self.path)
-        print(self.events_files)
-
-        # Create a SparkSession
-        # Note: In case its run on Windows and generates errors use (tmp Folder mus exist):
-        # spark = SparkSession.builder.config("spark.sql.warehouse.dir", "file:///C:/temp").appName("Postprocessing").getOrCreate()
-        conf = SparkConf().setMaster("local[*]").setAppName("Test")
-        sc = SparkContext(conf=conf)
-        spark = SparkSession(sc).builder.appName("Calculate_Controvercy_Score_Edges").getOrCreate()
-
-        for file in self.events_files:
-            results = pd.DataFrame(columns=('revision', 'source', 'target', 'event', 'cscore'))
-            tmp_results_file = 'tmp_' + file
-            events_source = spark.sparkContext.textFile(os.path.join(self.path, file))
-            events = events_source.map(self.mapper_events)
-            events_df = spark.createDataFrame(events).cache()
-            events_df.createOrReplaceTempView("events")
-
-            events_grouped_df = events_df.groupBy('source', 'target').agg(collect_list('revision').alias('revision'))
-            edge_events = events_grouped_df.rdd.map(self.process_spark_list).collect()
-            edge_events = [item for sublist in edge_events for item in sublist]
-
-            self.write_list(os.path.join(self.path, tmp_results_file), edge_events)
-
-
-            # keine lust mehr: Machen wir doch die doofe lösung: Speichern der liste in eine csv
-            # und dann wieder einlesen als df, was eleganteres fällt mir nicht ein, da die cscore werte beim toDF auf Null gesetzt werden
-            # ist wohl ein spark problem
-
-            #x = edge_events[11][3]
-
-            #edge_events_rdd = sc.parallelize(edge_events)
-            #edge_events_rdd.collect()
-
-            #edge_events_rows = edge_events_rdd.map(lambda x: Row(**x))
-            #edge_events_df = spark.createDataFrame(edge_events_rows)
-            #edge_events_df = spark.createDataFrame(edge_events_rdd, ['revision', 'source', 'target', 'cscore']).cache()  # , ['revision', 'source', 'target', 'cscore']
-            #edge_events_df.show()
-
-            #edge_events_df = edge_events.toDF('revision', 'source', 'target' 'cscore')
-            #edge_events_df.show()
-            #edge_events_df
-            #print(hasattr(edge_events, "toDF"))
-
-            #edge_events.show()
-
-
-            #TODO Auflösung von Resultaten
-            #edge_events = events_grouped_df.rdd.map(self.process_spark_list).collect()
-            # print(edge_events)
-            # tmp_edge_events = []
-
-            '''
-            for edge in edge_events:
-                for event in edge:
-                    tmp_edge_events.append([[event[1], event[2], event[3] ]])
-                    outfile.write(
-                        str(event[0]) + '\t' + str(event[1]) + '\t' + str(event[2]) + '\t' + str(event[3]) + '\t' + str(
-                            event[4]) + '\n')
-
-            '''
-
-            #edge_events_df = spark.createDataFrame(edge_events).cache() #, ['revision', 'source', 'target', 'cscore']
-            #edge_events_df.show()
-            #edge_events_df.createOrReplaceTempView("edge_events")
-
-            #edge_events_df.show()
-
-            '''
-            edge_events_df = spark.sql('SELECT e.revision, e.source, e.target, e.event, c.cscore FROM '
-                                       'events e JOIN edge_events c ON e.source = c.source '
-                                       'AND e.target = c.target AND e.revision = c.revision')
-
-            edge_events_results = edge_events_df.collect()
-
-            with open(os.path.join(self.path, tmp_results_file), 'w', newline='') as outfile:
-                for edge in edge_events_results:
-                    for event in edge:
-                        outfile.write(str(event[0]) + '\t' + str(event[1]) + '\t' + str(event[2]) + '\t' +str(event[3]) + '\t' + str(event[4]) + '\n')
-
-                #curr_results = pd.DataFrame(edge_event, columns=('revision', 'source', 'target', 'event', 'cscore'))
-                #results = results.append(curr_results, ignore_index=True)
-                #for event in edge:
-                #    print(event[0])
-                #    print(event[1])
-            #results.to_csv(os.path.join(self.path, tmp_results_file), sep='\t', index=False, header=False, mode='w')
-            '''
     def process_spark_list(self, row):
         source = row[0]
         target = row[1]
@@ -156,25 +83,63 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
             results.append([ts_list[i], source, target, cscore])
         return results
 
-    def calculate_node_score_spark(self):
-        print(self.path)
-        print(self.events_files)
-        print(self.nodes_files)
+    def calculate_edge_score(self):
+        # Create a SparkSession
+        # Note: In case its run on Windows and generates errors use (tmp Folder mus exist):
+        # spark = SparkSession.builder.config("spark.sql.warehouse.dir", "file:///C:/temp").appName("Postprocessing").getOrCreate()
+        conf = SparkConf().setMaster("local[*]").setAppName("Test")
+        sc = SparkContext(conf=conf)
+        spark = SparkSession(sc).builder.appName("Calculate_Controvercy_Score_Edges").getOrCreate()
+
+        for file in self.events_files:
+            results_file = os.path.join(self.data_path, file)
+            tmp_results_file = os.path.join(self.data_path, 'tmp_' + file)
+            spark_results_path = os.path.join(self.data_path, file[:-4])
+
+            events_source = spark.sparkContext.textFile(os.path.join(self.data_path, file))
+            events = events_source.map(self.mapper_events)
+            events_df = spark.createDataFrame(events).cache()
+            events_df.createOrReplaceTempView("events")
+
+            events_grouped_df = events_df.groupBy('source', 'target').agg(collect_list('revision').alias('revision'))
+            cscore_events = events_grouped_df.rdd.map(self.process_spark_list).collect()
+            cscore_events = [item for sublist in cscore_events for item in sublist]
+            self.write_list(tmp_results_file, cscore_events)
+            cscore_events_source = spark.sparkContext.textFile(tmp_results_file)
+            cscore_events = cscore_events_source.map(self.mapper_tmp_cscore_events)
+            cscore_events_df = spark.createDataFrame(cscore_events).cache()
+            cscore_events_df.createOrReplaceTempView("cscore_events")
+
+            resolved_event_type_df = spark.sql('SELECT e.revision, e.source, e.target, e.event, c.cscore FROM '
+                                               'events e JOIN cscore_events c ON e.source = c.source '
+                                               'AND e.target = c.target AND e.revision = c.revision')
+
+            resolved_event_type_df.write.format('com.databricks.spark.csv').option('header', 'false').option('delimiter', '\t').save(spark_results_path)
+            os.remove(tmp_results_file)
+            self.assemble_spark_results(spark_results_path, tmp_results_file)
+            os.remove(os.path.join(self.data_path, file))
+            os.rename(tmp_results_file, results_file)
+
+
+    def calculate_avg_node_score(self):
+        # TODO Assumes that only one nodes file exists, needs to be fixed for link data
 
         # Create a SparkSession
         # Note: In case its run on Windows and generates errors use (tmp Folder mus exist):
         # spark = SparkSession.builder.config("spark.sql.warehouse.dir", "file:///C:/temp").appName("Postprocessing").getOrCreate()
-        spark = SparkSession.builder.appName("Calculate_Controvercy_Score_Edges").getOrCreate()
+        spark = SparkSession.builder.appName("Calculate_Controvercy_Score_Nodes").getOrCreate()
 
-        nodes_source = spark.sparkContext.textFile(os.path.join(self.path, self.nodes_files))
+        nodes_source = spark.sparkContext.textFile(os.path.join(self.data_path, self.nodes_files[0]))
         nodes = nodes_source.map(self.mapper_nodes)
         nodes_df = spark.createDataFrame(nodes).cache()
         nodes_df.createOrReplaceTempView("nodes")
 
-        for file in self.events_files:
-            tmp_results_file = 'tmp_' + file
+        results_file = os.path.join(self.data_path, self.nodes_files[0])
+        tmp_results_file = os.path.join(self.data_path, 'tmp_' + self.nodes_files[0])
+        spark_results_path = os.path.join(self.data_path, self.nodes_files[0][:-4])
 
-            events_source = spark.sparkContext.textFile(os.path.join(self.path, file))
+        for file in self.events_files:
+            events_source = spark.sparkContext.textFile(os.path.join(self.data_path, file))
             events = events_source.map(self.mapper_events)
             events_df = spark.createDataFrame(events).cache()
             events_df.createOrReplaceTempView("events")
@@ -183,159 +148,47 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
             target_df = spark.sql('SELECT target as node, cscore FROM events')
             node_cscores_df = source_df.union(target_df)
             avg_node_cscores_df = node_cscores_df.groupby('node').agg(avg('cscore').alias('avg_cscore'))
-            avg_node_cscores_df.show()
+            avg_node_cscores_df.createOrReplaceTempView("cscore_nodes")
 
+            nodes = spark.sql("SELECT n.id, n.title, n.ns, c.avg_cscore as cscore "
+                              "FROM nodes n LEFT OUTER JOIN cscore_nodes c ON n.id = c.node")
+            nodes.write.format('com.databricks.spark.csv').option('header', 'false').option('delimiter', '\t').save(spark_results_path)
 
+            self.assemble_spark_results(spark_results_path, tmp_results_file)
+            os.remove(os.path.join(self.data_path, self.nodes_files[0]))
+            os.rename(tmp_results_file, results_file)
 
+    def calculate_avg_edge_score(self):
+        # TODO Assumes that only one edges file exists, needs to be fixed for link data
+        # Create a SparkSession
+        # Note: In case its run on Windows and generates errors use (tmp Folder mus exist):
+        # spark = SparkSession.builder.config("spark.sql.warehouse.dir", "file:///C:/temp").appName("Postprocessing").getOrCreate()
+        spark = SparkSession.builder.appName("Calculate_Controvercy_Score_Edges").getOrCreate()
 
+        edges_source = spark.sparkContext.textFile(os.path.join(self.data_path, self.edges_files[0]))
+        edges = edges_source.map(self.mapper_edges)
+        edges_df = spark.createDataFrame(edges).cache()
+        edges_df.createOrReplaceTempView("edges")
 
+        results_file = os.path.join(self.data_path, self.edges_files[0])
+        tmp_results_file = os.path.join(self.data_path, 'tmp_' + self.edges_files[0])
+        spark_results_path = os.path.join(self.data_path, self.edges_files[0][:-4])
 
-        '''
-        curr={}
-        results = pd.DataFrame(columns=('id', 'title', 'ns', 'cscore'))
         for file in self.events_files:
-            self.load_events(file, columns=['revision', 'source', 'target', 'event', 'cscore'])
-            for key, row in self.events.iterrows():
-                if row[1] in curr.keys():
-                    curr[row[1]] = [curr[row[1]][0]+float(row[4]), curr[row[1]][0]+1]
-                else:
-                    curr[row[1]] = [float(row[4]), 1]
-        for file in self.nodes_files:
-            self.load_nodes(file, columns=['id', 'title', 'ns'])
-            for key, row in self.nodes.iterrows():
-                id = row[0]
-                title = row[1]
-                ns = row[2]
-                cscore = curr[id][0]/curr[id][1]
-                curr_results = pd.DataFrame([[id, title, ns, cscore]], columns=('id', 'title', 'ns', 'cscore'))
-                results = results.append(curr_results, ignore_index=True)
-            results.to_csv(file + '_test', sep='\t', index=False, header=False, mode='w')
-        '''
+            events_source = spark.sparkContext.textFile(os.path.join(self.data_path, file))
+            events = events_source.map(self.mapper_events)
+            events_df = spark.createDataFrame(events).cache()
+            events_df.createOrReplaceTempView("events")
 
+            avg_edge_cscores_df = events_df.groupby('source', 'target').agg(avg('cscore').alias('avg_cscore'))
+            avg_edge_cscores_df.createOrReplaceTempView("cscore_edges")
+            edges = spark.sql("SELECT e.source, e.target, e.etype, c.avg_cscore as cscore "
+                              "FROM edges e LEFT OUTER JOIN cscore_edges c "
+                              "ON e.source = c.source AND e.target = c.target")
+            edges.write.format('com.databricks.spark.csv').option('header', 'false').option('delimiter', '\t').save(spark_results_path)
 
-    def calculate_edge_score2(self):
-        counter = 0
-        for file in self.events_files:
-            results = pd.DataFrame(columns=('revision', 'source', 'target', 'event', 'cscore'))
-            self.load_events(file, columns=['revision', 'source', 'target', 'event'])
-            tmp_results_file = 'tmp_' + file
-            for group, events in self.events.groupby(['source', 'target']):
-                events = events.sort_values(['revision'])
-                source = group[0]
-                target = group[1]
-                # key = str(source) + '|' + str(target)
-                past_revision = None
-                past_cscore = None
-                for event in events.iterrows():
-                    revision = event[1]['revision']
-                    event_type = event[1]['event']
-                    if past_cscore is None:
-                        cscore = 0
-                        past_revision = revision
-                    else:
-                        cscore = self.cscore(past_revision, revision, cscore=past_cscore)
+            self.assemble_spark_results(spark_results_path, tmp_results_file)
 
-                    curr_results = pd.DataFrame([[revision, source, target, event_type, cscore]], columns=('revision', 'source', 'target', 'event', 'cscore'))
-                    results = results.append(curr_results, ignore_index=True)
-                    past_cscore = cscore
+            os.remove(os.path.join(self.data_path, self.events_files[0]))
+            os.rename(tmp_results_file, results_file)
 
-                # TODO ONCE TEST WORKED: WRITING RESULTS TO FILE AND REPLACING ORIGINAL FILE WITH RESULTS
-                counter = self.progress(counter)
-            results.to_csv(os.path.join(self.path, tmp_results_file), sep='\t', index=False, header=False, mode='w')
-            os.remove(os.path.join(self.path, file))
-            os.rename(os.path.join(self.path, tmp_results_file), os.path.join(self.path, file))
-
-
-    def calculate_edge_score(self):
-        curr = {}
-        for file in self.events_files:
-            chunksize = 10 ** 6
-            for chunk in pd.read_csv(os.path.join(self.path, file), delimiter='\t',
-                                     names=['revision', 'source', 'target', 'event', 'cscore'],
-                                     chunksize=chunksize):
-                results = pd.DataFrame(columns=('revision', 'source', 'target', 'event', 'cscore'))
-                for key, row in chunk.iterrows():
-                    revision = row['revision']
-                    source = row['source']
-                    target = row['target']
-                    key = str(source)+'|'+str(target)
-                    event = row['event']
-                    if key in curr.keys():
-                        past_cscore = curr[key][0]
-                        past_revision = curr[key][1]
-                        cscore = self.cscore(past_revision, revision, cscore=past_cscore)
-                    else:
-                        cscore = self.start_score
-                    #print(cscore)
-                    curr[key] = [cscore, revision]
-                    curr_results = pd.DataFrame([[revision, source, target, event, cscore]], columns=('revision', 'source', 'target', 'event', 'cscore'))
-                    results = results.append(curr_results, ignore_index=True)
-                #TODO ONCE TEST WORKED: WRITING RESULTS TO FILE AND REPLACING ORIGINAL FILE WITH RESULTS
-                results.to_csv(file+'_test', sep='\t', index=False, header=False, mode='a')
-                print('A chunk is done')
-
-    def calculate_node_score(self):
-        curr={}
-        results = pd.DataFrame(columns=('id', 'title', 'ns', 'cscore'))
-        for file in self.events_files:
-            self.load_events(file, columns=['revision', 'source', 'target', 'event', 'cscore'])
-            for key, row in self.events.iterrows():
-                if row[1] in curr.keys():
-                    curr[row[1]] = [curr[row[1]][0]+float(row[4]), curr[row[1]][0]+1]
-                else:
-                    curr[row[1]] = [float(row[4]), 1]
-        for file in self.nodes_files:
-            self.load_nodes(file, columns=['id', 'title', 'ns'])
-            for key, row in self.nodes.iterrows():
-                id = row[0]
-                title = row[1]
-                ns = row[2]
-                cscore = curr[id][0]/curr[id][1]
-                curr_results = pd.DataFrame([[id, title, ns, cscore]], columns=('id', 'title', 'ns', 'cscore'))
-                results = results.append(curr_results, ignore_index=True)
-            results.to_csv(file + '_tmp', sep='\t', index=False, header=False, mode='w')
-
-    '''
-    def cscore_test(self):
-        t1 = '2003-04-25 22:18:38'
-        t1 = parser.parse(t1)
-        print(t1)
-        t2 = '2003-12-26 16:55:41'
-        t2 = parser.parse(t2)
-        print(t2)
-        print(type(t2))
-        delta = t2-t1
-        print(delta)
-        print(delta.total_seconds())
-        print(type(delta.total_seconds()))
-        #cscore = 1
-        try:
-            cscore
-        except NameError:
-            cscore = self.start_score
-        print('start score:' + str(cscore))
-        print('decay factor: '+ str(math.exp(-1 * self.decay_rate * delta.total_seconds())))
-        cscore = cscore * math.exp(-1 * self.decay_rate * delta.total_seconds()) + self.growth_rate
-        print(cscore)
-    '''
-
-    def calc_cscore_test(self):
-        df = pd.DataFrame([['a', 'b'], ['c', 'd'], ['e', 'F']], columns=list('AB'))
-        print(df)
-        for key, row in df.iterrows():
-            print(row['B'])
-            print()
-
-    def cscore(self, t1, t2, cscore=-0.9):
-        delta = (t2-t1)
-        cscore = cscore * math.exp(-1 * self.decay_rate * delta) + self.growth_rate
-        return cscore
-
-    def progress(self, counter):
-        chunks = 10**5
-        if counter >= chunks:
-            print(str(chunks)+' edges have been processed')
-            return 0
-        else:
-            counter = counter + 1
-            return counter

@@ -49,12 +49,10 @@ class SparkProcessor(Processor):
                 os.rename(os.path.join(path, filename), os.path.join(path, file))
 
     def assemble_spark_results(self, path, results_file):
-        print(os.path.join(os.getcwd(), path))
-        print(os.path.isdir(os.path.join(os.getcwd(), path)))
         for file in next(os.walk(os.path.join(os.getcwd(), path)))[2]:
             if file[0] != '.':
                 with open(os.path.join(os.getcwd(), results_file), 'a') as out:
-                    with open(os.path.join(os.getcwd(), path) + file, 'r') as infile:
+                    with open(os.path.join(os.getcwd(), path, file), 'r') as infile:
                         try:
                             for line in infile.readlines():
                                 fields = line.split('\t')

@@ -29,8 +29,8 @@ class Processor:
 
     def write_list(self, file, list_data):
         with open(file, 'w', newline='') as outfile:
-            wr = csv.writer(outfile, delimiter='\t', quoting=csv.QUOTE_NONE)
-            wr.writerow(list_data)
+            for item in list_data:
+                outfile.write('%s\n' % '\t'.join(map(str, item)))
         return
 
     def register_results(self, results_type, page_info=[], revision_info=[], cat_data=[], link_data=[],

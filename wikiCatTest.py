@@ -24,7 +24,9 @@ mp.load_project()
 #GraphDataGenerator(mp, 'cat_data').generate_graph_data(override=True)
 
 
-ControvercyScore(mp).calculate_edge_score_spark()
+ControvercyScore(mp).calculate_edge_score()
+ControvercyScore(mp).calculate_avg_node_score()
+ControvercyScore(mp).calculate_avg_edge_score()
 
 #cat_data_fixed_none_errors_removed_1_edge
 
