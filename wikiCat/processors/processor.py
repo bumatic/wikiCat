@@ -26,6 +26,7 @@ class Processor:
         else:
             print('Error. Please pass a valid processor_type: dump, parsed, graph')
             return
+
     def write_list(self, file, list_data):
         with open(file, 'w', newline='') as outfile:
             wr = csv.writer(outfile, delimiter='\t', quoting=csv.QUOTE_NONE)

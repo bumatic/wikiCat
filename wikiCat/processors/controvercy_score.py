@@ -1,10 +1,11 @@
 import findspark
 findspark.init()
-from pyspark import SparkConf, SparkContext
 from pyspark.sql import Row
 from pyspark.sql import SparkSession
+from pyspark import SparkConf, SparkContext
 from pyspark.sql.functions import collect_list, avg
 from wikiCat.processors.pandas_processor_graph import PandasProcessorGraph
+from wikiCat.processors.spark_processor import SparkProcessorGraph
 from dateutil import parser
 import math
 #import datetime
@@ -12,9 +13,10 @@ import pandas as pd
 import os
 
 
-class ControvercyScore(PandasProcessorGraph):
+class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
     def __init__(self, project, fixed='fixed_none', errors='errors_removed'):
         PandasProcessorGraph.__init__(self, project)
+        SparkProcessorGraph.__init__(self, project)
         self.growth_rate = 1
         self.decay_rate = 0.0000001
         self.start_score = -0.9
@@ -24,19 +26,6 @@ class ControvercyScore(PandasProcessorGraph):
         self.decay_rate = decay_rate
         self.start_score = start_score
 
-    def cscore(self, t1, t2, cscore=-0.9):
-        delta = (t2-t1)
-        cscore = cscore * math.exp(-1 * self.decay_rate * delta) + self.growth_rate
-        return cscore
-
-    def progress(self, counter):
-        chunks = 10**5
-        if counter >= chunks:
-            print(str(chunks)+' edges have been processed')
-            return 0
-        else:
-            counter = counter + 1
-            return counter
 
     def mapper_nodes(self, line):
         fields = line.split('\t')
@@ -87,19 +76,22 @@ class ControvercyScore(PandasProcessorGraph):
             edge_events = events_grouped_df.rdd.map(self.process_spark_list).collect()
             edge_events = [item for sublist in edge_events for item in sublist]
 
+            self.write_list(os.path.join(self.path, tmp_results_file), edge_events)
+
+
             # keine lust mehr: Machen wir doch die doofe lösung: Speichern der liste in eine csv
             # und dann wieder einlesen als df, was eleganteres fällt mir nicht ein, da die cscore werte beim toDF auf Null gesetzt werden
             # ist wohl ein spark problem
 
-            x = edge_events[11][3]
+            #x = edge_events[11][3]
 
-            edge_events_rdd = sc.parallelize(edge_events)
+            #edge_events_rdd = sc.parallelize(edge_events)
             #edge_events_rdd.collect()
 
-            edge_events_rows = edge_events_rdd.map(lambda x: Row(**x))
-            edge_events_df = spark.createDataFrame(edge_events_rows)
+            #edge_events_rows = edge_events_rdd.map(lambda x: Row(**x))
+            #edge_events_df = spark.createDataFrame(edge_events_rows)
             #edge_events_df = spark.createDataFrame(edge_events_rdd, ['revision', 'source', 'target', 'cscore']).cache()  # , ['revision', 'source', 'target', 'cscore']
-            edge_events_df.show()
+            #edge_events_df.show()
 
             #edge_events_df = edge_events.toDF('revision', 'source', 'target' 'cscore')
             #edge_events_df.show()
@@ -334,3 +326,16 @@ class ControvercyScore(PandasProcessorGraph):
             print(row['B'])
             print()
 
+    def cscore(self, t1, t2, cscore=-0.9):
+        delta = (t2-t1)
+        cscore = cscore * math.exp(-1 * self.decay_rate * delta) + self.growth_rate
+        return cscore
+
+    def progress(self, counter):
+        chunks = 10**5
+        if counter >= chunks:
+            print(str(chunks)+' edges have been processed')
+            return 0
+        else:
+            counter = counter + 1
+            return counter

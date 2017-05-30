@@ -1,4 +1,4 @@
-from wikiCat.processors.spark_processor import Processor
+from wikiCat.processors.processor import Processor
 from dateutil import parser
 import findspark
 findspark.init()
@@ -7,9 +7,9 @@ import shutil
 import os
 
 
-class SparkProcessorParsed(Processor):
-    def __init__(self, project):
-        Processor.__init__(self, project, 'parsed')
+class SparkProcessor(Processor):
+    def __init__(self, project, dtype):
+        Processor.__init__(self, project, dtype)
 
     # Function fo parse node information into a DataFrame
     # Returns DataFrame with Columns: id, title, ns
@@ -66,3 +66,13 @@ class SparkProcessorParsed(Processor):
                         except:
                             pass
         shutil.rmtree(os.path.join(os.getcwd(), path))
+
+
+class SparkProcessorParsed(SparkProcessor):
+    def __init__(self, project):
+        Processor.__init__(self, project, 'parsed')
+
+
+class SparkProcessorGraph(SparkProcessor):
+    def __init__(self, project):
+        Processor.__init__(self, project, 'graph')
