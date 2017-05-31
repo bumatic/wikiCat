@@ -5,6 +5,7 @@ from wikiCat.processors.graph_data_gererator import GraphDataGenerator
 from wikiCat.processors.spark_processor_parsed import SparkProcessorParsed
 from wikiCat.processors.controvercy_score import ControvercyScore
 from wikiCat.processors.oldest_revision import OldestRevision
+from wikiCat.processors.gt_graph_generator import GtGraphGenerator
 
 
 pp = pprint.PrettyPrinter(indent=4)
@@ -23,10 +24,13 @@ mp.load_project()
 
 #GraphDataGenerator(mp, 'cat_data').generate_graph_data(override=True)
 
+GtGraphGenerator(mp).create_gt_graph()
 
-ControvercyScore(mp).calculate_edge_score()
-ControvercyScore(mp).calculate_avg_node_score()
-ControvercyScore(mp).calculate_avg_edge_score()
+#ControvercyScore(mp).calculate_edge_score()
+#ControvercyScore(mp).calculate_avg_node_score()
+#ControvercyScore(mp).calculate_avg_edge_score()
+
+
 
 #cat_data_fixed_none_errors_removed_1_edge
 

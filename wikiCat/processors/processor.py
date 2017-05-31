@@ -1,6 +1,6 @@
 import os
 import csv
-
+import json
 
 class Processor:
     def __init__(self, project, processor_type):
@@ -31,6 +31,11 @@ class Processor:
         with open(file, 'w', newline='') as outfile:
             for item in list_data:
                 outfile.write('%s\n' % '\t'.join(map(str, item)))
+        return
+
+    def write_json(self, file, dict_data):
+        with open(file, 'w') as outfile:
+            json.dump(dict_data, outfile, sort_keys=True, indent=4)
         return
 
     def register_results(self, results_type, page_info=[], revision_info=[], cat_data=[], link_data=[],

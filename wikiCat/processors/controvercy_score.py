@@ -189,6 +189,6 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
 
             self.assemble_spark_results(spark_results_path, tmp_results_file)
 
-            os.remove(os.path.join(self.data_path, self.events_files[0]))
+            os.remove(os.path.join(self.data_path, self.edges_files[0]))
             os.rename(tmp_results_file, results_file)
 
