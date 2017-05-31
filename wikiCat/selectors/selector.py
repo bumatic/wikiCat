@@ -2,6 +2,7 @@
 from wikiCat.processors.pandas_processor_graph import PandasProcessorGraph
 from dateutil import parser
 
+
 class Selector(PandasProcessorGraph):
     def __init__(self, project, fixed='fixed_none', errors='errors_removed', start_date=None):
         PandasProcessorGraph.__init__(self, project, fixed=fixed, errors=errors)
@@ -34,8 +35,8 @@ class Selector(PandasProcessorGraph):
             else:
                 self.load_events(file, columns=['revision', 'source', 'target', 'event'])
             for revision, events in self.events.groupby('revision'):
-                if (revision - last_slice) > delta:
-                    results[revision] = tmp_results
+                if (revision - last_slice) > delta and revision >= self.start_date:
+                    results[last_slice] = tmp_results
                     last_slice = revision
                 for event in events.iterrows():
                     if event[1]['event'] == 'start':
@@ -46,7 +47,24 @@ class Selector(PandasProcessorGraph):
         results[self.end_date] = tmp_results
         # TODO: Implement handling of results
 
-    def sub_graph(self, seed=None):
+    def temporal_views_spark(self, slice='year', cscore=True, start_date=None):
+        assert slice is 'year' or 'month' or 'day', 'Error. Pass a valid value for slice: year, month, day.'
+        assert type(cscore) is bool, 'Error. A bool value is expected for cscore signalling, if data file contains ' \
+                                     'cscore.'
+
+        # TODO Implementieren
+        '''
+        IDEE:
+            1. Generate list of desired dates/cuts
+            2. For each slice:
+                A) SELECT max(revision) as revision, source, target, type FROM events WHERE revision < slice_date'
+                B) SELECT source, target FROM events where type = 'start'
+                B) Collect results and add list to results-dict, with slice date as key
+        '''
+
+
+
+    def sub_graph(self, seed=None, depth=3):
         pass
 
     def sub_graph_views(self):

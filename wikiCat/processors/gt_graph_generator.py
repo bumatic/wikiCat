@@ -29,6 +29,9 @@ class GtGraphGenerator(PandasProcessorGraph):
         self.node_id_dict = {}
         self.edge_dict = {}
 
+        #self.fixed = fixed
+        #self.errors = errors
+
     def create_gt_graph(self, cscore=True):
         self.create_nodes()
         self.create_edges()
@@ -84,10 +87,14 @@ class GtGraphGenerator(PandasProcessorGraph):
         self.graph.save(os.path.join(self.data_path, self.gt_filename), fmt='gt')
         self.write_json(os.path.join(self.data_path, self.gt_nodes_filename), self.node_id_dict)
         self.write_json(os.path.join(self.data_path, self.gt_edges_filename), self.edge_dict)
-
-
+        self.add_gt_graph()
         pass
 
+    def add_gt_graph(self):
+        self.register_results('graph', nodes=self.nodes_files, edges=self.edges_files, events=self.events_files,
+                              gt=[self.gt_filename, self.gt_nodes_filename, self.gt_edges_filename],
+                              fixed=self.fixed, errors=self.errors, override=True)
+        return
 
 
 

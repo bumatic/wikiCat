@@ -38,14 +38,14 @@ class Processor:
             json.dump(dict_data, outfile, sort_keys=True, indent=4)
         return
 
-    def register_results(self, results_type, page_info=[], revision_info=[], cat_data=[], link_data=[],
-                         error_data=[], error_type='error', nodes=[], edges=[], events=[],  fixed='fixed_none',
+    def register_results(self, results_type, page_info=None, revision_info=None, cat_data=None, link_data=None,
+                         error_data=None, error_type='error', nodes=None, edges=None, events=None,  gt=None, fixed='fixed_none',
                          errors='errors_removed', override=False):
         if results_type == 'parsed':
             self.project.add_data('parsed', page_info=page_info, revision_info=revision_info, cat_data=cat_data,
                                   link_data=link_data, override=override)
         elif results_type == 'graph':
-            self.project.add_data('graph', nodes=nodes, edges=edges, events=events, fixed=fixed, errors=errors,
+            self.project.add_data('graph', nodes=nodes, edges=edges, events=events, gt=gt, fixed=fixed, errors=errors,
                                   override=override)
             pass
         elif results_type == 'error':
