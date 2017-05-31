@@ -11,7 +11,7 @@ class PandasProcessorGraph(Processor):
         self.fixed = fixed
         self.errors = errors
         self.data_status = 'graph__' + self.fixed + '__' + self.errors
-        print (self.data_status)
+        #self.data_obj[self.data_status]
         if 'events' in self.data_obj.data[self.data_status]:
             self.events_files = self.data_obj.data[self.data_status]['events']
             self.events = pd.DataFrame()

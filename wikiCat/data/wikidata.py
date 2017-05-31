@@ -51,6 +51,7 @@ class WikiData:
     def add_graph_data(self, nodes=None, edges=None, events=None, gt=None, fixed='fixed_none', errors='errors_removed',
                        override=False):
         self.data_status = 'graph__'+fixed+'__'+errors
+        self.data_path = self.project.graph_data_path
 
         #TODO CHECK FOR ERRORS in ADDING GRAPH DATA
 
@@ -76,10 +77,9 @@ class WikiData:
                     print('events file(s) do not exist')
             if gt is not None:
                 if self.check_files(gt):
-                    self.data[self.self.data_status]['gt'] = gt
+                    self.data[self.data_status]['gt'] = gt
                 else:
                     print('gt graph file(s) do not exist')
-        print(self.data)
         return self.data
 
     def add_error_data(self, error_data=[], error_type='error', override=False):
@@ -97,7 +97,6 @@ class WikiData:
     def check_files(self, file_list):
         exists = True
         for f in file_list:
-            print(os.path.join(self.data_path, f))
             if not os.path.exists(os.path.join(self.data_path, f)):
                 exists = False
         return exists

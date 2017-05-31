@@ -24,11 +24,12 @@ mp.load_project()
 
 #GraphDataGenerator(mp, 'cat_data').generate_graph_data(override=True)
 
-GtGraphGenerator(mp).create_gt_graph()
-
+#GtGraphGenerator(mp).create_gt_graph()
 #ControvercyScore(mp).calculate_edge_score()
 #ControvercyScore(mp).calculate_avg_node_score()
 #ControvercyScore(mp).calculate_avg_edge_score()
+
+GtGraphGenerator(mp).add_gt_graph()
 
 
 

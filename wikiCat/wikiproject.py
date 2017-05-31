@@ -142,8 +142,8 @@ class Project:
             json.dump(self.pinfo, info_file, sort_keys=True, indent=4)
         return
 
-    def add_data(self, dtype, page_info=[], revision_info=[], cat_data=[], link_data=[], error_data=[],
-                 error_type='error', nodes=[], edges=[], events=[], fixed='fixed_none',
+    def add_data(self, dtype, page_info=None, revision_info=None, cat_data=None, link_data=None, error_data=None,
+                 error_type='error', nodes=None, edges=None, events=None, gt=None, fixed='fixed_none',
                  errors='errors_removed', override=False):
         if dtype == 'dump':
             print('ADD DUMP - NOT YET IMPLEMENTED')
@@ -156,19 +156,20 @@ class Project:
                 self.data_objs[dtype] = WikiData(self, dtype)
                 self.data_desc[dtype] = self.data_objs[dtype].add_parsed_data(page_info=page_info,
                                                                               revision_info=revision_info,
-                                                                              cat_data=cat_data, link_data=link_data)
+                                                                              cat_data=cat_data, link_data=link_data,
+                                                                              override=override)
                 self.save_project()
         elif dtype == 'graph':
             try:
                 self.data_desc[dtype] = self.data_objs[dtype].add_graph_data(nodes=nodes, edges=edges,
-                                                                             events=events, fixed=fixed,
-                                                                             errors=errors)
+                                                                             events=events, gt=gt, fixed=fixed,
+                                                                             errors=errors, override=override)
 
             except:
                 self.data_objs[dtype] = WikiData(self, dtype)
                 self.data_desc[dtype] = self.data_objs[dtype].add_graph_data(nodes=nodes, edges=edges,
-                                                                             events=events, fixed=fixed,
-                                                                             errors=errors)
+                                                                             events=events, gt=gt, fixed=fixed,
+                                                                             errors=errors, override=override)
 
             self.save_project()
         elif dtype == 'error':
