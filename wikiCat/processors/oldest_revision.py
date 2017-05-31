@@ -17,7 +17,7 @@ class OldestRevision(SparkProcessorParsed):
         # Create a SparkSession
         # Note: In case its run on Windows and generates errors use (tmp Folder mus exist):
         # spark = SparkSession.builder.config("spark.sql.warehouse.dir", "file:///C:/temp").appName("Postprocessing").getOrCreate()
-        spark = SparkSession.builder.appName("Generate_Graph_Data").getOrCreate()
+        spark = SparkSession.builder.appName("Oldest Revision").getOrCreate()
 
         # Infer the schema, and register the DataFrames as tables.
         revision_info_source = spark.sparkContext.textFile(os.path.join(self.data_path, self.revision_info))
@@ -27,6 +27,7 @@ class OldestRevision(SparkProcessorParsed):
 
         # Select oldest revision
         revision_info_df = spark.sql("SELECT min(rev_date) as revision from revision")
-        results = revision_info_df.collect()
-        print(results)
-        return results
+        revision_info_df.show()
+        #results = revision_info_df.collect()
+        #print(results)
+        #return results

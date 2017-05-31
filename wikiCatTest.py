@@ -13,9 +13,7 @@ pp = pprint.PrettyPrinter(indent=4)
 mp = Project('project')
 mp.load_project()
 
-mp.set_dump_date('2016-11-01')
-
-pp.pprint(mp.pinfo)
+#mp.set_dump_date('2016-11-01')
 
 OldestRevision(mp).get()
 

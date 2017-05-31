@@ -210,7 +210,7 @@ class Project:
             return 'No start date has been calculated yet. Use the method find_oldest_revision(self).'
 
     def set_title(self, title):
-        self.title = title
+        self.project_title = title
         self.save_project()
 
     def set_description(self, description):
