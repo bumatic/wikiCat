@@ -14,7 +14,9 @@ mp = Project('project')
 mp.load_project()
 #mp.find_start_date()
 
+#mp.set_dump_date('2016-11-01')
 
+OldestRevision(mp).get()
 #mp.set_dump_date('2016-11-01')
 pp.pprint(mp.pinfo)
 

@@ -205,7 +205,7 @@ class Project:
             return 'No dump date has been set yet. Use the method set_dump_date to set it..'
 
     def set_title(self, title):
-        self.title = title
+        self.project_title = title
         self.save_project()
 
     def set_description(self, description):
