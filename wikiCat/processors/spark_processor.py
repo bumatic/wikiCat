@@ -10,6 +10,7 @@ import os
 class SparkProcessor(Processor):
     def __init__(self, project, dtype):
         Processor.__init__(self, project, dtype)
+        self.project = project
 
     # Function fo parse node information into a DataFrame
     # Returns DataFrame with Columns: id, title, ns
@@ -67,7 +68,7 @@ class SparkProcessor(Processor):
             source = fields[0]
             target = fields[1]
             etype = fields[2]
-            cscore = cscore[3]
+            cscore = fields[3]
             return Row(source=source, target=target, etype=etype, cscore=cscore)
 
     def mapper_tmp_cscore_events(self, line):
@@ -126,8 +127,13 @@ class SparkProcessor(Processor):
 class SparkProcessorParsed(SparkProcessor):
     def __init__(self, project):
         Processor.__init__(self, project, 'parsed')
+        self.path = self.project.parsed_data_path
 
 
 class SparkProcessorGraph(SparkProcessor):
-    def __init__(self, project):
+    def __init__(self, project, fixed='fixed_none', errors='errors_removed'):
         Processor.__init__(self, project, 'graph')
+        self.path = self.project.graph_data_path
+        self.fixed = fixed
+        self.errors = errors
+        self.data_status = 'graph__' + self.fixed + '__' + self.errors

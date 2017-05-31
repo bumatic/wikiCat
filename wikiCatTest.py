@@ -18,10 +18,10 @@ mp.load_project()
 
 #mp.find_start_date()
 #mp.set_dump_date('2016-11-01')
-#pp.pprint(mp.pinfo)
+pp.pprint(mp.pinfo)
 
 
-Selector(mp).temporal_views_spark()
+#Selector(mp).temporal_views_spark()
 
 #ParsedDataErrorCheck(mp, 'cat_data').missing_info_source_ids()
 #ParsedDataErrorCheck(mp, 'cat_data').find_unresolvable_target_titles()

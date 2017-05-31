@@ -48,6 +48,7 @@ class Processor:
             self.project.add_data('graph', nodes=nodes, edges=edges, events=events, gt=gt, fixed=fixed, errors=errors,
                                   override=override)
             pass
+        #TODO INCLUdE REGISTER GTGraph -> send to all
         elif results_type == 'error':
             self.project.add_data('error', error_data=error_data, error_type=error_type)
         elif results_type == 'results':

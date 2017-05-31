@@ -4,9 +4,9 @@ from wikiCat.data.wikidata import WikiData
 from wikiCat.processors.oldest_revision import OldestRevision
 from dateutil import parser
 
+
 class Project:
     def __init__(self, path):
-
         self.path = path
         self.project_title = ''
         self.project_description = ''
@@ -14,24 +14,28 @@ class Project:
         self.pinfo = {}
         self.pinfo_file = os.path.join(self.path, '_project_info.json')
         self.log_path = os.path.join(self.path, '01_logs')
-        self.data_path = os.path.join(self.path, '02_data')
-        self.test_data_path = os.path.join(self.data_path, '00_testdata')
-        self.dump_data_path = os.path.join(self.data_path, '01_dump')
-        self.parsed_data_path = os.path.join(self.data_path, '02_parsed')
-        self.graph_data_path = os.path.join(self.data_path, '03_graph')
-        self.error_data_path = os.path.join(self.data_path, '04_error')
-        self.results_path = os.path.join(self.path, '03_results')
+        self.raw_data_path = os.path.join(self.path, '02_data')
+        self.test_data_path = os.path.join(self.raw_data_path, '00_testdata')
+        self.dump_data_path = os.path.join(self.raw_data_path, '01_dump')
+        self.parsed_data_path = os.path.join(self.raw_data_path, '02_parsed')
+        self.graph_data_path = os.path.join(self.raw_data_path, '03_graph_raw')
+        self.error_data_path = os.path.join(self.raw_data_path, '04_error')
+        self.gt_graph_path = os.path.join(self.path, '03_gt_graphs')
+        self.results_path = os.path.join(self.path, '04_results')
         self.data_objs = {}
         self.data_desc = {}
+        self.gt_graph_objs = {}
+        self.gt_graph_desc = {}
         self.start_date = None
         self.dump_date = None
 
-    def create_project(self, title='New WikiCat Project', description='This is a WikiCat Project', dump_date=None):
+    def create_project(self, title='New WikiCat Project',
+                       description='This is a WikiCat Project', dump_date=None):
         if not os.path.exists(os.path.join(os.getcwd(), self.pinfo_file)):
             if not os.path.isdir(os.path.join(os.getcwd(), self.log_path)):
                 os.makedirs(os.path.join(os.getcwd(), self.log_path))
-            if not os.path.isdir(os.path.join(os.getcwd(), self.data_path)):
-                os.makedirs(os.path.join(os.getcwd(), self.data_path))
+            if not os.path.isdir(os.path.join(os.getcwd(), self.raw_data_path)):
+                os.makedirs(os.path.join(os.getcwd(), self.raw_data_path))
             if not os.path.isdir(os.path.join(os.getcwd(), self.test_data_path)):
                 os.makedirs(os.path.join(os.getcwd(), self.test_data_path))
             if not os.path.isdir(os.path.join(os.getcwd(), self.dump_data_path)):
@@ -42,9 +46,10 @@ class Project:
                 os.makedirs(os.path.join(os.getcwd(), self.graph_data_path))
             if not os.path.isdir(os.path.join(os.getcwd(), self.error_data_path)):
                 os.makedirs(os.path.join(os.getcwd(), self.error_data_path))
+            if not os.path.isdir(os.path.join(os.getcwd(), self.gt_graph_path)):
+                os.makedirs(os.path.join(os.getcwd(), self.gt_graph_path))
             if not os.path.isdir(os.path.join(os.getcwd(), self.results_path)):
                 os.makedirs(os.path.join(os.getcwd(), self.results_path))
-
             self.project_title = title
             self.project_description = description
             self.project_status = '001'
@@ -110,18 +115,11 @@ class Project:
                 self.data_desc['error'] = self.data_objs['error'].get_data_desc()
             else:
                 pass
-
-
-            '''
-            data_types = ['raw', 'parsed', 'graph', 'error']
-
-            for dtype in data_types:
-                if dtype in self.pinfo['data'].keys():
-                    self.data_objs[dtype] = WikiData(self, dtype)
-                    self.data_objs[dtype].init_data(self.pinfo['data'][dtype])
-                    self.data_desc[dtype] = self.data_objs[dtype].get_data_desc()
-            '''
-
+            if 'gt_graph' in self.pinfo.keys():
+                # TODO needs to be implemented
+                pass
+            else:
+                pass
         else:
             print('Project cannot be loaded: The file _project_info.json does not exist. Try creating a new project.')
         return
@@ -133,6 +131,7 @@ class Project:
         self.pinfo['status'] = self.project_status
         self.pinfo['path'] = self.path
         self.pinfo['data'] = self.data_desc
+        self.pinfo['gt_graph'] = self.gt_graph_desc
         if self.start_date is not None:
             self.pinfo['start_date'] = str(self.start_date)
         if self.dump_date is not None:

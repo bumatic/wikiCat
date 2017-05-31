@@ -91,6 +91,7 @@ class GtGraphGenerator(PandasProcessorGraph):
         pass
 
     def add_gt_graph(self):
+        #TODO THIS NEEDS TO BE CHANGED TO REGISTER GT GRAPH AS GRAPH OBJECT
         self.register_results('graph', nodes=self.nodes_files, edges=self.edges_files, events=self.events_files,
                               gt=[self.gt_filename, self.gt_nodes_filename, self.gt_edges_filename],
                               fixed=self.fixed, errors=self.errors, override=True)
