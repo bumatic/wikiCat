@@ -71,6 +71,7 @@ class Selector(PandasProcessorGraph, SparkProcessorGraph):
             results.append(curr_date)
             curr_date = curr_date + delta
         results.append(self.end_date)
+        print(results)
         return results
 
     #TODO CHECK IF THIS WORKS!
@@ -82,7 +83,8 @@ class Selector(PandasProcessorGraph, SparkProcessorGraph):
             self.start_date = parser.parse(start_date).timestamp()
         if end_date is not None:
             self.end_date = parser.parse(end_date).timestamp()
-        slice_list = self.generate_slice_list()
+
+        slice_list = self.generate_slice_list(slice)
 
         # Create a SparkSession
         # Note: In case its run on Windows and generates errors use (tmp Folder mus exist):
@@ -102,13 +104,17 @@ class Selector(PandasProcessorGraph, SparkProcessorGraph):
             else:
                 all_events_df = all_events_df.union(events_df)
         for slice in slice_list:
-            all_events_df.createOrReplaceTempView("events")
-            active_edges_df = spark.sql('SELECT * FROM events WHERE revision < '+str(slice))
+            all_events_df.createOrReplaceTempView("all_events")
+            active_edges_df = spark.sql('SELECT * FROM all_events WHERE revision < '+str(slice))
             active_edges_df.createOrReplaceTempView("events")
-            active_edges_df = spark.sql('SELECT max(revision) as revision, source, target, type FROM events '
+            active_edges_df = spark.sql('SELECT max(revision) as revision, source, target FROM events '
                                         'GROUP BY source, target')
             active_edges_df.createOrReplaceTempView("events")
-            active_edges_df = spark.sql('SELECT source, target FROM events WHERE type = start')
+            active_edges_df = spark.sql('SELECT e.revision, e.source, e.target, a.event FROM events e '
+                                        'JOIN all_events a ON e.revision=a.revision AND e.source = a.source AND '
+                                        'e.target = a.target')
+            active_edges_df.createOrReplaceTempView("events")
+            active_edges_df = spark.sql('SELECT source, target FROM events WHERE event = \'start\'')
             active_edges = active_edges_df.collect()
             snapshots[slice] = active_edges
 

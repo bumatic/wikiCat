@@ -38,7 +38,6 @@ class OldestRevision(SparkProcessorGraph):
 
 
     def get(self):
-        print(self.events_files)
         # Create a SparkSession
         # Note: In case its run on Windows and generates errors use (tmp Folder mus exist):
         # spark = SparkSession.builder.config("spark.sql.warehouse.dir", "file:///C:/temp").appName("Postprocessing").getOrCreate()

@@ -6,7 +6,7 @@ from wikiCat.processors.spark_processor_parsed import SparkProcessorParsed
 from wikiCat.processors.controvercy_score import ControvercyScore
 from wikiCat.processors.oldest_revision import OldestRevision
 from wikiCat.processors.gt_graph_generator import GtGraphGenerator
-
+from wikiCat.selectors.selector import Selector
 
 pp = pprint.PrettyPrinter(indent=4)
 
@@ -16,11 +16,12 @@ mp.load_project()
 
 #mp.set_dump_date('2016-11-01')
 
-OldestRevision(mp).get()
+#mp.find_start_date()
 #mp.set_dump_date('2016-11-01')
-pp.pprint(mp.pinfo)
+#pp.pprint(mp.pinfo)
 
 
+Selector(mp).temporal_views_spark()
 
 #ParsedDataErrorCheck(mp, 'cat_data').missing_info_source_ids()
 #ParsedDataErrorCheck(mp, 'cat_data').find_unresolvable_target_titles()
