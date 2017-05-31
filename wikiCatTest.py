@@ -13,14 +13,18 @@ pp = pprint.PrettyPrinter(indent=4)
 mp = Project('project')
 mp.load_project()
 
-#pp.pprint(mp.pinfo)
+mp.set_dump_date('2016-11-01')
+
+pp.pprint(mp.pinfo)
+
+OldestRevision(mp).get()
 
 #ParsedDataErrorCheck(mp, 'cat_data').missing_info_source_ids()
 #ParsedDataErrorCheck(mp, 'cat_data').find_unresolvable_target_titles()
 
 #mp.find_oldest_revision()
 
-#OldestRevision(mp).get()
+
 
 #GraphDataGenerator(mp, 'cat_data').generate_graph_data(override=True)
 
@@ -29,7 +33,7 @@ mp.load_project()
 #ControvercyScore(mp).calculate_avg_node_score()
 #ControvercyScore(mp).calculate_avg_edge_score()
 
-GtGraphGenerator(mp).add_gt_graph()
+#GtGraphGenerator(mp).add_gt_graph()
 
 
 

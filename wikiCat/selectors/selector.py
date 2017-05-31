@@ -1,11 +1,12 @@
 # from wikiCat.wikiproject import Project
 from wikiCat.processors.pandas_processor_graph import PandasProcessorGraph
+from wikiCat.processors.spark_processor import SparkProcessorGraph
 from dateutil import parser
 
-
-class Selector(PandasProcessorGraph):
+class Selector(PandasProcessorGraph, SparkProcessorGraph):
     def __init__(self, project, fixed='fixed_none', errors='errors_removed', start_date=None):
         PandasProcessorGraph.__init__(self, project, fixed=fixed, errors=errors)
+        SparkProcessorGraph.__init__(self, project)
         self.project = project
         self.end_date = self.project.dump_date.timestamp()
 

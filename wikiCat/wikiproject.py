@@ -134,9 +134,9 @@ class Project:
         self.pinfo['path'] = self.path
         self.pinfo['data'] = self.data_desc
         if self.start_date is not None:
-            self.pinfo['start_date'] = self.start_date
+            self.pinfo['start_date'] = str(self.start_date)
         if self.dump_date is not None:
-            self.pinfo['dump_date'] = self.dump_date
+            self.pinfo['dump_date'] = str(self.dump_date)
 
         with open(self.pinfo_file, 'w') as info_file:
             json.dump(self.pinfo, info_file, sort_keys=True, indent=4)

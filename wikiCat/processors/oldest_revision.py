@@ -28,4 +28,5 @@ class OldestRevision(SparkProcessorParsed):
         # Select oldest revision
         revision_info_df = spark.sql("SELECT min(rev_date) as revision from revision")
         results = revision_info_df.collect()
+        print(results)
         return results
