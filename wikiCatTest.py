@@ -12,12 +12,13 @@ pp = pprint.PrettyPrinter(indent=4)
 
 mp = Project('project')
 mp.load_project()
+#mp.find_start_date()
 
-mp.set_dump_date('2016-11-01')
 
+#mp.set_dump_date('2016-11-01')
 pp.pprint(mp.pinfo)
 
-OldestRevision(mp).get()
+
 
 #ParsedDataErrorCheck(mp, 'cat_data').missing_info_source_ids()
 #ParsedDataErrorCheck(mp, 'cat_data').find_unresolvable_target_titles()

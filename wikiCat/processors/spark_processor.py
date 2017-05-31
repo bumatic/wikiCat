@@ -40,6 +40,63 @@ class SparkProcessor(Processor):
         rev_date = rev_date.timestamp()
         return Row(rev_id=rev_id, rev_date=rev_date)
 
+    # Function fo parse revision information into a DataFrame
+    # Returns Key-Value-Pair with the revision ID as key and revision TIME as value
+    def mapper_nodes(self, line):
+        fields = line.split('\t')
+        if len(fields) == 3:
+            id = fields[0]
+            title = fields[1]
+            ns = fields[2]
+            return Row(id=id, title=title, ns=ns)
+        elif len(fields) == 4:
+            id = fields[0]
+            title = fields[1]
+            ns = fields[2]
+            cscore = fields[3]
+            return Row(id=id, title=title, ns=ns, cscore=cscore)
+
+    def mapper_edges(self, line):
+        fields = line.split('\t')
+        if len(fields) == 3:
+            source = fields[0]
+            target = fields[1]
+            etype = fields[2]
+            return Row(source=source, target=target, etype=etype)
+        elif len(fields) == 4:
+            source = fields[0]
+            target = fields[1]
+            etype = fields[2]
+            cscore = cscore[3]
+            return Row(source=source, target=target, etype=etype, cscore=cscore)
+
+    def mapper_tmp_cscore_events(self, line):
+        fields = line.split('\t')
+        revision = fields[0]
+        source = fields[1]
+        target = fields[2]
+        cscore = fields[3]
+        return Row(revision=revision, source=source, target=target, cscore=cscore)
+
+    def mapper_events(self, line):
+        fields = line.split('\t')
+        if len(fields) == 4:
+            revision = float(fields[0])
+            source = fields[1]
+            target = fields[2]
+            event = fields[3]
+            return Row(revision=revision, source=source, target=target, event=event)
+        elif len(fields) == 5:
+            revision = float(fields[0])
+            source = fields[1]
+            target = fields[2]
+            event = fields[3]
+            cscore = fields[4]
+            return Row(revision=revision, source=source, target=target, event=event, cscore=cscore)
+        else:
+            print('Error while mapping events')
+            return
+
     def handle_spark_results(self, path, file):
         spark_path = os.path.join(path, file)
         for filename in os.listdir(spark_path):

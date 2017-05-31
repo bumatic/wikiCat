@@ -26,48 +26,6 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
         self.decay_rate = decay_rate
         self.start_score = start_score
 
-
-    def mapper_nodes(self, line):
-        fields = line.split('\t')
-        id = fields[0]
-        title = fields[1]
-        ns = fields[2]
-        return Row(id=id, title=title, ns=ns)
-
-    def mapper_edges(self, line):
-        fields = line.split('\t')
-        source = fields[0]
-        target = fields[1]
-        etype = fields[2]
-        return Row(source=source, target=target, etype=etype)
-
-    def mapper_tmp_cscore_events(self, line):
-        fields = line.split('\t')
-        revision = fields[0]
-        source = fields[1]
-        target = fields[2]
-        cscore = fields[3]
-        return Row(revision=revision, source=source, target=target, cscore=cscore)
-
-    def mapper_events(self, line):
-        fields = line.split('\t')
-        if len(fields) == 4:
-            revision = float(fields[0])
-            source = fields[1]
-            target = fields[2]
-            event = fields[3]
-            return Row(revision=revision, source=source, target=target, event=event)
-        elif len(fields) == 5:
-            revision = float(fields[0])
-            source = fields[1]
-            target = fields[2]
-            event = fields[3]
-            cscore = fields[4]
-            return Row(revision=revision, source=source, target=target, event=event, cscore=cscore)
-        else:
-            print('Error while mapping events')
-            return
-
     def process_spark_list(self, row):
         source = row[0]
         target = row[1]

@@ -183,11 +183,6 @@ class Project:
             print('Please enter a valid type: dump, parsed, cleaned, graph, error')
         return
 
-    def find_oldest_revision(self):
-        #TODO: This needs some testing. Probably an array is returned and the vorrect value needs to be accessed.
-        self.start_date = OldestRevision(self).get()
-        self.save_project()
-
     def get_title(self):
         return self.project_title
 
@@ -201,13 +196,13 @@ class Project:
         if self.start_date is not None:
             return self.start_date
         else:
-            return 'No start date has been calculated yet. Use the method find_oldest_revision(self).'
+            return 'No start date has been calculated yet. Use the method find_start_date(self).'
 
     def get_dump_date(self):
         if self.dump_date is not None:
             return self.dump_date
         else:
-            return 'No start date has been calculated yet. Use the method find_oldest_revision(self).'
+            return 'No dump date has been set yet. Use the method set_dump_date to set it..'
 
     def set_title(self, title):
         self.title = title
@@ -224,6 +219,14 @@ class Project:
     def set_dump_date(self, date):
         self.dump_date = parser.parse(date)
         self.save_project()
+
+    def find_start_date(self):
+        if 'graph' in self.data_desc.keys():
+            # TODO: This needs some testing. Probably an array is returned and the vorrect value needs to be accessed.
+            self.start_date = OldestRevision(self).get()
+            self.save_project()
+        else:
+            print('The calculation of the start date requires graph data')
 
     def update_data_desc(self, data_type, info):
         self.data_desc[data_type] = info
