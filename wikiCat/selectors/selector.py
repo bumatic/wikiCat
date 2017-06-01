@@ -6,6 +6,7 @@ from pyspark import SparkConf, SparkContext
 from pyspark.sql.functions import collect_list, avg, col
 from wikiCat.processors.pandas_processor_graph import PandasProcessorGraph
 from wikiCat.processors.spark_processor import SparkProcessorGraph
+from wikiCat.data.wikigraph import WikiGraph
 from dateutil import parser
 #import math
 from datetime import datetime
@@ -13,10 +14,11 @@ from datetime import datetime
 import os
 
 
-class Selector(PandasProcessorGraph, SparkProcessorGraph):
-    def __init__(self, project, fixed='fixed_none', errors='errors_removed'):
-        PandasProcessorGraph.__init__(self, project, fixed=fixed, errors=errors)
-        SparkProcessorGraph.__init__(self, project)
+class Selector(SparkProcessorGraph): #PandasProcessorGraph
+    def __init__(self, graph):
+        self.project = graph.project
+        #PandasProcessorGraph.__init__(self, self.project, fixed=fixed, errors=errors)
+        SparkProcessorGraph.__init__(self, self.project)
         self.start_date = self.project.start_date.timestamp()
         self.end_date = self.project.dump_date.timestamp()
 
@@ -88,7 +90,6 @@ class Selector(PandasProcessorGraph, SparkProcessorGraph):
         sc = SparkContext(conf=conf)
         spark = SparkSession(sc).builder.appName("Calculate_Slices").getOrCreate()
         counter = 0
-        snapshots = {}
         for file in self.events_files:
             counter = counter + 1
             events_source = spark.sparkContext.textFile(os.path.join(self.data_path, file))
