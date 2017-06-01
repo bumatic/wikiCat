@@ -31,7 +31,6 @@ class WikiGraph(Data):
         self.data[gt_type]['main'] = {}
         self.data[gt_type]['main']['gt_file'] = gt_file
         self.data[gt_type]['main']['gt_node_id_file'] = gt_id_dict
-        self.data[gt_type]['main']['nodes'] = nodes
         self.data[gt_type]['main']['location'] = graph_path
         self.data[gt_type]['main']['source_nodes'] = source_nodes
         self.data[gt_type]['main']['source_edges'] = source_edges
