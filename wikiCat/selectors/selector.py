@@ -14,46 +14,16 @@ from datetime import datetime
 import os
 
 
-class Selector(PandasProcessorGraph, SparkProcessorGraph): #PandasProcessorGraph
-    def __init__(self, graph, fixed='fixed_none', errors='errors_removed'):
+class Selector(SparkProcessorGraph): #PandasProcessorGraph
+    def __init__(self, graph):
+        self.graph = graph
+        assert self.graph.curr_working_graph is not None, 'Error. Set a current working graph before creating ' \
+                                                          'a selector.'
         self.project = graph.project
-        PandasProcessorGraph.__init__(self, self.project, fixed=fixed, errors=errors)
+        #PandasProcessorGraph.__init__(self, self.project, fixed=fixed, errors=errors)
         SparkProcessorGraph.__init__(self, self.project)
         self.start_date = self.project.start_date.timestamp()
         self.end_date = self.project.dump_date.timestamp()
-
-    def create_snapshot_views(self, slice='year', cscore=True, start_date=None):
-        assert slice is 'year' or 'month' or 'day', 'Error. Pass a valid value for slice: year, month, day.'
-        assert type(cscore) is bool, 'Error. A bool value is expected for cscore signalling, if data file contains ' \
-                                     'cscore.'
-        if start_date is not None:
-            self.start_date = parser.parse(start_date).timestamp()
-        if slice == 'day':
-            delta = 86400
-        elif slice == 'month':
-            delta = 2592000
-        elif slice == 'year':
-            delta = 31536000
-        results = {}
-        tmp_results = {}
-        last_slice = self.start_date.timestamp()
-        for file in self.events_files:
-            if cscore:
-                self.load_events(file, columns=['revision', 'source', 'target', 'event', 'cscore'])
-            else:
-                self.load_events(file, columns=['revision', 'source', 'target', 'event'])
-            for revision, events in self.events.groupby('revision'):
-                if (revision - last_slice) > delta and revision >= self.start_date:
-                    results[last_slice] = tmp_results
-                    last_slice = revision
-                for event in events.iterrows():
-                    if event[1]['event'] == 'start':
-                        tmp_results[str(event[1]['source'])+'|'+str(event[1]['target'])] = True
-                    elif event[1]['event'] == 'end':
-                        tmp_results[str(event[1]['source']) + '|' + str(event[1]['target'])] = False
-
-        results[self.end_date] = tmp_results
-        # TODO: Implement handling of results
 
     def generate_slice_list(self, slice):
         if slice == 'day':
@@ -72,10 +42,14 @@ class Selector(PandasProcessorGraph, SparkProcessorGraph): #PandasProcessorGraph
         return results
 
     #TODO CHECK IF THIS WORKS!
-    def temporal_views_spark(self, slice='year', cscore=True, start_date=None, end_date=None):
+    def create_snapshot_views_spark(self, slice='year', cscore=True, start_date=None, end_date=None):
         assert slice is 'year' or 'month' or 'day', 'Error. Pass a valid value for slice: year, month, day.'
         assert type(cscore) is bool, 'Error. A bool value is expected for cscore signalling, if data file contains ' \
                                      'cscore.'
+        assert parser.parse(start_date).timestamp() >= self.start_date, 'Error. The start date needs to be after ' \
+                                                                        + str(datetime.fromtimestamp(self.start_date))
+        assert parser.parse(end_date).timestamp() <= self.end_date, 'Error. The end date needs to be before ' \
+                                                                    + str(datetime.fromtimestamp(self.end_date))
         if start_date is not None:
             self.start_date = parser.parse(start_date).timestamp()
         if end_date is not None:
@@ -90,6 +64,7 @@ class Selector(PandasProcessorGraph, SparkProcessorGraph): #PandasProcessorGraph
         sc = SparkContext(conf=conf)
         spark = SparkSession(sc).builder.appName("Calculate_Slices").getOrCreate()
         counter = 0
+
         for file in self.events_files:
             counter = counter + 1
             events_source = spark.sparkContext.textFile(os.path.join(self.data_path, file))
@@ -99,6 +74,8 @@ class Selector(PandasProcessorGraph, SparkProcessorGraph): #PandasProcessorGraph
                 all_events_df = events_df
             else:
                 all_events_df = all_events_df.union(events_df)
+
+        # Calculate snapshots and store tmp results
         for slice in slice_list:
             all_events_df.createOrReplaceTempView("all_events")
             active_edges_df = spark.sql('SELECT * FROM all_events WHERE revision < '+str(slice))
@@ -112,11 +89,21 @@ class Selector(PandasProcessorGraph, SparkProcessorGraph): #PandasProcessorGraph
             active_edges_df.createOrReplaceTempView("events")
             active_edges_df = spark.sql('SELECT source, target FROM events WHERE event = \'start\'')
             active_edges = active_edges_df.collect()
-            snapshots[slice] = active_edges
+            self.write_list(slice, active_edges)
+
+        snapshots = {}
+        # Assemble tmp results
+        for slice in slice_list:
+            tmp = self.load_pandas_df(slice, columns=['source', 'target'])
+            snapshots[slice] = tmp.values.tolist()
+            os.remove(slice)
+
+        filename = 'snapshots_' + slice + str(datetime.fromtimestamp(self.start_date)) + '-' + str(datetime.fromtimestamp(self.end_date)) +'.json'
+        self.write_json(os.path.join(self.graph.curr_data_path, filename), snapshots)
 
         # TODO STORAGE OF RESULTS NEEDS TO BE DONE
-        self.write_json('123file.json', snapshots)
 
+    '''
     def sub_graph(self, seed=None, depth=3, include='cat'):
         assert include == 'cat' or consider == 'link' or consider == 'both', 'Error. Pass either cat, link or both for include'
         assert seed is not None, 'Error. One or more seed IDs need to be passed for creating a subgraph.'
@@ -175,10 +162,56 @@ class Selector(PandasProcessorGraph, SparkProcessorGraph): #PandasProcessorGraph
             else:
                 cond = col('target') == seed | col('source') == seed
         return cond
-
+    '''
     def sub_graph_views(self):
         # combination of temporal_views and sub_graph_views
         pass
 
+    def load_pandas_df(self, file, columns):
+        df = pd.read_csv(file, header=None, delimiter='\t', names=columns)
+        return df
 
+
+
+    '''
+
+    def create_snapshot_views(self, slice='year', cscore=True, start_date=None, end_date=None):
+        assert slice is 'year' or 'month' or 'day', 'Error. Pass a valid value for slice: year, month, day.'
+        assert type(cscore) is bool, 'Error. A bool value is expected for cscore signalling, if data file contains ' \
+                                     'cscore.'
+        assert parser.parse(start_date).timestamp() >= self.start_date, 'Error. The start date needs to be after ' \
+                                                                        + str(datetime.fromtimestamp(self.start_date))
+        assert parser.parse(end_date).timestamp() <= self.end_date, 'Error. The end date needs to be before ' \
+                                                                    + str(datetime.fromtimestamp(self.end_date))
+        if start_date is not None:
+            self.start_date = parser.parse(start_date).timestamp()
+        if slice == 'day':
+            delta = 86400
+        elif slice == 'month':
+            delta = 2592000
+        elif slice == 'year':
+            delta = 31536000
+        results = {}
+        tmp_results_files = []
+        last_slice = self.start_date.timestamp()
+        for file in self.graph:
+            tmp_results = {}
+            if cscore:
+                self.load_events(file, columns=['revision', 'source', 'target', 'event', 'cscore'])
+            else:
+                self.load_events(file, columns=['revision', 'source', 'target', 'event'])
+            for revision, events in self.events.groupby('revision'):
+                if (revision - last_slice) > delta and revision >= self.start_date:
+                    results[last_slice] = tmp_results
+                    last_slice = revision
+                for event in events.iterrows():
+                    if event[1]['event'] == 'start':
+                        tmp_results[str(event[1]['source'])+'|'+str(event[1]['target'])] = True
+                    elif event[1]['event'] == 'end':
+                        tmp_results[str(event[1]['source']) + '|' + str(event[1]['target'])] = False
+
+        results[self.end_date] = tmp_results
+        # TODO: Implement handling of results
+
+    '''
 

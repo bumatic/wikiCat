@@ -9,7 +9,11 @@ class WikiGraph(Data):
         Data.__init__(self, project, 'gt_graph')
         self.source_path = self.project.graph_data_path
         self.graph = Graph()
-        self.curr_working_graph = 'fixed_none__errors_removed'
+        self.curr_working_graph = None
+        self.curr_data_path = None
+        self.source_nodes = None
+        self.source_edges = None
+        self.source_events = None
         pass
 
     def add_new_graph(self, gt_file=None, gt_type='fixed_none__errors_removed', gt_id_dict=None, gt_source="graph__fixed_none__errors_removed"):
@@ -60,7 +64,14 @@ class WikiGraph(Data):
         for key in self.data:
             print(key)
 
-    def set_working_graph(self, key):
+    def set_working_graph(self, key='main'):
         self.curr_working_graph = key
+        self.source_nodes = self.data[key]['source_nodes']
+        self.source_edges = self.data[key]['source_edges']
+        self.source_events = self.data[key]['source_events']
+        self.curr_data_path = self.data[key]['location']
+
+
+
 
 

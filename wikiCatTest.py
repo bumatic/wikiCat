@@ -22,10 +22,10 @@ mp.load_project()
 #pp.pprint(mp.pinfo)
 
 #WikiGraph(mp).
+#GtGraphGenerator(mp).register_gt_graph()
 
 
-GtGraphGenerator(mp).register_gt_graph()
-
+print(mp.gt_graph_desc)
 
 
 #Selector(mp).temporal_views_spark()
