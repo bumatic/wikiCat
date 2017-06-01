@@ -47,3 +47,6 @@ class PandasProcessorGraph(Processor):
         # Default node columns ['id', 'title', 'ns', ('cscore')]
         self.nodes = pd.read_csv(os.path.join(self.path, file), header=None, delimiter='\t',
                                  names=columns)
+
+
+

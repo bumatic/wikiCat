@@ -14,15 +14,15 @@ from datetime import datetime
 import os
 
 
-class Selector(SparkProcessorGraph): #PandasProcessorGraph
-    def __init__(self, graph):
+class Selector(PandasProcessorGraph, SparkProcessorGraph): #PandasProcessorGraph
+    def __init__(self, graph, fixed='fixed_none', errors='errors_removed'):
         self.project = graph.project
-        #PandasProcessorGraph.__init__(self, self.project, fixed=fixed, errors=errors)
+        PandasProcessorGraph.__init__(self, self.project, fixed=fixed, errors=errors)
         SparkProcessorGraph.__init__(self, self.project)
         self.start_date = self.project.start_date.timestamp()
         self.end_date = self.project.dump_date.timestamp()
 
-    def temporal_views(self, slice='year', cscore=True, start_date=None):
+    def create_snapshot_views(self, slice='year', cscore=True, start_date=None):
         assert slice is 'year' or 'month' or 'day', 'Error. Pass a valid value for slice: year, month, day.'
         assert type(cscore) is bool, 'Error. A bool value is expected for cscore signalling, if data file contains ' \
                                      'cscore.'

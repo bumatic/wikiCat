@@ -33,6 +33,7 @@ class GtGraphGenerator(PandasProcessorGraph):
         #self.fixed = fixed
         #self.errors = errors
 
+
     def create_gt_graph(self, cscore=True):
         self.create_nodes()
         self.create_edges()
@@ -92,7 +93,9 @@ class GtGraphGenerator(PandasProcessorGraph):
         pass
 
     def register_gt_graph(self):
-        self.register_results('gt_graph', gt_file=self.gt_filename, gt_id_dict=self.gt_nodes_filename, nodes=self.nodes_files)
+        self.register_results('gt_graph', gt_file=self.gt_filename, gt_id_dict=self.gt_nodes_filename,
+                              gt_source=self.data_status)
+
 
 
 

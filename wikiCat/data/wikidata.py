@@ -6,7 +6,7 @@ from wikiCat.data.data import Data
 class WikiData(Data):
     def __init__(self, project, data_type):
         Data.__init__(self, project, data_type)
-
+        self.data = self.project.data_desc[data_type]
 
     def add_dump_data(self):
         print('Add dump data is not yet implemented')

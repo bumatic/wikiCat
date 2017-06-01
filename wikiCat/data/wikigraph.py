@@ -3,13 +3,15 @@ from graph_tool.all import *
 import os
 import shutil
 
+
 class WikiGraph(Data):
     def __init__(self, project):
         Data.__init__(self, project, 'gt_graph')
         self.source_path = self.project.graph_data_path
         self.graph = Graph()
-        self.graph_file = '' # How to identify?
         self.curr_working_graph = 'fixed_none__errors_removed'
+        self.data = self.project.gt_graph_desc
+
         pass
 
     def add_new_graph(self, gt_file=None, gt_type='fixed_none__errors_removed', gt_id_dict=None, gt_source="graph__fixed_none__errors_removed"):
@@ -27,16 +29,18 @@ class WikiGraph(Data):
 
         shutil.move(os.path.join(self.source_path, gt_file), os.path.join(graph_path, gt_file))
         shutil.move(os.path.join(self.source_path, gt_id_dict), os.path.join(graph_path, gt_id_dict))
-        self.data[gt_type] = {}
-        self.data[gt_type]['main'] = {}
-        self.data[gt_type]['main']['gt_file'] = gt_file
-        self.data[gt_type]['main']['gt_node_id_file'] = gt_id_dict
-        self.data[gt_type]['main']['location'] = graph_path
-        self.data[gt_type]['main']['source_nodes'] = source_nodes
-        self.data[gt_type]['main']['source_edges'] = source_edges
-        self.data[gt_type]['main']['source_events'] = source_events
+        self.data = {}
+        self.data['main'] = {}
+        self.data['main']['gt_file'] = gt_file
+        self.data['main']['gt_node_id_file'] = gt_id_dict
+        self.data['main']['location'] = graph_path
+        self.data['main']['source_nodes'] = source_nodes
+        self.data['main']['source_edges'] = source_edges
+        self.data['main']['source_events'] = source_events
         print (self.data)
         return self.data
+
+
 
     def assemble_source_locations(self, files):
         if type(files) is list:
@@ -46,10 +50,9 @@ class WikiGraph(Data):
             files = os.path.join(self.source_path, files)
         return files
 
-
-    def load_graph(self):
+    def load_graph(self, type='main'):
         try:
-            self.graph.load(self.data[self.curr_working_graph]['main']['gt_file'])
+            self.graph.load(self.data[self.curr_working_graph][type]['gt_file'])
         except:
             print('Graph could not be loaded. A valid current working graph needs to be set before loading.')
 
@@ -63,3 +66,5 @@ class WikiGraph(Data):
 
     def set_working_graph(self, key):
         self.curr_working_graph = key
+
+
