@@ -1,24 +1,12 @@
-import os
-import bz2
+from wikiCat.data.data import Data
+#import os
+#import bz2
 
-class WikiData:
+
+class WikiData(Data):
     def __init__(self, project, data_type):
-        self.project = project
-        self.path = self.project.path
-        self.data_type = data_type
-        self.data_status = ''
-        self.data = {}
+        Data.__init__(self, project, data_type)
 
-        if self.data_type == 'dump':
-            self.data_path = self.project.dump_data_path
-        elif self.data_type == 'parsed':
-            self.data_path = self.project.parsed_data_path
-        elif self.data_type == 'graph':
-            self.data_path = self.project.graph_data_path
-        elif self.data_type == 'error':
-            self.data_path = self.project.error_data_path
-        else:
-            print('Please enter a valid data_type: dump, parsed, graph, error')
 
     def add_dump_data(self):
         print('Add dump data is not yet implemented')
@@ -45,7 +33,6 @@ class WikiData:
                 self.data['link_data'] = self.check_filetype(link_data)
             else:
                 print('link_data file(s) do not exist')
-        print(self.data)
         return self.data
 
     def add_graph_data(self, nodes=None, edges=None, events=None, gt=None, fixed='fixed_none', errors='errors_removed',
@@ -75,6 +62,7 @@ class WikiData:
                     self.data[self.data_status]['events'] = events
                 else:
                     print('events file(s) do not exist')
+            # TODO Potentially to take out
             if gt is not None:
                 if self.check_files(gt):
                     self.data[self.data_status]['gt'] = gt
@@ -93,62 +81,6 @@ class WikiData:
         self.data = data
         #self.project.update_data_desc(self.data_type, data)
         # TODO: Low priority: IMPLEMENT CHECK IF EVERYTHING EXISTS?!?!
-
-    def check_files(self, file_list):
-        exists = True
-        for f in file_list:
-            if not os.path.exists(os.path.join(self.data_path, f)):
-                exists = False
-        return exists
-
-    def check_filetype(self, file_list):
-        new_list = []
-        for f in file_list:
-            if f[-3:] == 'bz2':
-                new_list.append([f, 'bz2'])
-            elif f[-3:] == 'csv':
-                new_list.append([f, 'csv'])
-            else:
-                new_list.append([f, 'unknown'])
-        return new_list
-
-    def file_handling(self, source_file, action):
-        if action == 'decompress':
-            file = source_file[:-4]
-            with open(file, 'wb') as new_file, open(source_file, 'rb') as source:
-                decompressor = bz2.BZ2Decompressor()
-                for data in iter(lambda: source.read(1024000), b''):
-                    new_file.write(decompressor.decompress(data))
-            return file
-        elif action == 'compress':
-            file = source_file + '.bz2'
-            with open(source_file, 'rb') as input:
-                with bz2.BZ2File(file, 'wb', compresslevel=9) as output:
-                    shutil.copyfileobj(input, output)
-            return file
-        elif action == 'remove':
-            os.remove(source_file)
-            return
-
-    def decompress_data_files(self, remove_compressed=False):
-        new_data_dict = {}
-        for type, file_list in self.data.items():
-            new_file_list = []
-            for f in file_list:
-                if f[1] == 'bz2':
-                    new_file = self.file_handling(os.path.join(self.data_path, f[0]), 'decompress')
-                    print(new_file)
-                    new_file_list.append([f[0][:-4], 'csv'])
-                elif f[1] == 'csv':
-                    new_file_list.append([f[0], 'csv'])
-            new_data_dict[type] = new_file_list
-        if remove_compressed:
-            for type, file_list in self.data.items():
-                for f in file_list:
-                    if f[1] == 'bz2':
-                        self.file_handling(os.path.join(self.data_path, f[0]), 'remove')
-        self.data = new_data_dict
-        return
 
     def get_data_desc(self):
         return self.data

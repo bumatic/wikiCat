@@ -7,6 +7,7 @@ from wikiCat.processors.controvercy_score import ControvercyScore
 from wikiCat.processors.oldest_revision import OldestRevision
 from wikiCat.processors.gt_graph_generator import GtGraphGenerator
 from wikiCat.selectors.selector import Selector
+from wikiCat.data.wikigraph import WikiGraph
 
 pp = pprint.PrettyPrinter(indent=4)
 
@@ -18,7 +19,13 @@ mp.load_project()
 
 #mp.find_start_date()
 #mp.set_dump_date('2016-11-01')
-pp.pprint(mp.pinfo)
+#pp.pprint(mp.pinfo)
+
+WikiGraph(mp)
+
+
+#GtGraphGenerator(mp).register_gt_graph()
+
 
 
 #Selector(mp).temporal_views_spark()

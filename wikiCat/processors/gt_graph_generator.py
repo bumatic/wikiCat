@@ -1,6 +1,7 @@
 from wikiCat.processors.pandas_processor_graph import PandasProcessorGraph
 from graph_tool.all import *
 import os
+import shutil
 
 
 class GtGraphGenerator(PandasProcessorGraph):
@@ -8,7 +9,7 @@ class GtGraphGenerator(PandasProcessorGraph):
         PandasProcessorGraph.__init__(self, project)
         self.graph = Graph()
         self.gt_filename = 'gt_graph_' + self.data_status + '.gt'
-        self.gt_edges_filename = 'gt_edges_'+self.data_status + '.json'
+        #self.gt_edges_filename = 'gt_edges_'+self.data_status + '.json'
         self.gt_nodes_filename = 'gt_nodes_' + self.data_status + '.json'
 
         # Create and internalize node property maps
@@ -27,7 +28,7 @@ class GtGraphGenerator(PandasProcessorGraph):
         self.edge_cscore = self.graph.new_edge_property('double')
         self.graph.edge_properties['cscore'] = self.edge_cscore
         self.node_id_dict = {}
-        self.edge_dict = {}
+        #self.edge_dict = {}
 
         #self.fixed = fixed
         #self.errors = errors
@@ -76,7 +77,7 @@ class GtGraphGenerator(PandasProcessorGraph):
                     self.edge_cscore[tmp] = edge[1]['cscore']
                 else:
                     self.edge_cscore[tmp] = 0
-                self.edge_dict[str(self.node_id_dict[edge[1]['source']]) + '|' + str(self.node_id_dict[edge[1]['target']])] = [self.node_id_dict[edge[1]['source']], self.node_id_dict[edge[1]['target']]]
+                #self.edge_dict[str(self.node_id_dict[edge[1]['source']]) + '|' + str(self.node_id_dict[edge[1]['target']])] = [self.node_id_dict[edge[1]['source']], self.node_id_dict[edge[1]['target']]]
 
             else:
                 counter = counter + 1
@@ -86,15 +87,30 @@ class GtGraphGenerator(PandasProcessorGraph):
         # registering the file in the project needs to bee implemented.
         self.graph.save(os.path.join(self.data_path, self.gt_filename), fmt='gt')
         self.write_json(os.path.join(self.data_path, self.gt_nodes_filename), self.node_id_dict)
-        self.write_json(os.path.join(self.data_path, self.gt_edges_filename), self.edge_dict)
-        self.add_gt_graph()
+        #self.write_json(os.path.join(self.data_path, self.gt_edges_filename), self.edge_dict)
+        #self.add_gt_graph()
         pass
 
-    def add_gt_graph(self):
+    def register_gt_graph(self):
+
+
+
+
+
+        self.results_path = os.path.join(self.results_path, self.data_status)
+        if not os.path.isdir(self.results_path):
+            os.makedirs(self.results_path)
+        shutil.move(os.path.join(self.data_path, self.gt_filename), os.path.join(self.results_path, self.gt_filename))
+        shutil.move(os.path.join(self.data_path, self.gt_nodes_filename), os.path.join(self.results_path, self.gt_nodes_filename))
+        # shutil.move(os.path.join(self.data_path, self.gt_edges_filename), os.path.join(self.results_path, self.gt_edges_filename))
+        for file in self.nodes_files:
+            shutil.copy(os.path.join(self.data_path, file), os.path.join(self.results_path, file))
+
+
         #TODO THIS NEEDS TO BE CHANGED TO REGISTER GT GRAPH AS GRAPH OBJECT
-        self.register_results('graph', nodes=self.nodes_files, edges=self.edges_files, events=self.events_files,
-                              gt=[self.gt_filename, self.gt_nodes_filename, self.gt_edges_filename],
-                              fixed=self.fixed, errors=self.errors, override=True)
+        #self.register_results('gt_graph', nodes=self.nodes_files, edges=self.edges_files, events=self.events_files,
+        #                      gt=[self.gt_filename, self.gt_nodes_filename, self.gt_edges_filename],
+        #                      fixed=self.fixed, errors=self.errors, override=True)
         return
 
 

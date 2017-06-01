@@ -1,6 +1,7 @@
 import os
 import json
 from wikiCat.data.wikidata import WikiData
+from wikiCat.data.wikigraph import WikiGraph
 from wikiCat.processors.oldest_revision import OldestRevision
 from dateutil import parser
 
@@ -117,6 +118,10 @@ class Project:
                 pass
             if 'gt_graph' in self.pinfo.keys():
                 # TODO needs to be implemented
+                # Das folgende ist nur eine hilfslösung
+                self.gt_graph_desc = self.pinfo['gt_graph']
+                for key in self.gt_graph_desc:
+                    self.gt_graph_objs[key] = WikiGraph(self)
                 pass
             else:
                 pass
@@ -142,8 +147,9 @@ class Project:
         return
 
     def add_data(self, dtype, page_info=None, revision_info=None, cat_data=None, link_data=None, error_data=None,
-                 error_type='error', nodes=None, edges=None, events=None, gt=None, fixed='fixed_none',
-                 errors='errors_removed', override=False):
+                 error_type='error', nodes=None, edges=None, events=None, fixed='fixed_none',
+                 errors='errors_removed', gt_file=None, gt_type='fixed_none__errors_removed', gt_id_dict=None,
+                 override=False):
         if dtype == 'dump':
             print('ADD DUMP - NOT YET IMPLEMENTED')
         elif dtype == 'parsed':
@@ -161,13 +167,13 @@ class Project:
         elif dtype == 'graph':
             try:
                 self.data_desc[dtype] = self.data_objs[dtype].add_graph_data(nodes=nodes, edges=edges,
-                                                                             events=events, gt=gt, fixed=fixed,
+                                                                             events=events, fixed=fixed,
                                                                              errors=errors, override=override)
 
             except:
                 self.data_objs[dtype] = WikiData(self, dtype)
                 self.data_desc[dtype] = self.data_objs[dtype].add_graph_data(nodes=nodes, edges=edges,
-                                                                             events=events, gt=gt, fixed=fixed,
+                                                                             events=events, fixed=fixed,
                                                                              errors=errors, override=override)
 
             self.save_project()
@@ -178,8 +184,21 @@ class Project:
                 self.data_objs[dtype] = WikiData(self, dtype)
                 self.data_desc[dtype] = self.data_objs[dtype].add_error_data(error_data, error_type)
             self.save_project()
+        elif dtype == 'gt_graph':
+            assert gt_file is not None and gt_id_dict is not None and nodes is not None, 'Error. Required data missing for adding the gt_graph.'
+            if gt_type in self.gt_graph_desc.keys():
+                print('Graph of this type already exists. Try loading the graph and creating subgraphs or '
+                      'adding as another type')
+            else:
+                self.gt_graph_objs[dtype] = WikiGraph(self)
+                self.gt_graph_desc[dtype] = self.gt_graph_objs[dtype].add_new_graph(gt_file=gt_file, gt_type=gt_type,
+                                                                                    gt_id_dict=gt_id_dict, nodes=nodes)
+            self.save_project()
+                # TODO IMPLEmENT
+                pass
+
         else:
-            print('Please enter a valid type: dump, parsed, cleaned, graph, error')
+            print('Please enter a valid type: dump, parsed, cleaned, graph, gt_graph error')
         return
 
     def get_title(self):
