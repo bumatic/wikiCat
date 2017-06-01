@@ -10,8 +10,6 @@ class WikiGraph(Data):
         self.source_path = self.project.graph_data_path
         self.graph = Graph()
         self.curr_working_graph = 'fixed_none__errors_removed'
-        self.data = self.project.gt_graph_desc
-
         pass
 
     def add_new_graph(self, gt_file=None, gt_type='fixed_none__errors_removed', gt_id_dict=None, gt_source="graph__fixed_none__errors_removed"):
@@ -39,8 +37,6 @@ class WikiGraph(Data):
         self.data['main']['source_events'] = source_events
         print (self.data)
         return self.data
-
-
 
     def assemble_source_locations(self, files):
         if type(files) is list:

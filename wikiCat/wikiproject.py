@@ -185,14 +185,14 @@ class Project:
                 self.data_desc[dtype] = self.data_objs[dtype].add_error_data(error_data, error_type)
             self.save_project()
         elif dtype == 'gt_graph':
-            assert gt_file is not None and gt_id_dict is not None and nodes is not None, 'Error. Required data missing for adding the gt_graph.'
+            assert gt_file is not None and gt_id_dict is not None and gt_source is not None, 'Error. Required data missing for adding the gt_graph.'
             if gt_type in self.gt_graph_desc.keys():
                 print('Graph of this type already exists. Try loading the graph and creating subgraphs or '
                       'adding as another type')
             else:
-                self.gt_graph_objs[dtype] = WikiGraph(self)
-                self.gt_graph_desc[dtype] = self.gt_graph_objs[dtype].add_new_graph(gt_file=gt_file, gt_type=gt_type,
-                                                                                    gt_id_dict=gt_id_dict, gt_source=gt_source)
+                self.gt_graph_objs[gt_type] = WikiGraph(self)
+                self.gt_graph_desc[gt_type] = self.gt_graph_objs[gt_type].add_new_graph(gt_file=gt_file, gt_type=gt_type,
+                                                                                      gt_id_dict=gt_id_dict, gt_source=gt_source)
             self.save_project()
         else:
             print('Please enter a valid type: dump, parsed, cleaned, graph, gt_graph error')

@@ -6,7 +6,6 @@ from wikiCat.data.data import Data
 class WikiData(Data):
     def __init__(self, project, data_type):
         Data.__init__(self, project, data_type)
-        self.data = self.project.data_desc[data_type]
 
     def add_dump_data(self):
         print('Add dump data is not yet implemented')
@@ -39,8 +38,6 @@ class WikiData(Data):
                        override=False):
         self.data_status = 'graph__'+fixed+'__'+errors
         self.data_path = self.project.graph_data_path
-
-        #TODO CHECK FOR ERRORS in ADDING GRAPH DATA
 
         if self.data_status in self.data.keys() and not override:
             print('This type of graph data has already been added. Pass override=True to replace it.')
