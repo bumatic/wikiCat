@@ -92,26 +92,26 @@ class GtGraphGenerator(PandasProcessorGraph):
         pass
 
     def register_gt_graph(self):
+        self.register_results('gt_graph', gt_file=self.gt_filename, gt_id_dict=self.gt_nodes_filename, nodes=self.nodes_files)
 
 
 
-
-
-        self.results_path = os.path.join(self.results_path, self.data_status)
-        if not os.path.isdir(self.results_path):
-            os.makedirs(self.results_path)
-        shutil.move(os.path.join(self.data_path, self.gt_filename), os.path.join(self.results_path, self.gt_filename))
-        shutil.move(os.path.join(self.data_path, self.gt_nodes_filename), os.path.join(self.results_path, self.gt_nodes_filename))
-        # shutil.move(os.path.join(self.data_path, self.gt_edges_filename), os.path.join(self.results_path, self.gt_edges_filename))
-        for file in self.nodes_files:
-            shutil.copy(os.path.join(self.data_path, file), os.path.join(self.results_path, file))
+#
+#        self.results_path = os.path.join(self.results_path, self.data_status)
+#        if not os.path.isdir(self.results_path):
+#            os.makedirs(self.results_path)
+ ##       shutil.move(os.path.join(self.data_path, self.gt_filename), os.path.join(self.results_path, self.gt_filename))
+  #      shutil.move(os.path.join(self.data_path, self.gt_nodes_filename), os.path.join(self.results_path, self.gt_nodes_filename))
+   #     # shutil.move(os.path.join(self.data_path, self.gt_edges_filename), os.path.join(self.results_path, self.gt_edges_filename))
+    #    for file in self.nodes_files:
+     ##       shutil.copy(os.path.join(self.data_path, file), os.path.join(self.results_path, file))
 
 
         #TODO THIS NEEDS TO BE CHANGED TO REGISTER GT GRAPH AS GRAPH OBJECT
         #self.register_results('gt_graph', nodes=self.nodes_files, edges=self.edges_files, events=self.events_files,
         #                      gt=[self.gt_filename, self.gt_nodes_filename, self.gt_edges_filename],
         #                      fixed=self.fixed, errors=self.errors, override=True)
-        return
+       # return
 
 
 

@@ -7,11 +7,12 @@ class WikiGraph(Data):
     def __init__(self, project):
         Data.__init__(self, project, 'gt_graph')
         self.source_path = self.project.graph_data_path
-        #self.graph = Graph()
-        #self.graph_file = '' # How to identify?
+        self.graph = Graph()
+        self.graph_file = '' # How to identify?
+        self.curr_working_graph = 'fixed_none__errors_removed'
         pass
 
-    def add_new_graph(self, gt_file, gt_type, gt_id_dict, nodes):
+    def add_new_graph(self, nodes=None, gt_file=None, gt_type='fixed_none__errors_removed', gt_id_dict=None):
         graph_path = os.path.join(self.data_path, gt_type, 'main')
 
         if gt_type in self.data.keys():
@@ -38,31 +39,19 @@ class WikiGraph(Data):
         print (self.data)
         return self.data
 
+    def load_graph(self):
+        try:
+            self.graph.load(self.data[self.curr_working_graph]['main']['gt_file'])
+        except:
+            print('Graph could not be loaded. A valid current working graph needs to be set before loading.')
 
+    def create_subgraph(self, title):
+        pass
 
+    def list_graphs(self):
+        print('Keys of available Graphs:')
+        for key in self.data:
+            print(key)
 
-    '''
-
-        if not os.path.isdir(self.results_path):
-            os.makedirs(self.results_path)
-        shutil.move(os.path.join(self.data_path, self.gt_filename), os.path.join(self.results_path, self.gt_filename))
-        shutil.move(os.path.join(self.data_path, self.gt_nodes_filename), os.path.join(self.results_path, self.gt_nodes_filename))
-        # shutil.move(os.path.join(self.data_path, self.gt_edges_filename), os.path.join(self.results_path, self.gt_edges_filename))
-        for file in self.nodes_files:
-            shutil.copy(os.path.join(self.data_path, file), os.path.join(self.results_path, file))
-
-
-        #TODO THIS NEEDS TO BE CHANGED TO REGISTER GT GRAPH AS GRAPH OBJECT
-        #self.register_results('gt_graph', nodes=self.nodes_files, edges=self.edges_files, events=self.events_files,
-        #                      gt=[self.gt_filename, self.gt_nodes_filename, self.gt_edges_filename],
-        #                      fixed=self.fixed, errors=self.errors, override=True)
-
-
-
-    self.results_path = os.path.join(self.results_path, self.data_status)
-        if not os.path.isdir(self.results_path):
-            os.makedirs(self.results_path)
-        shutil.move(os.path.join(self.data_path, self.gt_filename), os.path.join(self.results_path, self.gt_filename))
-        shutil.move(os.path.join(self.data_path, self.gt_nodes_filename), os.path.join(self.results_path, self.gt_nodes_filename))
-        shutil.move(os.path.join(self.data_path, self.gt_edges_filename), os.path.join(self.results_path, self.gt_edges_filename))
-    '''
+    def set_working_graph(self, key):
+        self.curr_working_graph = key

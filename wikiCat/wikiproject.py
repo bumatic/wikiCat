@@ -195,8 +195,6 @@ class Project:
                                                                                     gt_id_dict=gt_id_dict, nodes=nodes)
             self.save_project()
                 # TODO IMPLEmENT
-                pass
-
         else:
             print('Please enter a valid type: dump, parsed, cleaned, graph, gt_graph error')
         return

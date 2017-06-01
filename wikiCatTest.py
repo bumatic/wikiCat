@@ -21,10 +21,10 @@ mp.load_project()
 #mp.set_dump_date('2016-11-01')
 #pp.pprint(mp.pinfo)
 
-WikiGraph(mp)
+#WikiGraph(mp).
 
 
-#GtGraphGenerator(mp).register_gt_graph()
+GtGraphGenerator(mp).register_gt_graph()
 
 
 
