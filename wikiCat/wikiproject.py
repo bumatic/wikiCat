@@ -121,7 +121,7 @@ class Project:
                 # Das folgende ist nur eine hilfslösung
                 self.gt_graph_desc = self.pinfo['gt_graph']
                 for key in self.gt_graph_desc:
-                    self.gt_graph_objs[key] = WikiGraph(self)
+                    self.gt_graph_objs[key] = WikiGraph(self, data=self.gt_graph_desc[key])
                 pass
             else:
                 pass

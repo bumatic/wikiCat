@@ -24,9 +24,11 @@ mp.load_project()
 #WikiGraph(mp).
 #GtGraphGenerator(mp).register_gt_graph()
 
+from wikiCat.selectors.selector import Selector
 
-print(mp.gt_graph_desc)
-
+g = mp.gt_graph_objs['fixed_none__errors_removed']
+g.set_working_graph()
+Selector(g).create_snapshot_views_spark()
 
 #Selector(mp).temporal_views_spark()
 

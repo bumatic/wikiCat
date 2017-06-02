@@ -3,15 +3,16 @@ findspark.init()
 from pyspark.sql import Row
 from pyspark.sql import SparkSession
 from pyspark import SparkConf, SparkContext
-from pyspark.sql.functions import collect_list, avg, col
-from wikiCat.processors.pandas_processor_graph import PandasProcessorGraph
 from wikiCat.processors.spark_processor import SparkProcessorGraph
-from wikiCat.data.wikigraph import WikiGraph
 from dateutil import parser
-#import math
 from datetime import datetime
-#import pandas as pd
+import pandas as pd
 import os
+
+#from wikiCat.data.wikigraph import WikiGraph
+#import math
+#from pyspark.sql.functions import collect_list, avg, col
+#from wikiCat.processors.pandas_processor_graph import PandasProcessorGraph
 
 
 class Selector(SparkProcessorGraph): #PandasProcessorGraph
@@ -20,10 +21,16 @@ class Selector(SparkProcessorGraph): #PandasProcessorGraph
         assert self.graph.curr_working_graph is not None, 'Error. Set a current working graph before creating ' \
                                                           'a selector.'
         self.project = graph.project
-        #PandasProcessorGraph.__init__(self, self.project, fixed=fixed, errors=errors)
         SparkProcessorGraph.__init__(self, self.project)
+        self.graph_id = self.graph.curr_working_graph
+
         self.start_date = self.project.start_date.timestamp()
         self.end_date = self.project.dump_date.timestamp()
+
+
+
+    def register_results(self):
+        pass
 
     def generate_slice_list(self, slice):
         if slice == 'day':
@@ -46,13 +53,13 @@ class Selector(SparkProcessorGraph): #PandasProcessorGraph
         assert slice is 'year' or 'month' or 'day', 'Error. Pass a valid value for slice: year, month, day.'
         assert type(cscore) is bool, 'Error. A bool value is expected for cscore signalling, if data file contains ' \
                                      'cscore.'
-        assert parser.parse(start_date).timestamp() >= self.start_date, 'Error. The start date needs to be after ' \
-                                                                        + str(datetime.fromtimestamp(self.start_date))
-        assert parser.parse(end_date).timestamp() <= self.end_date, 'Error. The end date needs to be before ' \
-                                                                    + str(datetime.fromtimestamp(self.end_date))
         if start_date is not None:
+            assert parser.parse(start_date).timestamp() >= self.start_date, 'Error. The start date needs to be after ' \
+                                                                        + str(datetime.fromtimestamp(self.start_date))
             self.start_date = parser.parse(start_date).timestamp()
         if end_date is not None:
+            assert parser.parse(end_date).timestamp() <= self.end_date, 'Error. The end date needs to be before ' \
+                                                                        + str(datetime.fromtimestamp(self.end_date))
             self.end_date = parser.parse(end_date).timestamp()
 
         slice_list = self.generate_slice_list(slice)
@@ -65,9 +72,9 @@ class Selector(SparkProcessorGraph): #PandasProcessorGraph
         spark = SparkSession(sc).builder.appName("Calculate_Slices").getOrCreate()
         counter = 0
 
-        for file in self.events_files:
+        for file in self.graph.source_events:
             counter = counter + 1
-            events_source = spark.sparkContext.textFile(os.path.join(self.data_path, file))
+            events_source = spark.sparkContext.textFile(file)
             events = events_source.map(self.mapper_events)
             events_df = spark.createDataFrame(events).cache()
             if counter == 1:
@@ -89,7 +96,7 @@ class Selector(SparkProcessorGraph): #PandasProcessorGraph
             active_edges_df.createOrReplaceTempView("events")
             active_edges_df = spark.sql('SELECT source, target FROM events WHERE event = \'start\'')
             active_edges = active_edges_df.collect()
-            self.write_list(slice, active_edges)
+            self.write_list(str(slice), active_edges)
 
         snapshots = {}
         # Assemble tmp results

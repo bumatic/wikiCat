@@ -1,14 +1,16 @@
 from wikiCat.data.data import Data
+from wikiCat.selectors.selector import  Selector
 from graph_tool.all import *
 import os
 import shutil
 
 
 class WikiGraph(Data):
-    def __init__(self, project):
+    def __init__(self, project, data={}):
         Data.__init__(self, project, 'gt_graph')
         self.source_path = self.project.graph_data_path
         self.graph = Graph()
+        self.data = data
         self.curr_working_graph = None
         self.curr_data_path = None
         self.source_nodes = None
@@ -39,7 +41,7 @@ class WikiGraph(Data):
         self.data['main']['source_nodes'] = source_nodes
         self.data['main']['source_edges'] = source_edges
         self.data['main']['source_events'] = source_events
-        print (self.data)
+        print(self.data)
         return self.data
 
     def assemble_source_locations(self, files):
@@ -70,6 +72,10 @@ class WikiGraph(Data):
         self.source_edges = self.data[key]['source_edges']
         self.source_events = self.data[key]['source_events']
         self.curr_data_path = self.data[key]['location']
+
+    def generate_snapshots(self, slice, cscore=True, start_date=None, end_date=None):
+        pass
+
 
 
 
