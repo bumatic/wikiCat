@@ -18,58 +18,75 @@ import os
 class Selector(SparkProcessorGraph): #PandasProcessorGraph
     def __init__(self, graph):
         self.graph = graph
+        self.data = self.graph.data
         assert self.graph.curr_working_graph is not None, 'Error. Set a current working graph before creating ' \
                                                           'a selector.'
+
         self.project = graph.project
+        assert self.project.start_date is not None, 'Error. The project has no start date. Please generate it with ' \
+                                                    'wikiCat.wikiproject.Project.find_start_date()'
+        assert self.project.dump_date is not None, 'Error. The project has no start date. Please set it with ' \
+                                                   'wikiCat.wikiproject.Project.set_dump_date(date)'
+
         SparkProcessorGraph.__init__(self, self.project)
         self.graph_id = self.graph.curr_working_graph
-
+        self.graph_path = self.graph.curr_data_path
         self.start_date = self.project.start_date.timestamp()
+        #print(self.data)
+        #print(self.graph_id)
+        #print(self.graph.curr_data_path)
+
         self.end_date = self.project.dump_date.timestamp()
+        self.results = {}
 
+    def load_pandas_df(self, file, columns):
+        df = pd.read_csv(file, header=None, delimiter='\t', names=columns)
+        return df
 
+    def create_results_path(self, folder):
+        if not os.path.isdir(folder):
+            os.makedirs(folder)
 
-    def register_results(self):
-        pass
-
-    def generate_slice_list(self, slice):
-        if slice == 'day':
-            delta = 86400
-        elif slice == 'month':
-            delta = 2592000
-        elif slice == 'year':
-            delta = 31536000
-        results = []
-        curr_date = self.start_date
-        while curr_date < self.end_date:
-            results.append(curr_date)
-            curr_date = curr_date + delta
-        results.append(self.end_date)
-        print(results)
-        return results
-
-    #TODO CHECK IF THIS WORKS!
-    def create_snapshot_views_spark(self, slice='year', cscore=True, start_date=None, end_date=None):
-        assert slice is 'year' or 'month' or 'day', 'Error. Pass a valid value for slice: year, month, day.'
-        assert type(cscore) is bool, 'Error. A bool value is expected for cscore signalling, if data file contains ' \
-                                     'cscore.'
+    def set_selector_dates(self, start_date, end_date):
         if start_date is not None:
             assert parser.parse(start_date).timestamp() >= self.start_date, 'Error. The start date needs to be after ' \
                                                                         + str(datetime.fromtimestamp(self.start_date))
             self.start_date = parser.parse(start_date).timestamp()
+
         if end_date is not None:
             assert parser.parse(end_date).timestamp() <= self.end_date, 'Error. The end date needs to be before ' \
                                                                         + str(datetime.fromtimestamp(self.end_date))
             self.end_date = parser.parse(end_date).timestamp()
 
-        slice_list = self.generate_slice_list(slice)
+    # def register_results(self):
+    #    for key in self.results:
+    #        self.data[self.graph_id][key] = self.results[key]
+
+
+class Snapshots(Selector):
+    def __init__(self, graph):
+        Selector.__init__(graph)
+
+    def create_snapshot_views_spark(self, slice='year', cscore=True, start_date=None, end_date=None):
+        # TODO CHECK IF THIS WORKS!
+
+        assert slice is 'year' or 'month' or 'day', 'Error. Pass a valid value for slice: year, month, day.'
+        assert type(cscore) is bool, 'Error. A bool value is expected for cscore signalling, if data file contains ' \
+                                     'cscore.'
+
+
+        self.set_selector_dates(start_date, end_date)
+        slice_list = self.generate_snapshot_list(slice)
+        snapshot_type = 'snapshots_' + slice + str(self.start_date) + '-' + str(self.end_date)
+        snapshot_path = os.path.join(self.graph_path, snapshot_type)
+        self.create_results_path(snapshot_path)
 
         # Create a SparkSession
         # Note: In case its run on Windows and generates errors use (tmp Folder mus exist):
         # spark = SparkSession.builder.config("spark.sql.warehouse.dir", "file:///C:/temp").appName("Postprocessing").getOrCreate()
         conf = SparkConf().setMaster("local[*]").setAppName("Test")
         sc = SparkContext(conf=conf)
-        spark = SparkSession(sc).builder.appName("Calculate_Slices").getOrCreate()
+        spark = SparkSession(sc).builder.appName("Calculate_Snapshots").getOrCreate()
         counter = 0
 
         for file in self.graph.source_events:
@@ -83,6 +100,7 @@ class Selector(SparkProcessorGraph): #PandasProcessorGraph
                 all_events_df = all_events_df.union(events_df)
 
         # Calculate snapshots and store tmp results
+        results_files = []
         for slice in slice_list:
             all_events_df.createOrReplaceTempView("all_events")
             active_edges_df = spark.sql('SELECT * FROM all_events WHERE revision < '+str(slice))
@@ -96,19 +114,33 @@ class Selector(SparkProcessorGraph): #PandasProcessorGraph
             active_edges_df.createOrReplaceTempView("events")
             active_edges_df = spark.sql('SELECT source, target FROM events WHERE event = \'start\'')
             active_edges = active_edges_df.collect()
-            self.write_list(str(slice), active_edges)
+            results_file = str(slice) + '.csv'
+            self.write_list(os.path.join(snapshot_path, results_file), active_edges)
+            results_files.append(results_file)
 
-        snapshots = {}
-        # Assemble tmp results
-        for slice in slice_list:
-            tmp = self.load_pandas_df(slice, columns=['source', 'target'])
-            snapshots[slice] = tmp.values.tolist()
-            os.remove(slice)
+        self.data[self.graph_id][snapshot_type] = results_files
+        self.graph.update_graph_data(self.data)
 
-        filename = 'snapshots_' + slice + str(datetime.fromtimestamp(self.start_date)) + '-' + str(datetime.fromtimestamp(self.end_date)) +'.json'
-        self.write_json(os.path.join(self.graph.curr_data_path, filename), snapshots)
+
+
 
         # TODO STORAGE OF RESULTS NEEDS TO BE DONE
+
+    def generate_snapshot_list(self, slice):
+        if slice == 'day':
+            delta = 86400
+        elif slice == 'month':
+            delta = 2592000
+        elif slice == 'year':
+            delta = 31536000
+        results = []
+        curr_date = self.start_date + 86400
+        while curr_date < self.end_date:
+            results.append(curr_date)
+            curr_date = curr_date + delta
+        results.append(self.end_date)
+        print(results)
+        return results
 
     '''
     def sub_graph(self, seed=None, depth=3, include='cat'):
@@ -170,13 +202,12 @@ class Selector(SparkProcessorGraph): #PandasProcessorGraph
                 cond = col('target') == seed | col('source') == seed
         return cond
     '''
+
     def sub_graph_views(self):
         # combination of temporal_views and sub_graph_views
         pass
 
-    def load_pandas_df(self, file, columns):
-        df = pd.read_csv(file, header=None, delimiter='\t', names=columns)
-        return df
+
 
 
 

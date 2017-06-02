@@ -6,11 +6,14 @@ import shutil
 
 
 class WikiGraph(Data):
-    def __init__(self, project, data={}):
+    def __init__(self, project, data={}, gt_type=None):
         Data.__init__(self, project, 'gt_graph')
+        assert gt_type is not None, 'Error. gt_type needs to be passed!'
+        self.gt_type = gt_type
         self.source_path = self.project.graph_data_path
         self.graph = Graph()
         self.data = data
+        print(self.data)
         self.curr_working_graph = None
         self.curr_data_path = None
         self.source_nodes = None
@@ -53,13 +56,11 @@ class WikiGraph(Data):
         return files
 
     def load_graph(self, type='main'):
+        #TODO probably does not work?
         try:
             self.graph.load(self.data[self.curr_working_graph][type]['gt_file'])
         except:
             print('Graph could not be loaded. A valid current working graph needs to be set before loading.')
-
-    def create_subgraph(self, title):
-        pass
 
     def list_graphs(self):
         print('Keys of available Graphs:')
@@ -76,8 +77,13 @@ class WikiGraph(Data):
     def generate_snapshots(self, slice, cscore=True, start_date=None, end_date=None):
         pass
 
+    def create_subgraph(self, title):
+        pass
 
-
+    def update_graph_data(self, data):
+        assert type(data) is dict, 'Error: Data for updating a graph needs to be passed as dict.'
+        self.data = data
+        print(self.data)
 
 
 

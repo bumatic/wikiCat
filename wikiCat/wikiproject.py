@@ -121,7 +121,7 @@ class Project:
                 # Das folgende ist nur eine hilfslösung
                 self.gt_graph_desc = self.pinfo['gt_graph']
                 for key in self.gt_graph_desc:
-                    self.gt_graph_objs[key] = WikiGraph(self, data=self.gt_graph_desc[key])
+                    self.gt_graph_objs[key] = WikiGraph(self, data=self.gt_graph_desc[key], gt_type=key)
                 pass
             else:
                 pass
@@ -190,7 +190,7 @@ class Project:
                 print('Graph of this type already exists. Try loading the graph and creating subgraphs or '
                       'adding as another type')
             else:
-                self.gt_graph_objs[gt_type] = WikiGraph(self)
+                self.gt_graph_objs[gt_type] = WikiGraph(self, gt_type=gt_type)
                 self.gt_graph_desc[gt_type] = self.gt_graph_objs[gt_type].add_new_graph(gt_file=gt_file, gt_type=gt_type,
                                                                                       gt_id_dict=gt_id_dict, gt_source=gt_source)
             self.save_project()
@@ -246,3 +246,9 @@ class Project:
     def update_data_desc(self, data_type, info):
         self.data_desc[data_type] = info
         self.save_project()
+
+    def update_gt_graph_desc(self, gt_type, data, info):
+        self.gt_graph_desc[gt_type] = data
+        self.save_project()
+
+        pass
