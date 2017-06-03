@@ -247,8 +247,6 @@ class Project:
         self.data_desc[data_type] = info
         self.save_project()
 
-    def update_gt_graph_desc(self, gt_type, data, info):
+    def update_gt_graph_desc(self, gt_type, data):
         self.gt_graph_desc[gt_type] = data
         self.save_project()
-
-        pass

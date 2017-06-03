@@ -83,7 +83,8 @@ class WikiGraph(Data):
     def update_graph_data(self, data):
         assert type(data) is dict, 'Error: Data for updating a graph needs to be passed as dict.'
         self.data = data
-        print(self.data)
+        self.project.update_data_desc(self.gt_type, self.data)
+
 
 
 

@@ -32,10 +32,6 @@ class Selector(SparkProcessorGraph): #PandasProcessorGraph
         self.graph_id = self.graph.curr_working_graph
         self.graph_path = self.graph.curr_data_path
         self.start_date = self.project.start_date.timestamp()
-        #print(self.data)
-        #print(self.graph_id)
-        #print(self.graph.curr_data_path)
-
         self.end_date = self.project.dump_date.timestamp()
         self.results = {}
 
@@ -43,9 +39,13 @@ class Selector(SparkProcessorGraph): #PandasProcessorGraph
         df = pd.read_csv(file, header=None, delimiter='\t', names=columns)
         return df
 
-    def create_results_path(self, folder):
+    def check_results_path(self, folder):
         if not os.path.isdir(folder):
             os.makedirs(folder)
+            return None
+        elif not os.listdir(folder) == []:
+            print('Non-empty directory for the Selector with this title already exists. Either delete the directory or use a different name.')
+            return True
 
     def set_selector_dates(self, start_date, end_date):
         if start_date is not None:
@@ -58,16 +58,12 @@ class Selector(SparkProcessorGraph): #PandasProcessorGraph
                                                                         + str(datetime.fromtimestamp(self.end_date))
             self.end_date = parser.parse(end_date).timestamp()
 
-    # def register_results(self):
-    #    for key in self.results:
-    #        self.data[self.graph_id][key] = self.results[key]
-
 
 class Snapshots(Selector):
     def __init__(self, graph):
-        Selector.__init__(graph)
+        Selector.__init__(self, graph)
 
-    def create_snapshot_views_spark(self, slice='year', cscore=True, start_date=None, end_date=None):
+    def create(self, title, slice='year', cscore=True, start_date=None, end_date=None):
         # TODO CHECK IF THIS WORKS!
 
         assert slice is 'year' or 'month' or 'day', 'Error. Pass a valid value for slice: year, month, day.'
@@ -77,9 +73,10 @@ class Snapshots(Selector):
 
         self.set_selector_dates(start_date, end_date)
         slice_list = self.generate_snapshot_list(slice)
-        snapshot_type = 'snapshots_' + slice + str(self.start_date) + '-' + str(self.end_date)
-        snapshot_path = os.path.join(self.graph_path, snapshot_type)
-        self.create_results_path(snapshot_path)
+        snapshot_path = os.path.join(self.graph_path, title)
+        conflict = self.check_results_path(snapshot_path)
+        if conflict:
+            return
 
         # Create a SparkSession
         # Note: In case its run on Windows and generates errors use (tmp Folder mus exist):
@@ -118,11 +115,14 @@ class Snapshots(Selector):
             self.write_list(os.path.join(snapshot_path, results_file), active_edges)
             results_files.append(results_file)
 
-        self.data[self.graph_id][snapshot_type] = results_files
+        self.results['files']=results_files
+        self.results['type'] = 'snapshot'
+        self.results['interval'] = slice
+        self.results['start'] = self.start_date
+        self.results['end'] = self.end_date
+
+        self.data[self.graph_id][title] = self.results
         self.graph.update_graph_data(self.data)
-
-
-
 
         # TODO STORAGE OF RESULTS NEEDS TO BE DONE
 
@@ -139,7 +139,6 @@ class Snapshots(Selector):
             results.append(curr_date)
             curr_date = curr_date + delta
         results.append(self.end_date)
-        print(results)
         return results
 
     '''
