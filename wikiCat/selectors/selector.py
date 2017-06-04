@@ -2,6 +2,7 @@ import findspark
 findspark.init()
 from pyspark.sql import Row
 from pyspark.sql import SparkSession
+from pyspark.sql.functions import col
 from pyspark import SparkConf, SparkContext
 from wikiCat.processors.spark_processor import SparkProcessorGraph
 from dateutil import parser
@@ -58,6 +59,8 @@ class Selector(SparkProcessorGraph): #PandasProcessorGraph
                                                                         + str(datetime.fromtimestamp(self.end_date))
             self.end_date = parser.parse(end_date).timestamp()
 
+    def create(self):
+        pass
 
 class Snapshots(Selector):
     def __init__(self, graph):
@@ -141,33 +144,45 @@ class Snapshots(Selector):
         results.append(self.end_date)
         return results
 
-    '''
-    def sub_graph(self, seed=None, depth=3, include='cat'):
-        assert include == 'cat' or consider == 'link' or consider == 'both', 'Error. Pass either cat, link or both for include'
-        assert seed is not None, 'Error. One or more seed IDs need to be passed for creating a subgraph.'
-        counter = 0
-        for file in self.edges_files:
-            counter = counter + 1
-            edges_source = spark.sparkContext.textFile(os.path.join(self.data_path, file))
+
+class SubGraph(Selector):
+    def __init__(self, graph):
+        Selector.__init__(self, graph)
+
+    def create(self, seed=None, depth=3, include='cat'):
+        assert include == 'cat' or include   == 'link' or include == 'both', 'Error. Pass either cat, link or both for include'
+        assert seed is not None, 'Error. One or more seed IDs need to be passed for creating a sub graph.'
+        assert type(seed) is list, 'Error. The seeds need to be passed as a list.'
+        # Create a SparkSession
+        # Note: In case its run on Windows and generates errors use (tmp Folder mus exist):
+        # spark = SparkSession.builder.config("spark.sql.warehouse.dir", "file:///C:/temp").appName("Postprocessing").getOrCreate()
+        conf = SparkConf().setMaster("local[*]").setAppName("Test")
+        sc = SparkContext(conf=conf)
+        spark = SparkSession(sc).builder.appName("Create SubGraph").getOrCreate()
+
+        for i in range(len(self.graph.source_edges)):
+            edges_source = spark.sparkContext.textFile(self.graph.source_edges[i])
             edges = edges_source.map(self.mapper_events)
             edges_df = spark.createDataFrame(edges).cache()
-            if counter == 1:
+            if i == 0:
                 all_edges_df = edges_df
             else:
                 all_edges_df = all_edges_df.union(edges_df)
 
-        seed = [item for sublist in seed for item in sublist]
-        nodes = []
-        nodes.append(seed)
+        #nodes = [item for sublist in seed for item in sublist]
+        nodes = seed
         for i in range(depth):
-            cond = self.assemble_condition(nodes, include)
-            tmp_df = all_edges_df.where(cond)
-            tmp_df.createOrReplaceTempView("tmp")
-            tmp_results = spark.sql('SELECT source FROM tmp').distinct().rdd.collect()
-            tmp_results = [item for sublist in tmp_results for item in sublist]
-            nodes.append(tmp_results)
+            #cond = self.assemble_condition(nodes, include)
+            #tmp_df = all_edges_df.where(cond)
 
+            tmp_df = all_edges_df.select(col('source')).filter(col('target').isin(nodes))
+            tmp_df.show()
+            #tmp_df.createOrReplaceTempView("tmp")
+            #tmp_results = spark.sql('SELECT source FROM tmp').distinct().rdd.collect()
+            #tmp_results = [item for sublist in tmp_results for item in sublist]
+            #nodes.append(tmp_results)
 
+    '''
         self.write_list('file needs to be figured out', nodes) # destin
         # TODO DEALING WITH THE RESULTS
 

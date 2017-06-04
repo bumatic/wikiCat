@@ -29,7 +29,12 @@ from wikiCat.selectors.selector import *
 g = mp.gt_graph_objs['fixed_none__errors_removed']
 g.set_working_graph()
 
-Snapshots(g).create('snapshot_year_all')
+#Snapshots(g).create('snapshot_year_all')
+
+SubGraph(g).create(seed=[40261770, 39563179, 42031444, 42132341])
+
+
+
 
 #Selector(g).create_snapshot_views_spark()
 
