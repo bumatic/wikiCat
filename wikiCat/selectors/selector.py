@@ -32,6 +32,7 @@ class Selector(SparkProcessorGraph): #PandasProcessorGraph
         SparkProcessorGraph.__init__(self, self.project)
         self.graph_id = self.graph.curr_working_graph
         self.graph_path = self.graph.curr_data_path
+        self.base_path = os.path.split(self.graph_path)[0]
         self.start_date = self.project.start_date.timestamp()
         self.end_date = self.project.dump_date.timestamp()
         self.results = {}
@@ -73,7 +74,7 @@ class Snapshots(Selector):
         assert type(cscore) is bool, 'Error. A bool value is expected for cscore signalling, if data file contains ' \
                                      'cscore.'
 
-
+        interval = slice
         self.set_selector_dates(start_date, end_date)
         slice_list = self.generate_snapshot_list(slice)
         snapshot_path = os.path.join(self.graph_path, title)
@@ -84,20 +85,26 @@ class Snapshots(Selector):
         # Create a SparkSession
         # Note: In case its run on Windows and generates errors use (tmp Folder mus exist):
         # spark = SparkSession.builder.config("spark.sql.warehouse.dir", "file:///C:/temp").appName("Postprocessing").getOrCreate()
-        conf = SparkConf().setMaster("local[*]").setAppName("Test")
+        conf = SparkConf().setMaster("local[*]").setAppName("Snapshots")
         sc = SparkContext(conf=conf)
         spark = SparkSession(sc).builder.appName("Calculate_Snapshots").getOrCreate()
-        counter = 0
 
+        # Register dataframe for events data
+        all_events_df = None
         for file in self.graph.source_events:
-            counter = counter + 1
-            events_source = spark.sparkContext.textFile(file)
+            events_source = spark.sparkContext.textFile(os.path.join(self.source_locations, file))
             events = events_source.map(self.mapper_events)
             events_df = spark.createDataFrame(events).cache()
-            if counter == 1:
+            if all_events_df == None:
                 all_events_df = events_df
             else:
                 all_events_df = all_events_df.union(events_df)
+
+        # Register dataframe for wiki_id to gt_id map
+        id_map_source = spark.sparkContext.textFile(os.path.join(self.graph_path, self.gt_wiki_id_map))
+        id_map = id_map_source.map(self.mapper_ids)
+        id_map_df = spark.createDataFrame(id_map).cache()
+        id_map_df.createOrReplaceTempView("id_map")
 
         # Calculate snapshots and store tmp results
         results_files = []
@@ -113,6 +120,14 @@ class Snapshots(Selector):
                                         'e.target = a.target')
             active_edges_df.createOrReplaceTempView("events")
             active_edges_df = spark.sql('SELECT source, target FROM events WHERE event = \'start\'')
+            active_edges_df.createOrReplaceTempView("edges")
+
+            active_edges_df = spark.sql('SELECT i.gt_id as gt_source, e.target FROM edges e JOIN id_map i '
+                                        'ON e.source = i.wiki_id')
+            active_edges_df.createOrReplaceTempView("edges")
+            active_edges_df = spark.sql('SELECT e.gt_source, i.gt_id as gt_target FROM edges e JOIN id_map i '
+                                        'ON e.target = i.wiki_id')
+
             active_edges = active_edges_df.collect()
             results_file = str(slice) + '.csv'
             self.write_list(os.path.join(snapshot_path, results_file), active_edges)
@@ -120,14 +135,14 @@ class Snapshots(Selector):
 
         self.results['files'] = results_files
         self.results['type'] = 'snapshot'
-        self.results['interval'] = slice
-        self.results['start'] = self.start_date
-        self.results['end'] = self.end_date
+        self.results['interval'] = interval
+        self.results['start'] = str(datetime.fromtimestamp(self.start_date))
+        self.results['end'] = str(datetime.fromtimestamp(self.end_date))
 
         self.data[self.graph_id][title] = self.results
         self.graph.update_graph_data(self.data)
 
-        # TODO STORAGE OF RESULTS NEEDS TO BE DONE
+        sc.stop()
 
     def generate_snapshot_list(self, slice):
         if slice == 'day':
@@ -149,60 +164,25 @@ class SubGraph(Selector):
     def __init__(self, graph):
         Selector.__init__(self, graph)
 
-    def related_ids(seed=None):
-        # Create a SparkSession
-        # Note: In case its run on Windows and generates errors use (tmp Folder mus exist):
-        # spark = SparkSession.builder.config("spark.sql.warehouse.dir", "file:///C:/temp").appName("Postprocessing").getOrCreate()
-        conf = SparkConf().setMaster("local[*]").setAppName("Test")
-        sc = SparkContext(conf=conf)
-        spark = SparkSession(sc).builder.appName("Create SubGraph").getOrCreate()
-        for i in range(len(self.graph.source_edges)):
-            edges_source = spark.sparkContext.textFile(self.graph.source_edges[i])
-            edges = edges_source.map(self.mapper_edges)
-            edges_df = spark.createDataFrame(edges).cache()
-            if i == 0:
-                all_edges_df = edges_df
-            else:
-                all_edges_df = all_edges_df.union(edges_df)
-        results = all_edges_df[all_edges_df.target.isin(seed)]
-        results = results.select(col('source')).rdd.collect()
+    def create(self, title=None, seed=None, cats=True, subcats=2, supercats=2, links=False, inlinks=2, outlinks=2):
 
-        #Alternative
-        #results = all_edges_df.select(col('source')).filter(col('target').isin(seed)).rdd.collect()
-        results = [item for sublist in results for item in sublist]
-        #todo in every spark skript put sc.stop() at the end in order to enable chaining the processing steps.
-        # without it one gets an error that only one sparkcontext can be created.
-        sc.stop()
-        return results
-
-    def create(self, seed=None, depth=3, include='cat'):
-        assert include == 'cat' or include   == 'link' or include == 'both', 'Error. Pass either cat, link or both for include'
-        assert seed is not None, 'Error. One or more seed IDs need to be passed for creating a sub graph.'
-        assert type(seed) is list, 'Error. The seeds need to be passed as a list.'
-
-        #nodes = [item for sublist in seed for item in sublist]
-
-        for i in range(depth):
-            nodes.append(self.related_ids(nodes))
-            nodes = [str(i) for i in nodes] #cast items as str. otherwise results array does not work for spark
-        print(nodes)
-
-    def create2(self, seed=None, cats=True, subcats=2, supercats=2, links=False, inlinks=2, outlinks=2):
-    # depth=3, include='cat'):
-
+        assert title is not None, 'Error. You need to pass a title of the subgraph.'
         #TODO adapt assertions
         #assert include == 'cat' or include == 'link' or include == 'both', 'Error. Pass either cat, link or both for include'
         assert seed is not None, 'Error. One or more seed IDs need to be passed for creating a sub graph.'
         assert type(seed) is list, 'Error. The seeds need to be passed as a list.'
 
+        if title in self.data.keys():
+            print('Sub graph with this title already exists. Choose another title or remove the sub graph first.')
+            return False
         # Create a SparkSession
         # Note: In case its run on Windows and generates errors use (tmp Folder mus exist):
         # spark = SparkSession.builder.config("spark.sql.warehouse.dir", "file:///C:/temp").appName("Postprocessing").getOrCreate()
-        conf = SparkConf().setMaster("local[*]").setAppName("Test")
+        conf = SparkConf().setMaster("local[*]").setAppName("Subgraph")
         sc = SparkContext(conf=conf)
         spark = SparkSession(sc).builder.appName("Create SubGraph").getOrCreate()
         for i in range(len(self.graph.source_edges)):
-            edges_source = spark.sparkContext.textFile(self.graph.source_edges[i])
+            edges_source = spark.sparkContext.textFile(os.path.join(self.source_location, self.graph.source_edges[i]))
             edges = edges_source.map(self.mapper_edges)
             edges_df = spark.createDataFrame(edges).cache()
             if i == 0:
@@ -210,126 +190,125 @@ class SubGraph(Selector):
             else:
                 all_edges_df = all_edges_df.union(edges_df)
 
-        results_df = None
+        edge_results_df = None
         if cats:
+            self.results['cats'] = {}
             nodes = seed
             cat_edges_df = all_edges_df.where(all_edges_df.etype == 'cat')
             if subcats is not None:
+                self.results['cats']['subcats'] = subcats
                 for i in range(subcats):
                     tmp_results = cat_edges_df[cat_edges_df.target.isin(nodes)]
                     tmp_nodes = tmp_results.select(col('source')).rdd.collect()
-                    if results_df is None:
-                        results_df = tmp_results
+                    if edge_results_df is None:
+                        edge_results_df = tmp_results
                     else:
-                        results_df = results_df.union(tmp_results).distinct()
+                        edge_results_df = edge_results_df.union(tmp_results).distinct()
                     tmp_nodes = [item for sublist in tmp_nodes for item in sublist]
                     nodes = tmp_nodes
-                    #nodes = [item for sublist in nodes for item in sublist]
                     nodes = [str(i) for i in nodes] #cast items as str. otherwise results array does not work for spark
             if supercats is not None:
+                self.results['cats']['supercats'] = supercats
                 for i in range(supercats):
                     tmp_results = cat_edges_df[cat_edges_df.source.isin(nodes)]
                     tmp_nodes = tmp_results.select(col('target')).rdd.collect()
-                    if results_df is None:
-                        results_df = tmp_results
+                    if edge_results_df is None:
+                        edge_results_df = tmp_results
                     else:
-                        results_df = results_df.union(tmp_results).distinct()
+                        edge_results_df = edge_results_df.union(tmp_results).distinct()
                     tmp_nodes = [item for sublist in tmp_nodes for item in sublist]
                     nodes = tmp_nodes
-                    #nodes = [item for sublist in nodes for item in sublist]
                     nodes = [str(i) for i in nodes] #cast items as str. otherwise results array does not work for spark
         if links:
-            #TODO DEALING WITH LINKS NEEDS TO BE IMPLEMENTED
-            pass
+            self.results['links'] = {}
+            nodes = seed
+            link_edges_df = all_edges_df.where(all_edges_df.etype == 'links')
+            if inlinks is not None:
+                self.results['links']['inlinks'] = inlinks
+                for i in range(inlinks):
+                    tmp_results = link_edges_df[link_edges_df.target.isin(nodes)]
+                    tmp_nodes = tmp_results.select(col('source')).rdd.collect()
+                    if edge_results_df is None:
+                        edge_results_df = tmp_results
+                    else:
+                        edge_results_df = edge_results_df.union(tmp_results).distinct()
+                    tmp_nodes = [item for sublist in tmp_nodes for item in sublist]
+                    nodes = tmp_nodes
+                    nodes = [str(i) for i in nodes] #cast items as str. otherwise results array does not work for spark
+            if outlinks is not None:
+                self.results['links']['outlinks'] = outlinks
+                for i in range(outlinks):
+                    tmp_results = link_edges_df[link_edges_df.source.isin(nodes)]
+                    tmp_nodes = tmp_results.select(col('target')).rdd.collect()
+                    if edge_results_df is None:
+                        edge_results_df = tmp_results
+                    else:
+                        edge_results_df = edge_results_df.union(tmp_results).distinct()
+                    tmp_nodes = [item for sublist in tmp_nodes for item in sublist]
+                    nodes = tmp_nodes
+                    nodes = [str(i) for i in nodes] #cast items as str. otherwise results array does not work for spark
 
-        results_df.show()
-        #print(nodes)
+        edge_results_df.createOrReplaceTempView("edge_results")
+        edge_results_df = spark.sql('SELECT source, target, etype, cscore FROM edge_results').distinct()
+        edge_results = edge_results_df.rdd.collect()
 
+        results_path = os.path.join(self.base_path, str(title))
+        self.check_results_path(results_path)
+        edge_results_file = str(title) + '_' + self.graph.source_edges
+        events_results_file = str(title) + '_' + self.graph.source_events
+        self.write_list(os.path.join(results_path, edge_results_file), edge_results)
 
+        for i in range(len(self.graph.source_events)):
+            events_source = spark.sparkContext.textFile(os.path.join(self.source_location, self.graph.source_events[i]))
+            events = events_source.map(self.mapper_events)
+            events_df = spark.createDataFrame(events).cache()
+            if i == 0:
+                all_events_df = events_df
+            else:
+                all_events_df = all_events_df.union(events_df)
+
+        edge_results_df.createOrReplaceTempView("edge_results")
+        all_events_df.createOrReplaceTempView("events")
+
+        events_results_df = spark.sql('SELECT ev.revision, ev.source, ev.target, ev.event '
+                                      'FROM events ev JOIN edge_results ed ON ev.source = ed.source '
+                                      'AND ev.target = ed.target')
+        events_results = events_results_df.rdd.collect()
+        self.write_list(os.path.join(results_path, events_results_file), events_results)
+        self.results['source_edges'] = [edge_results_file]
+        self.results['source_events'] = [events_results_file]
+        self.results['location'] = results_path
+        self.results['type'] = 'subgraph'
+        self.results['derived_from'] = self.graph.curr_working_graph
+        self.results['seeds'] = seed
+
+        self.data[str(title)] = self.results
+        self.graph.update_graph_data(self.data)
 
         # todo in every spark skript put sc.stop() at the end in order to enable chaining the processing steps.
         # without it one gets an error that only one sparkcontext can be created.
         sc.stop()
+        return True
 
-    '''
-    def assemble_condition(self, seed, include):
-        if include == 'cat':
-            if type(seed) is list:
-                for i in range(len(seed)):
-                    if i == 0:
-                        cond = col('target') == seed[i]
-                    else:
-                        cond = cond | col('target') == seed[i]
-            else:
-                cond = col('target') == seed
-        elif include == 'link':
-            if type(seed) is list:
-                for i in range(len(seed)):
-                    if i == 0:
-                        cond = col('source') == seed[i]
-                    else:
-                        cond = cond | col('source') == seed[i]
-            else:
-                cond = col('source') == seed
-        elif include == 'both':
-            if type(seed) is list:
-                for i in range(len(seed)):
-                    if i == 0:
-                        cond = col('target') == seed[i] | col('source') == seed[i]
-                    else:
-                        cond = cond | col('target') == seed[i] | col('source') == seed[i]
-            else:
-                cond = col('target') == seed | col('source') == seed
-        return cond
-    '''
 
-    def sub_graph_views(self):
-        # combination of temporal_views and sub_graph_views
-        pass
+class SubGraphViews:
+    def __init__(self, graph):
+        self.graph = graph
+        #Snapshots.__init__(self, graph)
+        #SubGraph.__init__(self, graph)
+
+    def create(self, subgraph_title, snapshot_title, seed=None, cats=True, subcats=2, supercats=2, links=False,
+               inlinks=2, outlinks=2, slice='year', cscore=True, start_date=None, end_date=None):
+
+        print(subgraph_title)
+        success = SubGraph(self.graph).create(title=subgraph_title, seed=seed, cats=cats, subcats=subcats,
+                                              supercats=supercats, links=links, inlinks=inlinks, outlinks=outlinks)
+        if not success:
+            return
+
+        self.graph.set_working_graph(key=subgraph_title)
+        Snapshots(self.graph).create(snapshot_title, slice=slice, cscore=cscore, start_date=start_date, end_date=end_date)
 
 
 
-
-
-    '''
-
-    def create_snapshot_views(self, slice='year', cscore=True, start_date=None, end_date=None):
-        assert slice is 'year' or 'month' or 'day', 'Error. Pass a valid value for slice: year, month, day.'
-        assert type(cscore) is bool, 'Error. A bool value is expected for cscore signalling, if data file contains ' \
-                                     'cscore.'
-        assert parser.parse(start_date).timestamp() >= self.start_date, 'Error. The start date needs to be after ' \
-                                                                        + str(datetime.fromtimestamp(self.start_date))
-        assert parser.parse(end_date).timestamp() <= self.end_date, 'Error. The end date needs to be before ' \
-                                                                    + str(datetime.fromtimestamp(self.end_date))
-        if start_date is not None:
-            self.start_date = parser.parse(start_date).timestamp()
-        if slice == 'day':
-            delta = 86400
-        elif slice == 'month':
-            delta = 2592000
-        elif slice == 'year':
-            delta = 31536000
-        results = {}
-        tmp_results_files = []
-        last_slice = self.start_date.timestamp()
-        for file in self.graph:
-            tmp_results = {}
-            if cscore:
-                self.load_events(file, columns=['revision', 'source', 'target', 'event', 'cscore'])
-            else:
-                self.load_events(file, columns=['revision', 'source', 'target', 'event'])
-            for revision, events in self.events.groupby('revision'):
-                if (revision - last_slice) > delta and revision >= self.start_date:
-                    results[last_slice] = tmp_results
-                    last_slice = revision
-                for event in events.iterrows():
-                    if event[1]['event'] == 'start':
-                        tmp_results[str(event[1]['source'])+'|'+str(event[1]['target'])] = True
-                    elif event[1]['event'] == 'end':
-                        tmp_results[str(event[1]['source']) + '|' + str(event[1]['target'])] = False
-
-        results[self.end_date] = tmp_results
-        # TODO: Implement handling of results
-
-    '''
 

@@ -93,4 +93,120 @@ Folder structure
 
 
 
+ALTES Aus SELECTOR:
+    '''
+        def related_ids(seed=None):
+            # Create a SparkSession
+            # Note: In case its run on Windows and generates errors use (tmp Folder mus exist):
+            # spark = SparkSession.builder.config("spark.sql.warehouse.dir", "file:///C:/temp").appName("Postprocessing").getOrCreate()
+            conf = SparkConf().setMaster("local[*]").setAppName("Test")
+            sc = SparkContext(conf=conf)
+            spark = SparkSession(sc).builder.appName("Create SubGraph").getOrCreate()
+            for i in range(len(self.graph.source_edges)):
+                edges_source = spark.sparkContext.textFile(self.graph.source_edges[i])
+                edges = edges_source.map(self.mapper_edges)
+                edges_df = spark.createDataFrame(edges).cache()
+                if i == 0:
+                    all_edges_df = edges_df
+                else:
+                    all_edges_df = all_edges_df.union(edges_df)
+            results = all_edges_df[all_edges_df.target.isin(seed)]
+            results = results.select(col('source')).rdd.collect()
+
+            #Alternative
+            #results = all_edges_df.select(col('source')).filter(col('target').isin(seed)).rdd.collect()
+            results = [item for sublist in results for item in sublist]
+            #todo in every spark skript put sc.stop() at the end in order to enable chaining the processing steps.
+            # without it one gets an error that only one sparkcontext can be created.
+            sc.stop()
+            return results
+
+        def create(self, seed=None, depth=3, include='cat'):
+            assert include == 'cat' or include   == 'link' or include == 'both', 'Error. Pass either cat, link or both for include'
+            assert seed is not None, 'Error. One or more seed IDs need to be passed for creating a sub graph.'
+            assert type(seed) is list, 'Error. The seeds need to be passed as a list.'
+
+            #nodes = [item for sublist in seed for item in sublist]
+
+            for i in range(depth):
+                nodes.append(self.related_ids(nodes))
+                nodes = [str(i) for i in nodes] #cast items as str. otherwise results array does not work for spark
+            print(nodes)
+        '''
+
+    '''
+    def assemble_condition(self, seed, include):
+        if include == 'cat':
+            if type(seed) is list:
+                for i in range(len(seed)):
+                    if i == 0:
+                        cond = col('target') == seed[i]
+                    else:
+                        cond = cond | col('target') == seed[i]
+            else:
+                cond = col('target') == seed
+        elif include == 'link':
+            if type(seed) is list:
+                for i in range(len(seed)):
+                    if i == 0:
+                        cond = col('source') == seed[i]
+                    else:
+                        cond = cond | col('source') == seed[i]
+            else:
+                cond = col('source') == seed
+        elif include == 'both':
+            if type(seed) is list:
+                for i in range(len(seed)):
+                    if i == 0:
+                        cond = col('target') == seed[i] | col('source') == seed[i]
+                    else:
+                        cond = cond | col('target') == seed[i] | col('source') == seed[i]
+            else:
+                cond = col('target') == seed | col('source') == seed
+        return cond
+    '''
+
+
+      '''
+
+    def create_snapshot_views(self, slice='year', cscore=True, start_date=None, end_date=None):
+        assert slice is 'year' or 'month' or 'day', 'Error. Pass a valid value for slice: year, month, day.'
+        assert type(cscore) is bool, 'Error. A bool value is expected for cscore signalling, if data file contains ' \
+                                     'cscore.'
+        assert parser.parse(start_date).timestamp() >= self.start_date, 'Error. The start date needs to be after ' \
+                                                                        + str(datetime.fromtimestamp(self.start_date))
+        assert parser.parse(end_date).timestamp() <= self.end_date, 'Error. The end date needs to be before ' \
+                                                                    + str(datetime.fromtimestamp(self.end_date))
+        if start_date is not None:
+            self.start_date = parser.parse(start_date).timestamp()
+        if slice == 'day':
+            delta = 86400
+        elif slice == 'month':
+            delta = 2592000
+        elif slice == 'year':
+            delta = 31536000
+        results = {}
+        tmp_results_files = []
+        last_slice = self.start_date.timestamp()
+        for file in self.graph:
+            tmp_results = {}
+            if cscore:
+                self.load_events(file, columns=['revision', 'source', 'target', 'event', 'cscore'])
+            else:
+                self.load_events(file, columns=['revision', 'source', 'target', 'event'])
+            for revision, events in self.events.groupby('revision'):
+                if (revision - last_slice) > delta and revision >= self.start_date:
+                    results[last_slice] = tmp_results
+                    last_slice = revision
+                for event in events.iterrows():
+                    if event[1]['event'] == 'start':
+                        tmp_results[str(event[1]['source'])+'|'+str(event[1]['target'])] = True
+                    elif event[1]['event'] == 'end':
+                        tmp_results[str(event[1]['source']) + '|' + str(event[1]['target'])] = False
+
+        results[self.end_date] = tmp_results
+        # TODO: Implement handling of results
+
+    '''
+
 

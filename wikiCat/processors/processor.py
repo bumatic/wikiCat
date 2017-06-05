@@ -23,6 +23,8 @@ class Processor:
             self.data_path = self.project.graph_data_path
             self.results_path = self.project.gt_graph_path
             self.results_type = 'graph'
+        elif processor_type == 'gt_graph':
+            self.data_path = self.project.gt_graph_path
         else:
             print('Error. Please pass a valid processor_type: dump, parsed, graph')
             return
@@ -40,13 +42,13 @@ class Processor:
 
     def register_results(self, results_type, page_info=None, revision_info=None, cat_data=None, link_data=None,
                          error_data=None, error_type='error', nodes=None, edges=None, events=None, fixed='fixed_none',
-                         errors='errors_removed', gt_file=None, gt_type='fixed_none__errors_removed', gt_id_dict=None,
+                         errors='errors_removed', gt_file=None, gt_type='fixed_none__errors_removed', gt_wiki_id_map=None,
                          gt_source="graph__fixed_none__errors_removed", override=False):
 
         self.project.add_data(results_type, page_info=page_info, revision_info=revision_info, cat_data=cat_data,
                               link_data=link_data, error_data=error_data, error_type=error_type, nodes=nodes,
                               edges=edges, events=events, fixed=fixed, errors=errors, gt_file=gt_file,
-                              gt_type=gt_type, gt_id_dict=gt_id_dict, gt_source=gt_source, override=override)
+                              gt_type=gt_type, gt_wiki_id_map=gt_wiki_id_map, gt_source=gt_source, override=override)
 
 
         '''

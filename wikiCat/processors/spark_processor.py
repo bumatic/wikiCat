@@ -98,6 +98,12 @@ class SparkProcessor(Processor):
             print('Error while mapping events')
             return
 
+    def mapper_ids(self, line):
+        fields = line.split('\t')
+        wiki_id = fields[0]
+        gt_id = fields[1]
+        return Row(wiki_id=wiki_id, gt_id=gt_id)
+
     def handle_spark_results(self, path, file):
         spark_path = os.path.join(path, file)
         for filename in os.listdir(spark_path):

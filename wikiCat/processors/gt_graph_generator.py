@@ -10,7 +10,7 @@ class GtGraphGenerator(PandasProcessorGraph):
         self.graph = Graph()
         self.gt_filename = 'gt_graph_' + self.data_status + '.gt'
         #self.gt_edges_filename = 'gt_edges_'+self.data_status + '.json'
-        self.gt_nodes_filename = 'gt_nodes_' + self.data_status + '.json'
+        self.gt_nodes_filename = 'gt_nodes_' + self.data_status + '.csv'
 
         # Create and internalize node property maps
         self.node_id = self.graph.new_vertex_property('string')
@@ -28,16 +28,13 @@ class GtGraphGenerator(PandasProcessorGraph):
         self.edge_cscore = self.graph.new_edge_property('double')
         self.graph.edge_properties['cscore'] = self.edge_cscore
         self.node_id_dict = {}
-        #self.edge_dict = {}
-
-        #self.fixed = fixed
-        #self.errors = errors
-
+        self.node_id_list = []
 
     def create_gt_graph(self, cscore=True):
         self.create_nodes()
         self.create_edges()
         self.save_graph_gt()
+        self.register_gt_graph()
 
     def create_nodes(self, cscore=True):
         # TODO Assumes that only one edges file exists. Needs fixing for inclusion of link_data
@@ -50,6 +47,7 @@ class GtGraphGenerator(PandasProcessorGraph):
         nlist = self.graph.add_vertex(node_count)
         for n in nlist:
             node = node_iterator.__next__()
+            self.node_id_list.append([node[1]['id'], int(node[0])])
             self.node_id_dict[node[1]['id']] = int(node[0])
             self.node_id[n] = node[1]['id']
             self.node_title[n] = node[1]['title']
@@ -67,7 +65,6 @@ class GtGraphGenerator(PandasProcessorGraph):
         else:
             self.load_edges(self.edges_files[0], ['source', 'target', 'type'])
         for edge in self.edges.iterrows():
-
             if edge[1]['source'] in self.node_id_dict.keys() and edge[1]['target'] in self.node_id_dict.keys():
                 #, self.graph.vertex(self.node_id_dict[]
 
@@ -87,13 +84,13 @@ class GtGraphGenerator(PandasProcessorGraph):
     def save_graph_gt(self):
         # registering the file in the project needs to bee implemented.
         self.graph.save(os.path.join(self.data_path, self.gt_filename), fmt='gt')
-        self.write_json(os.path.join(self.data_path, self.gt_nodes_filename), self.node_id_dict)
+        self.write_list(os.path.join(self.data_path, self.gt_nodes_filename), self.node_id_list)
         #self.write_json(os.path.join(self.data_path, self.gt_edges_filename), self.edge_dict)
         #self.add_gt_graph()
         pass
 
     def register_gt_graph(self):
-        self.register_results('gt_graph', gt_file=self.gt_filename, gt_id_dict=self.gt_nodes_filename,
+        self.register_results('gt_graph', gt_file=self.gt_filename, gt_wiki_id_map=self.gt_nodes_filename,
                               gt_source=self.data_status)
 
 

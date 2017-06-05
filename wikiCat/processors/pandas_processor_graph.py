@@ -4,6 +4,7 @@ import os
 
 
 class PandasProcessorGraph(Processor):
+    #TODO check where this is used
     def __init__(self, project, fixed='fixed_none', errors='errors_removed'):
         Processor.__init__(self, project, 'graph')
         self.project = self.project
@@ -11,7 +12,6 @@ class PandasProcessorGraph(Processor):
         self.fixed = fixed
         self.errors = errors
         self.data_status = 'graph__' + self.fixed + '__' + self.errors
-        #self.data_obj[self.data_status]
         if 'events' in self.data_obj.data[self.data_status]:
             self.events_files = self.data_obj.data[self.data_status]['events']
             self.events = pd.DataFrame()
@@ -27,10 +27,10 @@ class PandasProcessorGraph(Processor):
             self.edges = pd.DataFrame()
         else:
             print('No csv with edges available')
-        if 'gt' in self.data_obj.data[self.data_status]:
-            self.gt_file = self.data_obj.data[self.data_status]['gt']
-        else:
-            print('No graph_tool gt file available')
+        #if 'gt' in self.data_obj.data[self.data_status]:
+        #    self.gt_file = self.data_obj.data[self.data_status]['gt']
+        #else:
+        #    print('No graph_tool gt file available')
 
     def load_events(self, file, columns=[]):
         # Default events columns: ['source', 'target', 'revision' 'event', ('cscore)]

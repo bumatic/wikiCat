@@ -148,7 +148,7 @@ class Project:
 
     def add_data(self, dtype, page_info=None, revision_info=None, cat_data=None, link_data=None, error_data=None,
                  error_type='error', nodes=None, edges=None, events=None, fixed='fixed_none',
-                 errors='errors_removed', gt_file=None, gt_type='fixed_none__errors_removed', gt_id_dict=None,
+                 errors='errors_removed', gt_file=None, gt_type='fixed_none__errors_removed', gt_wiki_id_map=None,
                  gt_source="graph__fixed_none__errors_removed", override=False):
         if dtype == 'dump':
             print('ADD DUMP - NOT YET IMPLEMENTED')
@@ -185,14 +185,14 @@ class Project:
                 self.data_desc[dtype] = self.data_objs[dtype].add_error_data(error_data, error_type)
             self.save_project()
         elif dtype == 'gt_graph':
-            assert gt_file is not None and gt_id_dict is not None and gt_source is not None, 'Error. Required data missing for adding the gt_graph.'
+            assert gt_file is not None and gt_wiki_id_map is not None and gt_source is not None, 'Error. Required data missing for adding the gt_graph.'
             if gt_type in self.gt_graph_desc.keys():
                 print('Graph of this type already exists. Try loading the graph and creating subgraphs or '
                       'adding as another type')
             else:
                 self.gt_graph_objs[gt_type] = WikiGraph(self, gt_type=gt_type)
                 self.gt_graph_desc[gt_type] = self.gt_graph_objs[gt_type].add_new_graph(gt_file=gt_file, gt_type=gt_type,
-                                                                                      gt_id_dict=gt_id_dict, gt_source=gt_source)
+                                                                                        gt_wiki_id_map=gt_wiki_id_map, gt_source=gt_source)
             self.save_project()
         else:
             print('Please enter a valid type: dump, parsed, cleaned, graph, gt_graph error')
