@@ -35,7 +35,6 @@ SubGraph(g).create2(seed=[40261770, 39563179, 42031444, 42132341])
 
 
 
-
 #Selector(g).create_snapshot_views_spark()
 
 #Selector(mp).temporal_views_spark()

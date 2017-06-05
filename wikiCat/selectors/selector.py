@@ -187,8 +187,11 @@ class SubGraph(Selector):
             nodes = [str(i) for i in nodes] #cast items as str. otherwise results array does not work for spark
         print(nodes)
 
-    def create2(self, seed=None, depth=3, include='cat'): #cats=True, subcats=2, supercats=2 links=False, inlinks=2 outlinkes=2
-        assert include == 'cat' or include == 'link' or include == 'both', 'Error. Pass either cat, link or both for include'
+    def create2(self, seed=None, cats=True, subcats=2, supercats=2, links=False, inlinks=2, outlinks=2):
+    # depth=3, include='cat'):
+
+        #TODO adapt assertions
+        #assert include == 'cat' or include == 'link' or include == 'both', 'Error. Pass either cat, link or both for include'
         assert seed is not None, 'Error. One or more seed IDs need to be passed for creating a sub graph.'
         assert type(seed) is list, 'Error. The seeds need to be passed as a list.'
 
@@ -207,18 +210,39 @@ class SubGraph(Selector):
             else:
                 all_edges_df = all_edges_df.union(edges_df)
 
-        nodes = seed
-        for i in range(depth):
-            results = all_edges_df[all_edges_df.target.isin(nodes)]
-            results = results.select(col('source')).rdd.collect()
-            results = [item for sublist in results for item in sublist]
-            print('RESULTS:')
-            print(results)
-            nodes = nodes + results
-            #nodes = [item for sublist in nodes for item in sublist]
-            nodes = [str(i) for i in nodes] #cast items as str. otherwise results array does not work for spark
-            print('NODES:')
-            print(nodes)
+        results_df = None
+        if cats:
+            nodes = seed
+            cat_edges_df = all_edges_df.where(all_edges_df.etype == 'cat')
+            if subcats is not None:
+                for i in range(subcats):
+                    tmp_results = cat_edges_df[cat_edges_df.target.isin(nodes)]
+                    tmp_nodes = tmp_results.select(col('source')).rdd.collect()
+                    if results_df is None:
+                        results_df = tmp_results
+                    else:
+                        results_df = results_df.union(tmp_results).distinct()
+                    tmp_nodes = [item for sublist in tmp_nodes for item in sublist]
+                    nodes = tmp_nodes
+                    #nodes = [item for sublist in nodes for item in sublist]
+                    nodes = [str(i) for i in nodes] #cast items as str. otherwise results array does not work for spark
+            if supercats is not None:
+                for i in range(supercats):
+                    tmp_results = cat_edges_df[cat_edges_df.source.isin(nodes)]
+                    tmp_nodes = tmp_results.select(col('target')).rdd.collect()
+                    if results_df is None:
+                        results_df = tmp_results
+                    else:
+                        results_df = results_df.union(tmp_results).distinct()
+                    tmp_nodes = [item for sublist in tmp_nodes for item in sublist]
+                    nodes = tmp_nodes
+                    #nodes = [item for sublist in nodes for item in sublist]
+                    nodes = [str(i) for i in nodes] #cast items as str. otherwise results array does not work for spark
+        if links:
+            #TODO DEALING WITH LINKS NEEDS TO BE IMPLEMENTED
+            pass
+
+        results_df.show()
         #print(nodes)
 
 
