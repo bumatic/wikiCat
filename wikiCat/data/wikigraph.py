@@ -13,7 +13,6 @@ class WikiGraph(Data):
         self.source_path = self.project.graph_data_path
         self.graph = Graph()
         self.data = data
-        print(self.data)
         self.curr_working_graph = None
         self.curr_data_path = None
         self.source_nodes = None
