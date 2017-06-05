@@ -31,7 +31,7 @@ g.set_working_graph()
 
 #Snapshots(g).create('snapshot_year_all')
 
-SubGraph(g).create(seed=[40261770, 39563179, 42031444, 42132341])
+SubGraph(g).create2(seed=[40261770, 39563179, 42031444, 42132341])
 
 
 
