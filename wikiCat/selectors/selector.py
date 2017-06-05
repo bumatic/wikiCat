@@ -118,7 +118,7 @@ class Snapshots(Selector):
             self.write_list(os.path.join(snapshot_path, results_file), active_edges)
             results_files.append(results_file)
 
-        self.results['files']=results_files
+        self.results['files'] = results_files
         self.results['type'] = 'snapshot'
         self.results['interval'] = slice
         self.results['start'] = self.start_date
@@ -187,7 +187,7 @@ class SubGraph(Selector):
             nodes = [str(i) for i in nodes] #cast items as str. otherwise results array does not work for spark
         print(nodes)
 
-    def create2(self, seed=None, depth=3, include='cat'):
+    def create2(self, seed=None, depth=3, include='cat'): #cats=True, subcats=2, supercats=2 links=False, inlinks=2 outlinkes=2
         assert include == 'cat' or include == 'link' or include == 'both', 'Error. Pass either cat, link or both for include'
         assert seed is not None, 'Error. One or more seed IDs need to be passed for creating a sub graph.'
         assert type(seed) is list, 'Error. The seeds need to be passed as a list.'
@@ -209,11 +209,23 @@ class SubGraph(Selector):
 
         nodes = seed
         for i in range(depth):
-            results = all_edges_df[all_edges_df.target.isin(seed)]
+            results = all_edges_df[all_edges_df.target.isin(nodes)]
             results = results.select(col('source')).rdd.collect()
-            nodes.append(results)
+            results = [item for sublist in results for item in sublist]
+            print('RESULTS:')
+            print(results)
+            nodes = nodes + results
+            #nodes = [item for sublist in nodes for item in sublist]
             nodes = [str(i) for i in nodes] #cast items as str. otherwise results array does not work for spark
-        print(nodes)
+            print('NODES:')
+            print(nodes)
+        #print(nodes)
+
+
+
+        # todo in every spark skript put sc.stop() at the end in order to enable chaining the processing steps.
+        # without it one gets an error that only one sparkcontext can be created.
+        sc.stop()
 
     '''
     def assemble_condition(self, seed, include):
