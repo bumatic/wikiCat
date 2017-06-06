@@ -32,6 +32,7 @@ class Selector(SparkProcessorGraph): #PandasProcessorGraph
         SparkProcessorGraph.__init__(self, self.project)
         self.graph_id = self.graph.curr_working_graph
         self.graph_path = self.graph.curr_data_path
+        self.source_location = self.graph.source_location
         self.base_path = os.path.split(self.graph_path)[0]
         self.start_date = self.project.start_date.timestamp()
         self.end_date = self.project.dump_date.timestamp()
@@ -92,7 +93,9 @@ class Snapshots(Selector):
         # Register dataframe for events data
         all_events_df = None
         for file in self.graph.source_events:
-            events_source = spark.sparkContext.textFile(os.path.join(self.source_locations, file))
+            print(self.source_location)
+            print(self.graph_path)
+            events_source = spark.sparkContext.textFile(os.path.join(self.graph.source_events_location, file))
             events = events_source.map(self.mapper_events)
             events_df = spark.createDataFrame(events).cache()
             if all_events_df == None:
@@ -101,7 +104,7 @@ class Snapshots(Selector):
                 all_events_df = all_events_df.union(events_df)
 
         # Register dataframe for wiki_id to gt_id map
-        id_map_source = spark.sparkContext.textFile(os.path.join(self.graph_path, self.gt_wiki_id_map))
+        id_map_source = spark.sparkContext.textFile(os.path.join(self.graph.gt_wiki_id_map_location, self.graph.gt_wiki_id_map))
         id_map = id_map_source.map(self.mapper_ids)
         id_map_df = spark.createDataFrame(id_map).cache()
         id_map_df.createOrReplaceTempView("id_map")
@@ -184,7 +187,7 @@ class SubGraph(Selector):
 
         # Register dataframe for edges
         for i in range(len(self.graph.source_edges)):
-            edges_source = spark.sparkContext.textFile(os.path.join(self.source_location, self.graph.source_edges[i]))
+            edges_source = spark.sparkContext.textFile(os.path.join(self.graph.source_edges_location, self.graph.source_edges[i]))
             edges = edges_source.map(self.mapper_edges)
             edges_df = spark.createDataFrame(edges).cache()
             if i == 0:
@@ -256,7 +259,7 @@ class SubGraph(Selector):
 
         # Register events dataframe
         for i in range(len(self.graph.source_events)):
-            events_source = spark.sparkContext.textFile(os.path.join(self.source_location, self.graph.source_events[i]))
+            events_source = spark.sparkContext.textFile(os.path.join(self.graph.source_events_location, self.graph.source_events[i]))
             events = events_source.map(self.mapper_events)
             events_df = spark.createDataFrame(events).cache()
             if i == 0:
@@ -271,8 +274,10 @@ class SubGraph(Selector):
                                       'FROM events ev JOIN edge_results ed ON ev.source = ed.source '
                                       'AND ev.target = ed.target')
 
+        '''
+        # mapping wiki Ids to gt ids for subgraph generates errors. Since they are used again for other mappings. Keep them and create an own mapper dynamic events viz
         # Register dataframe for wiki_id to gt_id mapping
-        id_map_source = spark.sparkContext.textFile(os.path.join(self.graph_path, self.gt_wiki_id_map))
+        id_map_source = spark.sparkContext.textFile(os.path.join(self.graph.gt_wiki_id_map_location, self.graph.gt_wiki_id_map))
         id_map = id_map_source.map(self.mapper_ids)
         id_map_df = spark.createDataFrame(id_map).cache()
 
@@ -281,28 +286,29 @@ class SubGraph(Selector):
         events_results_df.createOrReplaceTempView("events_results")
         id_map_df.createOrReplaceTempView("id_map")
 
-        edge_resolved_df = spark.sql('SELECT i.gt_id as gt_source, e.target, e.etype, e.cscore '
-                                     'FROM edge_results e JOIN id_map i ON e.source = i.wiki_id')
-        edge_resolved_df.createOrReplaceTempView("edges_resolved")
-        edge_resolved_df = spark.sql('SELECT e.gt_source, i.gt_id as gt_target, e.etype, e.cscore '
-                                     'FROM edge_resolved e JOIN id_map i ON e.target = i.wiki_id')
+        edges_resolved_df = spark.sql('SELECT i.gt_id as gt_source, e.target, e.etype, e.cscore '
+                                      'FROM edge_results e LEFT OUTER JOIN id_map i ON e.source = i.wiki_id')
+        edges_resolved_df.createOrReplaceTempView("edges_resolved")
+        edges_resolved_df = spark.sql('SELECT e.gt_source, i.gt_id as gt_target, e.etype, e.cscore '
+                                      'FROM edges_resolved e LEFT OUTER JOIN id_map i ON e.target = i.wiki_id')
 
         events_resolved_df = spark.sql('SELECT e.revision, i.gt_id as gt_source, e.target, e.event, e.cscore '
-                                       'FROM events_results e JOIN id_map i ON e.source = i.wiki_id')
+                                       'FROM events_results e LEFT OUTER JOIN id_map i ON e.source = i.wiki_id')
         events_resolved_df.createOrReplaceTempView("events_resolved")
-        events_resolved_df = spark.sql('SELECT e.revision, e.gt_source, i.gt_it as gt_target, e.event, e.cscore '
-                                       'FROM events_resolved e JOIN id_map i ON e.target = i.wiki_id')
+        events_resolved_df = spark.sql('SELECT e.revision, e.gt_source, i.gt_id as gt_target, e.event, e.cscore '
+                                       'FROM events_resolved e LEFT OUTER JOIN id_map i ON e.target = i.wiki_id')
+        '''
 
         # Create results path and filenames
         results_path = os.path.join(self.base_path, str(title))
         self.check_results_path(results_path)
-        edge_results_file = str(title) + '_' + self.graph.source_edges
-        events_results_file = str(title) + '_' + self.graph.source_events
+        edge_results_file = str(title) + '_' + self.graph.source_edges[0]
+        events_results_file = str(title) + '_' + self.graph.source_events[0]
 
         # Collect results and write to file
-        edge_results = edge_resolved_df.rdd.collect()
+        edge_results = edge_results_df.rdd.collect()
         self.write_list(os.path.join(results_path, edge_results_file), edge_results)
-        events_results = events_resolved_df.rdd.collect()
+        events_results = events_results_df.rdd.collect()
         self.write_list(os.path.join(results_path, events_results_file), events_results)
 
         # Assemble results data and register to project
@@ -331,7 +337,6 @@ class SubGraphViews:
     def create(self, subgraph_title, snapshot_title, seed=None, cats=True, subcats=2, supercats=2, links=False,
                inlinks=2, outlinks=2, slice='year', cscore=True, start_date=None, end_date=None):
 
-        print(subgraph_title)
         success = SubGraph(self.graph).create(title=subgraph_title, seed=seed, cats=cats, subcats=subcats,
                                               supercats=supercats, links=links, inlinks=inlinks, outlinks=outlinks)
         if not success:

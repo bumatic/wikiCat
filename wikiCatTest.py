@@ -26,10 +26,12 @@ mp.load_project()
 
 from wikiCat.selectors.selector import *
 
-#g = mp.gt_graph_objs['fixed_none__errors_removed']
-#g.set_working_graph('main')
-#Snapshots(g).create('snapshot_year_all')
+g = mp.gt_graph_objs['fixed_none__errors_removed']
+g.set_working_graph('main')
+Snapshots(g).create('snapshot_year')
 
+
+#GENERATE SUBGRAPH AND VIEW
 #SubGraphViews(g).create('bitcoin', 'snapshot_year',  seed=[40261770, 39563179, 42031444, 42132341], cats=True,
 #                        subcats=3, supercats=3)
 
@@ -51,8 +53,8 @@ from wikiCat.selectors.selector import *
 
 
 #GraphDataGenerator(mp, 'cat_data').generate_graph_data(override=True)
-
-GtGraphGenerator(mp).create_gt_graph()
+#Generate graph
+#GtGraphGenerator(mp).create_gt_graph()
 #ControvercyScore(mp).calculate_edge_score()
 #ControvercyScore(mp).calculate_avg_node_score()
 #ControvercyScore(mp).calculate_avg_edge_score()

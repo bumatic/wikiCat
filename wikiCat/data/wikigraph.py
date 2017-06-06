@@ -16,10 +16,14 @@ class WikiGraph(Data):
         self.curr_working_graph = None
         self.curr_data_path = None
         self.source_nodes = None
+        self.source_nodes_location = None
         self.source_edges = None
+        self.source_edges_location = None
         self.source_events = None
+        self.source_events_location = None
         self.source_location = None
         self.gt_wiki_id_map = None
+        self.gt_wiki_id_map_location = None
         pass
 
     def add_new_graph(self, gt_file=None, gt_type='fixed_none__errors_removed', gt_wiki_id_map=None, gt_source="graph__fixed_none__errors_removed"):
@@ -72,30 +76,61 @@ class WikiGraph(Data):
             print(key)
 
     def set_working_graph(self, key='main'):
+        # TODO Needs testing
         self.curr_working_graph = key
-
-        if 'source_location' in self.data[key].keys():
-            self.source_location = self.data[key]['source_location']
-        else:
-            self.source_location = self.data[self.data[key]['derived_from']]['source_location']
-        if 'source_nodes' in self.data[key].keys():
-            self.source_nodes = self.data[key]['source_nodes']
-        else:
-            self.source_nodes = self.data[self.data[key]['derived_from']]['source_nodes']
-        if 'source_edges' in self.data[key].keys():
-            self.source_edges = self.data[key]['source_edges']
-        else:
-            self.source_edges = self.data[self.data[key]['derived_from']]['source_edges']
-        if 'source_events' in self.data[key].keys():
-            self.source_events = self.data[key]['source_events']
-        else:
-            self.source_events = self.data[self.data[key]['derived_from']]['source_events']
-        if 'gt_wiki_id_map' in self.data[key].key():
-            self.gt_wiki_id_map = self.data[key]['gt_wiki_id_map']
-        else:
-            self.id_map = self.data[self.data[key]['derived_from']]['gt_wiki_id_map']
         self.curr_data_path = self.data[key]['location']
 
+        if key == 'main':
+            self.source_location = self.data[key]['source_location']
+            self.source_events_location = self.source_location
+            self.source_edges_location = self.source_location
+            self.source_nodes_location = self.source_location
+            self.gt_wiki_id_map_location = self.curr_data_path
+            self.source_nodes = self.data[key]['source_nodes']
+            self.source_edges = self.data[key]['source_edges']
+            self.source_events = self.data[key]['source_events']
+            self.gt_wiki_id_map = self.data[key]['gt_wiki_id_map']
+        else:
+            if 'source_location' in self.data[key].keys():
+                self.source_location = self.data[key]['source_location']
+            else:
+                self.source_location = self.data[self.data[key]['derived_from']]['source_location']
+            # print('curr working path:')
+            # print(self.curr_data_path)
+            # print('source locations:')
+            # print(self.source_location)
+            if 'source_nodes' in self.data[key].keys():
+                self.source_nodes = self.data[key]['source_nodes']
+                self.source_nodes_location = self.curr_data_path
+            else:
+                self.source_nodes = self.data[self.data[key]['derived_from']]['source_nodes']
+                self.source_nodes_location = self.source_location
+            # print('source node locations:')
+            # print(self.source_nodes_location)
+            if 'source_edges' in self.data[key].keys():
+                self.source_edges = self.data[key]['source_edges']
+                self.source_edges_location = self.curr_data_path
+            else:
+                self.source_edges = self.data[self.data[key]['derived_from']]['source_edges']
+                self.source_edges_location = self.source_location
+            # print('source edges location:')
+            # print(self.source_edges_location)
+            if 'source_events' in self.data[key].keys():
+                self.source_events = self.data[key]['source_events']
+                self.source_events_location = self.curr_data_path
+            else:
+                self.source_events = self.data[self.data[key]['derived_from']]['source_events']
+                self.source_events_location = self.source_location
+            # print('source events locations:')
+            # print(self.source_events_location)
+            if 'gt_wiki_id_map' in self.data[key].keys():
+                self.gt_wiki_id_map = self.data[key]['gt_wiki_id_map']
+                self.gt_wiki_id_map_location = self.curr_data_path
+            else:
+                self.gt_wiki_id_map = self.data[self.data[key]['derived_from']]['gt_wiki_id_map']
+                self.gt_wiki_id_map_location = self.data[self.data[key]['derived_from']]['location']
+            # print('gt_wiki_id locations:')
+            # print(self.gt_wiki_id_map_location)
     def generate_snapshots(self, slice, cscore=True, start_date=None, end_date=None):
         pass
 
