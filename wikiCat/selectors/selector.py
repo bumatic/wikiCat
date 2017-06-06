@@ -312,8 +312,16 @@ class GtEvents(Selector):
                                      'cscore.'
         self.set_selector_dates(start_date, end_date)
 
+        # Create a SparkSession
+        # Note: In case its run on Windows and generates errors use (tmp Folder mus exist):
+        # spark = SparkSession.builder.config("spark.sql.warehouse.dir", "file:///C:/temp").appName("Postprocessing").getOrCreate()
+        conf = SparkConf().setMaster("local[*]").setAppName("Events")
+        sc = SparkContext(conf=conf)
+        spark = SparkSession(sc).builder.appName("GtEvents").getOrCreate()
+
         # Create results path and filename
-        results_path = os.path.join(self.base_path, str(title))
+        results_path = os.path.join(self.graph.curr_data_path, str(title))
+        print(results_path)
         self.check_results_path(results_path)
         events_results_file = str(title) + '_' + self.graph.source_events[0]
 
@@ -355,6 +363,8 @@ class GtEvents(Selector):
 
         self.data[self.graph_id][title] = self.results
         self.graph.update_graph_data(self.data)
+
+        sc.stop()
 
 
 class SubGraphViews:

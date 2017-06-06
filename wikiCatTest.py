@@ -28,8 +28,12 @@ from wikiCat.selectors.selector import *
 
 g = mp.gt_graph_objs['fixed_none__errors_removed']
 g.set_working_graph('bitcoin')
-GtEvents(g).create('gt_events_all')
+#GtEvents(g).create('gt_events_all')
 #Snapshots(g).create('snapshot_year'
+
+
+from wikiCat.selectors.SelectorCscore import SelectorCscore
+SelectorCscore(g).get_highest_cscores('events', cats_only=True, n=10)
 
 
 #GENERATE SUBGRAPH AND VIEW

@@ -131,6 +131,7 @@ class WikiGraph(Data):
                 self.gt_wiki_id_map_location = self.data[self.data[key]['derived_from']]['location']
             # print('gt_wiki_id locations:')
             # print(self.gt_wiki_id_map_location)
+
     def generate_snapshots(self, slice, cscore=True, start_date=None, end_date=None):
         pass
 

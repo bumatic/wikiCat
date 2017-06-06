@@ -6,7 +6,13 @@ class Processor:
     def __init__(self, project, processor_type):
         self.project = project
         self.path = self.project.pinfo['path']
-        self.data_obj = self.project.data_objs[processor_type] #oder _objs
+
+        if processor_type == 'gt_graph':
+            #TODO this needs testing. probably a list of objs ist passed and not the obj
+            self.data_obj = self.project.gt_graph_objs
+        else:
+            self.data_obj = self.project.data_objs[processor_type] #oder _objs
+
         if processor_type == 'dump':
             self.data_path = self.project.dump_data_path
             self.results_path = self.project.parsed_data_path

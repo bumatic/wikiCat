@@ -5,15 +5,14 @@ import pandas as pd
 class PandasProcessor(Processor):
     def __init__(self, project, processor_type):
         Processor.__init__(self, project, processor_type)
-        print(self.path)
 
     def load_events(self, file, cscore=True):
         if cscore:
             events = pd.read_csv(file, header=None, delimiter='\t',
-                                 names=['source', 'target', 'revision' 'event', 'cscore'])
+                                 names=['revision', 'source', 'target', 'event', 'cscore'])
         else:
             events = pd.read_csv(file, header=None, delimiter='\t',
-                                 names=['source', 'target', 'revision' 'event'])
+                                 names=['revision', 'source', 'target', 'event'])
         return events
 
     def load_edges(self, file, cscore=True):
