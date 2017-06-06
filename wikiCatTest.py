@@ -27,8 +27,9 @@ mp.load_project()
 from wikiCat.selectors.selector import *
 
 g = mp.gt_graph_objs['fixed_none__errors_removed']
-g.set_working_graph('main')
-Snapshots(g).create('snapshot_year')
+g.set_working_graph('bitcoin')
+GtEvents(g).create('gt_events_all')
+#Snapshots(g).create('snapshot_year'
 
 
 #GENERATE SUBGRAPH AND VIEW

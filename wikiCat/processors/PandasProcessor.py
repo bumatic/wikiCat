@@ -1,6 +1,7 @@
 from wikiCat.processors.processor import Processor
 import pandas as pd
 
+
 class PandasProcessor(Processor):
     def __init__(self, project, processor_type):
         Processor.__init__(self, project, processor_type)
