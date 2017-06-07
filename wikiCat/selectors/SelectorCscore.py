@@ -1,15 +1,15 @@
-from wikiCat.selectors.selector import Selector
+from wikiCat.processors.GtGraphProcessor import GtGraphProcessor
 from wikiCat.processors.PandasProcessor import PandasProcessor
 import pandas as pd
 import os
 
 
-class SelectorCscore(PandasProcessor):
+class SelectorCscore(GtGraphProcessor, PandasProcessor):
     def __init__(self, graph):
-        self.graph = graph
-        self.project = self.graph.project
+        GtGraphProcessor.__init__(self, graph)
         PandasProcessor.__init__(self, self.project, 'gt_graph')
 
+        '''
         #SetVariables
         assert self.graph.curr_working_graph is not None, 'Error. Set a current working graph before creating ' \
                                                           'a selector.'
@@ -19,6 +19,7 @@ class SelectorCscore(PandasProcessor):
         self.events_location = self.graph.source_events_location
         self.edges = self.graph.source_edges
         self.edges_location = self.graph.source_edges_location
+        '''
 
     def get_highest_cscores(self, type, n=100, cats_only=False):
         assert type == 'nodes' or type == 'edges' or type == 'events', 'Error. Pass one of the following types: nodes, edges, events.'
@@ -52,7 +53,6 @@ class SelectorCscore(PandasProcessor):
             df.columns = ['revision', 'title_source', 'title_target', 'event', 'cscore']
 
         df = df.drop_duplicates()
-        #print(df)
         self.highest_cscores(df, n=n)
 
 
