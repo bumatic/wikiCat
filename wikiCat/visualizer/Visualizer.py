@@ -152,8 +152,36 @@ class SFDP(Visualizer):
         g = graph_view
 
         self.process_drawing_properties(g, vsize=vsize, vlabel=vlabel, color_by_type=color_by_type, esize=esize)
-        out = os.path.join(self.results_path, outfile+'.'+outtype)
+        out = os.path.join(self.results_path, 'sfpd_'+outfile+'.'+outtype)
         os.makedirs(os.path.dirname(out), exist_ok=True)
         pos = sfdp_layout(g)
-        graph_draw(g, pos, vprops=vprops, eprops=eprops, output_size=(20000, 20000), output=out)
+        graph_draw(g, pos, vprops=self.drawing_props['vprops'], eprops=self.drawing_props['eprops'], output_size=(20000, 20000), output=out)
 
+
+class ARF(Visualizer):
+    def __init__(self, graph):
+        Visualizer.__init__(self, graph)
+
+    def visualize(self, graph_view, outfile, outtype, vsize=None, vlabel=None, color_by_type=True, esize=None):
+        print('create Viz')
+        g = graph_view
+
+        self.process_drawing_properties(g, vsize=vsize, vlabel=vlabel, color_by_type=color_by_type, esize=esize)
+        out = os.path.join(self.results_path, 'arf_'+outfile+'.'+outtype)
+        os.makedirs(os.path.dirname(out), exist_ok=True)
+        pos = arf_layout(g)
+        graph_draw(g, pos, vprops=self.drawing_props['vprops'], eprops=self.drawing_props['eprops'], output_size=(20000, 20000), output=out)
+
+class FR(Visualizer):
+    def __init__(self, graph):
+        Visualizer.__init__(self, graph)
+
+    def visualize(self, graph_view, outfile, outtype, vsize=None, vlabel=None, color_by_type=True, esize=None):
+        print('create Viz')
+        g = graph_view
+
+        self.process_drawing_properties(g, vsize=vsize, vlabel=vlabel, color_by_type=color_by_type, esize=esize)
+        out = os.path.join(self.results_path, 'fr_'+outfile+'.'+outtype)
+        os.makedirs(os.path.dirname(out), exist_ok=True)
+        pos = fruchterman_reingold_layout(g)
+        graph_draw(g, pos, vprops=self.drawing_props['vprops'], eprops=self.drawing_props['eprops'], output_size=(20000, 20000), output=out)
