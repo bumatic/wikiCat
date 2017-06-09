@@ -64,6 +64,7 @@ class Selector(SparkProcessorGraph): #PandasProcessorGraph
     def create(self):
         pass
 
+
 class Snapshots(Selector):
     def __init__(self, graph):
         Selector.__init__(self, graph)

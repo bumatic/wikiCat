@@ -35,12 +35,18 @@ g.set_working_graph('bitcoin')
 ## from wikiCat.selectors.SelectorCscore import SelectorCscore
 #SelectorCscore(g).get_highest_cscores('nodes', cats_only=True, n=10)
 
-from wikiCat.visualizer.Visualizer import Visualizer
+from wikiCat.visualizer.Visualizer import *
 
-Visualizer(g).load(sub_graph='bitcoin')
+SFDP(g).snapshots('snapshot_year', vsize='cscore', vlabel='title', esize='cscore' ) #.load(sub_graph='bitcoin')
+
+
+
+
+
+
 
 #GENERATE SUBGRAPH AND VIEW
-#SubGraphViews(g).create('bitcoin', 'snapshot_year',  seed=[40261770, 39563179, 42031444, 42132341], cats=True,
+#SubGraphViews(g).create('bitcoin_subcats', 'snapshot_year',  seed=[40261770, 39563179, 42031444, 42132341], cats=True,
 #                        subcats=3, supercats=3)
 
 #SubGraph(g).create(title='bitcoin', seed=[40261770, 39563179, 42031444, 42132341], subcats=3, supercats=3)

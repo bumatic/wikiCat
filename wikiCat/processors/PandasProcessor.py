@@ -20,8 +20,8 @@ class PandasProcessor(Processor):
             edges = pd.read_csv(file, header=None, delimiter='\t',
                                 names=['source', 'target', 'type', 'cscore'])
         else:
-            edges = pd.read_csv(file, header=None, delimiter='\t',
-                                names=['source', 'target', 'type'])
+                edges = pd.read_csv(file, header=None, delimiter='\t',
+                                    names=['source', 'target', 'type'])
         return edges
 
     def load_nodes(self, file, cscore=True):
