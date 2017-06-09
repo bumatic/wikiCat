@@ -134,7 +134,7 @@ class Visualizer(GtGraphProcessor):
             graph_tool.map_property_values(g.vp.ns, vertex_color, lambda x: 'steelblue' if x == 14 else 'crimson')
             self.set_drawing_properties(vertex_fill_color=vertex_color)
         if esize == 'cscore':
-            edge_size = g.new_vertex_property("double")
+            edge_size = g.new_edge_property("double")
             graph_tool.map_property_values(g.ep.cscore, edge_size, lambda x: x + 0.1)
             edge_size = graph_tool.draw.prop_to_size(edge_size, mi=0.5, ma=1, log=False, power=0.5)
             self.set_drawing_properties(edge_pen_width=edge_size)
