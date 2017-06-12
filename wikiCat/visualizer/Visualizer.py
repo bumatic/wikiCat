@@ -16,14 +16,23 @@ class Visualizer(GtGraphProcessor):
         self.gt_wiki_id_map = pd.read_csv(os.path.join(self.data['main']['location'], self.data['main']['gt_wiki_id_map']),
                                           header=None, delimiter='\t', names=['wiki_id', 'gt_id'])
         self.drawing_props = {}
-        self.set_drawing_properties(vertex_text=None, vertex_text_color='black', vertex_font_size=24,
-                                    vertex_font_family='sans-serif', vertex_color=[1, 1, 1, 0],
-                                    vertex_fill_color='black', vertex_size=1, edge_color='black', edge_pen_width=1.2)
+        self.set_drawing_properties(vertex_text=None,
+                                    vertex_text_color='black',
+                                    vertex_font_size=200,
+                                    vertex_font_family='sans-serif',
+                                    vertex_color=[1, 1, 1, 0],
+                                    vertex_fill_color='black',
+                                    vertex_size=1,
+                                    vertex_pen_width=0.8,
+                                    edge_color='black',
+                                    edge_pen_width=1.2)
+        self.output_size = (10000, 10000)
         # Print all class variables
-        self.pp = pprint.PrettyPrinter(indent=4)
+        #self.pp = pprint.PrettyPrinter(indent=4)
         #v = vars(self)
         #self.pp.pprint(v)
 
+        #self.pp.pprint(self.drawing_props)
         print('Initialized graph visualizer')
 
     def snapshots(self, stype, outtype='png', vsize=None, vlabel=None, color_by_type=True, esize=None):
@@ -84,7 +93,7 @@ class Visualizer(GtGraphProcessor):
 
     def set_drawing_properties(self, vertex_text=None, vertex_text_color=None, vertex_font_size=None,
                                vertex_font_family=None, vertex_color=None, vertex_fill_color=None,
-                               vertex_size=None, edge_color=None, edge_pen_width=None):
+                               vertex_size=None, vertex_pen_width=None, edge_color=None, edge_pen_width=None):
 
         if 'vprops' in self.drawing_props.keys():
             vprops = self.drawing_props['vprops']
@@ -108,6 +117,8 @@ class Visualizer(GtGraphProcessor):
             vprops['fill_color'] = vertex_fill_color
         if vertex_size is not None:
             vprops['size'] = vertex_size
+        if vertex_pen_width is not None:
+            vprops['pen_width'] = vertex_pen_width
         if edge_color is not None:
             eprops['color'] = edge_color
         if edge_pen_width is not None:
@@ -118,25 +129,42 @@ class Visualizer(GtGraphProcessor):
 
     def process_drawing_properties(self, graph, vsize=None, vlabel=None, color_by_type=None, esize=None):
         g = graph
-        if vsize is not None and type(vsize) == int or float:
+        vcount = len(list(g.vertices()))
+        print(vcount)
+
+        #Set output size
+        output_dimension = vcount * 100
+        self.output_size = (output_dimension, output_dimension)
+
+        vmin = vcount/2
+        vmax = vcount*2
+        emin = vcount/8
+        emax = vcount/2
+
+        self.set_drawing_properties(vertex_font_size=vcount)
+
+
+        if vsize is not None and type(vsize) == int or type(vsize) == float:
             vertex_size = vsize
             self.set_drawing_properties(vertex_size=vertex_size)
+            print('SET HERE')
         elif vsize == 'cscore':
             vertex_size = g.new_vertex_property("double")
             graph_tool.map_property_values(g.vp.cscore, vertex_size, lambda x: x + 0.1)
-            vertex_size = graph_tool.draw.prop_to_size(vertex_size, mi=0.5, ma=1, log=False, power=0.5)
+            print(vertex_size)
+            vertex_size = graph_tool.draw.prop_to_size(vertex_size, mi=vmin, ma=vmax, log=False, power=0.5)
             self.set_drawing_properties(vertex_size=vertex_size)
         if vlabel == 'title':
             label = g.vp.title
             self.set_drawing_properties(vertex_text=label)
         if color_by_type:
             vertex_color = g.new_vertex_property("string")
-            graph_tool.map_property_values(g.vp.ns, vertex_color, lambda x: 'steelblue' if x == 14 else 'crimson')
+            graph_tool.map_property_values(g.vp.ns, vertex_color, lambda x: 'steelblue' if x == '14.0' else 'crimson')
             self.set_drawing_properties(vertex_fill_color=vertex_color)
         if esize == 'cscore':
             edge_size = g.new_edge_property("double")
             graph_tool.map_property_values(g.ep.cscore, edge_size, lambda x: x + 0.1)
-            edge_size = graph_tool.draw.prop_to_size(edge_size, mi=0.5, ma=1, log=False, power=0.5)
+            edge_size = graph_tool.draw.prop_to_size(edge_size, mi=emin, ma=emax, log=False, power=0.5)
             self.set_drawing_properties(edge_pen_width=edge_size)
 
     def visualize(self, graph_view, outfile):
@@ -155,7 +183,7 @@ class SFDP(Visualizer):
         out = os.path.join(self.results_path, 'sfpd_'+outfile+'.'+outtype)
         os.makedirs(os.path.dirname(out), exist_ok=True)
         pos = sfdp_layout(g)
-        graph_draw(g, pos, vprops=self.drawing_props['vprops'], eprops=self.drawing_props['eprops'], output_size=(20000, 20000), output=out)
+        graph_draw(g, pos, vprops=self.drawing_props['vprops'], eprops=self.drawing_props['eprops'], vertex_text_position=-2, output_size=self.output_size, output=out)
 
 
 class ARF(Visualizer):
@@ -170,7 +198,7 @@ class ARF(Visualizer):
         out = os.path.join(self.results_path, 'arf_'+outfile+'.'+outtype)
         os.makedirs(os.path.dirname(out), exist_ok=True)
         pos = arf_layout(g)
-        graph_draw(g, pos, vprops=self.drawing_props['vprops'], eprops=self.drawing_props['eprops'], output_size=(20000, 20000), output=out)
+        graph_draw(g, pos, vprops=self.drawing_props['vprops'], eprops=self.drawing_props['eprops'], vertex_text_position=-2, output_size=self.output_size, output=out)
 
 class FR(Visualizer):
     def __init__(self, graph):
@@ -184,4 +212,29 @@ class FR(Visualizer):
         out = os.path.join(self.results_path, 'fr_'+outfile+'.'+outtype)
         os.makedirs(os.path.dirname(out), exist_ok=True)
         pos = fruchterman_reingold_layout(g)
-        graph_draw(g, pos, vprops=self.drawing_props['vprops'], eprops=self.drawing_props['eprops'], output_size=(20000, 20000), output=out)
+        graph_draw(g, pos, vprops=self.drawing_props['vprops'], eprops=self.drawing_props['eprops'], vertex_text_position=-2, output_size=self.output_size, output=out)
+
+
+class RTL(Visualizer):
+    def __init__(self, graph):
+        Visualizer.__init__(self, graph)
+
+    def visualize(self, graph_view, seed, outfile, outtype, vsize=None, vlabel=None, color_by_type=True, esize=None):
+        print('create Viz')
+        g = graph_view
+
+        self.process_drawing_properties(g, vsize=vsize, vlabel=vlabel, color_by_type=color_by_type, esize=esize)
+        out = os.path.join(self.results_path, 'RTL_'+outfile+'.'+outtype)
+        os.makedirs(os.path.dirname(out), exist_ok=True)
+        pos = radial_tree_layout(g, seed)
+        graph_draw(g, pos, vprops=self.drawing_props['vprops'], eprops=self.drawing_props['eprops'], vertex_text_position=-2, output_size=self.output_size, output=out)
+
+    def snapshots(self, stype, seed=None, outtype='png', vsize=None, vlabel=None, color_by_type=True, esize=None):
+        self.load()
+        print('(Sub) Graph loaded')
+        self.results_path = os.path.join(self.results_path, stype)
+        snapshot_files = self.data[self.working_graph][stype]['files']
+        snapshot_path = os.path.join(self.graph.data[self.working_graph]['location'], stype)
+        graph_views = self.create_snapshot_views(snapshot_path, snapshot_files)
+        for key in graph_views.keys():
+            self.visualize(graph_views[key], seed, key, outtype, vsize=vsize, vlabel=vlabel, color_by_type=color_by_type, esize=esize)

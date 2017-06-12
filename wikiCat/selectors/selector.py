@@ -205,24 +205,38 @@ class SubGraph(Selector):
             if subcats is not None:
                 self.results['cats']['subcats'] = subcats
                 for i in range(subcats):
+                    print('subcats iteration ' + str(i))
                     tmp_results = cat_edges_df[cat_edges_df.target.isin(nodes)]
-                    tmp_nodes = tmp_results.select(col('source')).rdd.collect()
+
                     if edge_results_df is None:
                         edge_results_df = tmp_results
                     else:
                         edge_results_df = edge_results_df.union(tmp_results).distinct()
-                    tmp_nodes = [item for sublist in tmp_nodes for item in sublist]
-                    nodes = tmp_nodes
-                    nodes = [str(i) for i in nodes] #cast items as str. otherwise results array does not work for spark
+                    print('collect new seed nodes')
+                    try:
+                        #TODO Implement error handling for end of tree in the other selects as well.
+                        if tmp_results.select(col('source')).distinct().count() > 0:
+                            tmp_nodes = tmp_results.select(col('source')).distinct().rdd.collect()
+                            print('process list new seed nodes')
+                            tmp_nodes = [item for sublist in tmp_nodes for item in sublist]
+                            nodes = tmp_nodes
+                            nodes = [str(i) for i in nodes] #cast items as str. otherwise results array does not work for spark
+                    except:
+                        print('failed')
+                        print(tmp_results.select(col('source')).distinct().count())
             if supercats is not None:
                 self.results['cats']['supercats'] = supercats
                 for i in range(supercats):
+                    print('supercats iteration ' + str(i))
                     tmp_results = cat_edges_df[cat_edges_df.source.isin(nodes)]
                     tmp_nodes = tmp_results.select(col('target')).rdd.collect()
                     if edge_results_df is None:
                         edge_results_df = tmp_results
                     else:
                         edge_results_df = edge_results_df.union(tmp_results).distinct()
+                    print('collect new seed nodes')
+                    tmp_nodes = tmp_results.select(col('source')).distinct().rdd.collect()
+                    print('process list new seed nodes')
                     tmp_nodes = [item for sublist in tmp_nodes for item in sublist]
                     nodes = tmp_nodes
                     nodes = [str(i) for i in nodes] #cast items as str. otherwise results array does not work for spark
@@ -268,6 +282,7 @@ class SubGraph(Selector):
             else:
                 all_events_df = all_events_df.union(events_df)
 
+        print('Create events results')
         # Process events based on edge_results_df
         edge_results_df.createOrReplaceTempView("edge_results")
         all_events_df.createOrReplaceTempView("events")
@@ -301,6 +316,7 @@ class SubGraph(Selector):
         # todo in every spark skript put sc.stop() at the end in order to enable chaining the processing steps.
         # without it one gets an error that only one sparkcontext can be created.
         sc.stop()
+        print('end subgraph creation')
         return True
 
 
@@ -377,12 +393,17 @@ class SubGraphViews:
     def create(self, subgraph_title, snapshot_title, seed=None, cats=True, subcats=2, supercats=2, links=False,
                inlinks=2, outlinks=2, slice='year', cscore=True, start_date=None, end_date=None):
 
+        print('create subgraph')
         success = SubGraph(self.graph).create(title=subgraph_title, seed=seed, cats=cats, subcats=subcats,
                                               supercats=supercats, links=links, inlinks=inlinks, outlinks=outlinks)
+
         if not success:
             return
+        else:
+            print('SUCCEDSS')
 
         self.graph.set_working_graph(key=subgraph_title)
+        print('create snapshots')
         Snapshots(self.graph).create(snapshot_title, slice=slice, cscore=cscore, start_date=start_date, end_date=end_date)
 
 

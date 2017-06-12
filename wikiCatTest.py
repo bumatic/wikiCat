@@ -1,4 +1,3 @@
-from wikiCat.wikiproject import Project
 import pprint
 from wikiCat.processors.parsed_data_error_check import ParsedDataErrorCheck
 from wikiCat.processors.graph_data_gererator import GraphDataGenerator
@@ -8,46 +7,136 @@ from wikiCat.processors.oldest_revision import OldestRevision
 from wikiCat.processors.gt_graph_generator import GtGraphGenerator
 from wikiCat.selectors.selector import Selector
 from wikiCat.data.wikigraph import WikiGraph
-
-pp = pprint.PrettyPrinter(indent=4)
+from wikiCat.selectors.selector import *
+from wikiCat.wikiproject import Project
+from wikiCat.visualizer.Visualizer import *
 
 mp = Project('project')
 mp.load_project()
+
+g = mp.gt_graph_objs['fixed_none__errors_removed']
+
+'''
+g.set_working_graph('big_data_subcats')
+#RTL(g).snapshots('snapshot_year', seed=40423498, vsize='cscore', vlabel='title', esize='cscore')
+SFDP(g).snapshots('snapshot_year', vsize='cscore', vlabel='title', esize='cscore')
+ARF(g).snapshots('snapshot_year', vsize='cscore', vlabel='title')
+FR(g).snapshots('snapshot_year', vsize='cscore', vlabel='title')
+'''
+
+#g.set_working_graph('bitcoin')
+#SFDP(g).snapshots('snapshot_year', vsize='cscore', vlabel='title', esize='cscore')
+#ARF(g).snapshots('snapshot_year', vsize='cscore', vlabel='title')
+#FR(g).snapshots('snapshot_year', vsize='cscore', vlabel='title')
+
+'''ABOVE SFDP PRDUCES AND ERROR - CHECK
+
+nitialized graph visualizer
+(Sub) Graph loaded
+create Viz
+214
+<PropertyMap object with key type 'Vertex' and value type 'double', for Graph 0x1268a8a20, at 0x103203c50>
+create Viz
+370
+<PropertyMap object with key type 'Vertex' and value type 'double', for Graph 0x1268a86d8, at 0x103164240>
+Traceback (most recent call last):
+  File "wikiCatTest.py", line 26, in <module>
+    SFDP(g).snapshots('snapshot_year', vsize='cscore', vlabel='title', esize='cscore')
+  File "/Users/ga58sis/Desktop/wikiCat/wikiCat/visualizer/Visualizer.py", line 46, in snapshots
+    self.visualize(graph_views[key], key, outtype, vsize=vsize, vlabel=vlabel, color_by_type=color_by_type, esize=esize)
+  File "/Users/ga58sis/Desktop/wikiCat/wikiCat/visualizer/Visualizer.py", line 186, in visualize
+    graph_draw(g, pos, vprops=self.drawing_props['vprops'], eprops=self.drawing_props['eprops'], vertex_text_position=-2, output_size=self.output_size, output=out)
+  File "/usr/local/lib/python3.6/site-packages/graph_tool/draw/cairo_draw.py", line 1130, in graph_draw
+    output_size[1])
+SystemError: <class 'cairo.ImageSurface'> returned NULL without setting an error
+
+'''
+
+'''
+g.set_working_graph('big_data_supercats')
+SFDP(g).snapshots('snapshot_year', vsize='cscore', vlabel='title', esize='cscore')
+ARF(g).snapshots('snapshot_year', vsize='cscore', vlabel='title')
+FR(g).snapshots('snapshot_year', vsize='cscore', vlabel='title')
+
+g.set_working_graph('big_data_subcats')
+SFDP(g).snapshots('snapshot_year', vsize='cscore', vlabel='title', esize='cscore')
+ARF(g).snapshots('snapshot_year', vsize='cscore', vlabel='title')
+FR(g).snapshots('snapshot_year', vsize='cscore', vlabel='title')
+
+g.set_working_graph('prediction_subcats')
+#RTL(g).snapshots('snapshot_year', seed=1436435, vsize='cscore', vlabel='title', esize='cscore')
+SFDP(g).snapshots('snapshot_year', vsize='cscore', vlabel='title', esize='cscore')
+ARF(g).snapshots('snapshot_year', vsize='cscore', vlabel='title')
+FR(g).snapshots('snapshot_year', vsize='cscore', vlabel='title')
+
+g.set_working_graph('prediction_supercats')
+SFDP(g).snapshots('snapshot_year', vsize='cscore', vlabel='title', esize='cscore')
+ARF(g).snapshots('snapshot_year', vsize='cscore', vlabel='title')
+FR(g).snapshots('snapshot_year', vsize='cscore', vlabel='title')
+
+g.set_working_graph('omics_subcats')
+#RTL(g).snapshots('snapshot_year', seed=13693058, vsize='cscore', vlabel='title', esize='cscore')
+SFDP(g).snapshots('snapshot_year', vsize='cscore', vlabel='title', esize='cscore')
+ARF(g).snapshots('snapshot_year', vsize='cscore', vlabel='title')
+FR(g).snapshots('snapshot_year', vsize='cscore', vlabel='title')
+
+g.set_working_graph('omics_supercats')
+SFDP(g).snapshots('snapshot_year', vsize='cscore', vlabel='title', esize='cscore')
+ARF(g).snapshots('snapshot_year', vsize='cscore', vlabel='title')
+FR(g).snapshots('snapshot_year', vsize='cscore', vlabel='title')
+'''
+
+g.set_working_graph('main')
+#RTL(g).snapshots('snapshot_year', seed=40423498, vsize='cscore', vlabel='title', esize='cscore')
+ARF(g).snapshots('snapshot_year', vsize='cscore', vlabel='title', esize='cscore')
+SFDP(g).snapshots('snapshot_year', vsize='cscore', vlabel='title', esize='cscore')
+
+#FR(g).snapshots('snapshot_year', vsize='cscore', vlabel='title')
+
+
+
+
+#g.set_working_graph('main')
+#SubGraphViews(g).create('big_data_subcats', 'snapshot_year',  seed=[40423498], cats=True,
+#                        subcats=5, supercats=0)
+
+#g.set_working_graph('main')
+#SubGraphViews(g).create('big_data_supercats', 'snapshot_year',  seed=[40423498], cats=True,
+#                        subcats=0, supercats=5)
+
+
+
+pp = pprint.PrettyPrinter(indent=4)
+
+#g = mp.gt_graph_objs['fixed_none__errors_removed']
+#g.set_working_graph('main')
+#SubGraphViews(g).create('bitcoin_subcats', 'snapshot_year',  seed=[39563179], cats=True,
+#                        subcats=10, supercats=0)
+
+#SubGraphViews(g).create('bitcoin_supercats', 'snapshot_year',  seed=[39563179], cats=True,
+#                        subcats=0, supercats=2)
+
+
+
+
+
+
+
+#GtEvents(g).create('gt_events_all')
+#Snapshots(g).create('snapshot_year'
+## from wikiCat.selectors.SelectorCscore import SelectorCscore
+#SelectorCscore(g).get_highest_cscores('nodes', cats_only=True, n=10)
 #mp.find_start_date()
-
 #mp.set_dump_date('2016-11-01')
-
 #mp.find_start_date()
 #mp.set_dump_date('2016-11-01')
 #pp.pprint(mp.pinfo)
-
 #WikiGraph(mp).
 #GtGraphGenerator(mp).register_gt_graph()
 
-from wikiCat.selectors.selector import *
-
-g = mp.gt_graph_objs['fixed_none__errors_removed']
-g.set_working_graph('bitcoin')
-#GtEvents(g).create('gt_events_all')
-#Snapshots(g).create('snapshot_year'
-
-
-## from wikiCat.selectors.SelectorCscore import SelectorCscore
-#SelectorCscore(g).get_highest_cscores('nodes', cats_only=True, n=10)
-
-from wikiCat.visualizer.Visualizer import *
-
-SFDP(g).snapshots('snapshot_year', vsize='cscore', vlabel='title', esize='cscore' ) #.load(sub_graph='bitcoin')
-
-
-
-
-
-
-
 #GENERATE SUBGRAPH AND VIEW
-#SubGraphViews(g).create('bitcoin_subcats', 'snapshot_year',  seed=[40261770, 39563179, 42031444, 42132341], cats=True,
-#                        subcats=3, supercats=3)
+#SubGraphViews(g).create('bitcoin_subcats', 'snapshot_year',  seed=[39563179], cats=True,
+#                        subcats=10, supercats=0)
 
 #SubGraph(g).create(title='bitcoin', seed=[40261770, 39563179, 42031444, 42132341], subcats=3, supercats=3)
 
