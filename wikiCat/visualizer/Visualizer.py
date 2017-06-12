@@ -12,8 +12,8 @@ class Visualizer(GtGraphProcessor):
         self.data = self.graph.data
         self.working_graph = self.graph.curr_working_graph
         self.results_path = os.path.join(self.project.results_path, self.working_graph)
-        self.gt_wiki_id_map_file = os.path.join(self.data['main']['location'], self.data['main']['gt_wiki_id_map'])
-        self.gt_wiki_id_map = pd.read_csv(os.path.join(self.data['main']['location'], self.data['main']['gt_wiki_id_map']),
+        self.gt_wiki_id_map_path, self.gt_wiki_id_map_file = self.find_gt_wiki_id_map()
+        self.gt_wiki_id_map = pd.read_csv(os.path.join(self.gt_wiki_id_map_path, self.gt_wiki_id_map_file),
                                           header=None, delimiter='\t', names=['wiki_id', 'gt_id'])
         self.drawing_props = {}
         self.set_drawing_properties(vertex_text=None,
@@ -27,13 +27,22 @@ class Visualizer(GtGraphProcessor):
                                     edge_color='black',
                                     edge_pen_width=1.2)
         self.output_size = (10000, 10000)
+
         # Print all class variables
         #self.pp = pprint.PrettyPrinter(indent=4)
         #v = vars(self)
         #self.pp.pprint(v)
-
         #self.pp.pprint(self.drawing_props)
         print('Initialized graph visualizer')
+
+    def find_gt_wiki_id_map(self):
+        if 'gt_wiki_id_map' in self.data[self.working_graph].keys():
+            file = self.data[self.working_graph]['gt_wiki_id_map']
+            path = self.working_graph_path
+        else:
+            file = self.data['main']['gt_wiki_id_map']
+            path = self.data['main']['location']
+        return path, file
 
     def snapshots(self, stype, outtype='png', vsize=None, vlabel=None, color_by_type=True, esize=None):
         self.load()
@@ -41,22 +50,24 @@ class Visualizer(GtGraphProcessor):
         self.results_path = os.path.join(self.results_path, stype)
         snapshot_files = self.data[self.working_graph][stype]['files']
         snapshot_path = os.path.join(self.graph.data[self.working_graph]['location'], stype)
-        graph_views = self.create_snapshot_views(snapshot_path, snapshot_files)
-        for key in graph_views.keys():
-            self.visualize(graph_views[key], key, outtype, vsize=vsize, vlabel=vlabel, color_by_type=color_by_type, esize=esize)
+        for file in snapshot_files:
+            graph_view = self.create_snapshot_view(snapshot_path, file, stype)
+            self.visualize(graph_view, file[:-4], outtype, vsize=vsize, vlabel=vlabel, color_by_type=color_by_type,
+                           esize=esize)
 
-    def create_snapshot_views(self, path, files):
-        graph_views = {}
-        for file in files:
+    def create_snapshot_view(self, path, file, stype):
+        prop_map = stype + '_' + str(file[:-4])
+        if prop_map in self.gt.edge_properties.keys():
+            prop_map = self.gt.ep.prop_map
+        else:
             prop_map = self.gt.new_edge_property('bool')
             df = self.load_edges(os.path.join(path, file))
             if len(df.index) > 0:
                 for key, item in df.iterrows():
                     prop_map[self.gt.edge(item['source'], item['target'])] = True
-                graph_views[file[:-4]] = GraphView(self.gt, efilt=prop_map)
-                graph_views[file[:-4]] = GraphView(graph_views[file[:-4]],
-                                                   vfilt=lambda v: v.out_degree() > 0 or v.in_degree() > 0)
-        return graph_views
+        graph_view = GraphView(self.gt, efilt=prop_map)
+        graph_view = GraphView(graph_view, vfilt=lambda v: v.out_degree() > 0 or v.in_degree() > 0)
+        return graph_view
 
     def load(self):
         if self.working_graph != 'main':
@@ -69,7 +80,6 @@ class Visualizer(GtGraphProcessor):
                 graph_view = self.create_gt_view(self.edges_location, self.edges[0])
                 self.gt = graph_view
         else:
-            graph_type = 'main'
             self.gt.load(os.path.join(self.data[self.working_graph]['location'], self.data[self.working_graph]['gt_file']))
 
     def create_gt_view(self, path, file):
@@ -220,9 +230,8 @@ class RTL(Visualizer):
         Visualizer.__init__(self, graph)
 
     def visualize(self, graph_view, seed, outfile, outtype, vsize=None, vlabel=None, color_by_type=True, esize=None):
-        print('create Viz')
+        print('Create Viz')
         g = graph_view
-
         self.process_drawing_properties(g, vsize=vsize, vlabel=vlabel, color_by_type=color_by_type, esize=esize)
         out = os.path.join(self.results_path, 'RTL_'+outfile+'.'+outtype)
         os.makedirs(os.path.dirname(out), exist_ok=True)

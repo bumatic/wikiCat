@@ -9,12 +9,22 @@ from wikiCat.selectors.selector import Selector
 from wikiCat.data.wikigraph import WikiGraph
 from wikiCat.selectors.selector import *
 from wikiCat.wikiproject import Project
+from wikiCat.processors.GtGraphProcessor import *
 from wikiCat.visualizer.Visualizer import *
+
 
 mp = Project('project')
 mp.load_project()
 
 g = mp.gt_graph_objs['fixed_none__errors_removed']
+g.set_working_graph('bitcoin')
+
+
+sgp = SubGraphProcessor(g)
+sgp.create_gt_subgraph()
+
+#sgp.internalize_snapshots('snapshot_year')
+
 
 '''
 g.set_working_graph('big_data_subcats')
@@ -86,11 +96,10 @@ ARF(g).snapshots('snapshot_year', vsize='cscore', vlabel='title')
 FR(g).snapshots('snapshot_year', vsize='cscore', vlabel='title')
 '''
 
-g.set_working_graph('main')
+#g.set_working_graph('main')
 #RTL(g).snapshots('snapshot_year', seed=40423498, vsize='cscore', vlabel='title', esize='cscore')
-ARF(g).snapshots('snapshot_year', vsize='cscore', vlabel='title', esize='cscore')
-SFDP(g).snapshots('snapshot_year', vsize='cscore', vlabel='title', esize='cscore')
-
+#ARF(g).snapshots('snapshot_year', vsize='cscore', vlabel='title', esize='cscore')
+#SFDP(g).snapshots('snapshot_year', vsize='cscore', vlabel='title', esize='cscore')
 #FR(g).snapshots('snapshot_year', vsize='cscore', vlabel='title')
 
 
