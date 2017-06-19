@@ -140,7 +140,7 @@ class Visualizer(GtGraphProcessor):
         self.drawing_props['eprops'] = eprops
         return
 
-    def process_drawing_properties(self, graph, vsize=None, vlabel=None, color_by_type=None, esize=None):
+    def process_drawing_properties(self, graph, vsize=None, vlabel=None, color_by_type=None, esize=None, graphviz=False):
         g = graph
         vcount = len(list(g.vertices()))
         print(vcount)
@@ -186,7 +186,11 @@ class Visualizer(GtGraphProcessor):
         print(color_by_type)
         if color_by_type:
             vertex_color = g.new_vertex_property("string")
-            graph_tool.map_property_values(g.vp.ns, vertex_color, lambda x: 'lightsteelblue' if x == '14.0' else 'salmon')
+            if not graphviz:
+                graph_tool.map_property_values(g.vp.ns, vertex_color, lambda x: 'lightsteelblue' if x == '14.0' else 'salmon')
+            else:
+                graph_tool.map_property_values(g.vp.ns, vertex_color,
+                                               lambda x: '#2e3436' if x == '14.0' else '#a40000')
             self.set_drawing_properties(vertex_fill_color=vertex_color)
             print(vertex_color)
         if esize == 'cscore':
@@ -275,3 +279,36 @@ class RTL(Visualizer):
         graph_views = self.create_snapshot_views(snapshot_path, snapshot_files)
         for key in graph_views.keys():
             self.visualize(graph_views[key], seed, key, outtype, vsize=vsize, vlabel=vlabel, color_by_type=color_by_type, esize=esize)
+
+
+class DOT(Visualizer):
+    def __init__(self, graph):
+        Visualizer.__init__(self, graph)
+
+    def visualize(self, graph_view, outfile, outtype, vsize=None, vlabel=None, color_by_type=True, esize=None):
+        print('create Viz')
+        g = graph_view
+        try:
+            self.process_drawing_properties(g, vsize=vsize, vlabel=vlabel, color_by_type=color_by_type, esize=esize, graphviz=True)
+            vprops = {}
+            vprops['label'] = self.drawing_props['vprops']['text']
+            out = os.path.join(self.results_path, 'dot_'+outfile+'.'+outtype)
+            os.makedirs(os.path.dirname(out), exist_ok=True)
+            pos = sfdp_layout(g)
+            graphviz_draw(g, size=(self.output_dimension, self.output_dimension), vcolor=self.drawing_props['vprops']['fill_color'], vprops=vprops, layout='dot', ratio='auto', output=out) #vprops=self.drawing_props['vprops'], eprops=self.drawing_props['eprops']
+            #graph_draw(g, pos, vprops=self.drawing_props['vprops'], eprops=self.drawing_props['eprops'], vertex_text_position=-2, output_size=(self.output_dimension, self.output_dimension), output=out)
+            print('Done')
+        except Exception as e:
+            print(e)
+        try:
+            print(self.drawing_props['vprops']['text'])
+
+            for i in self.drawing_props['vprops']['text']:
+                print(i)
+        except:
+            pass
+        #for i in self.drawing_props['vprops']['text']:
+        #    print(i)
+
+            #vcolor=self.drawing_props['vprops']['fill_color']
+            ##2e3436

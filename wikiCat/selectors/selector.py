@@ -240,12 +240,17 @@ class SubGraph(Selector):
                 for i in range(supercats):
                     print('supercats iteration ' + str(i+1))
                     tmp_results_source = cat_edges_df[cat_edges_df.source.isin(nodes)]
+                    #Todo including members of supercategories results in very large graphs. Maybe there is anothter way of integrating those. For now I take it out.
+                    tmp_results = tmp_results_source
+                    '''
                     if i == 0:
                         #For the first iteration only follow sources
                         tmp_results = tmp_results_source
                     else:
                         tmp_results_target = cat_edges_df[cat_edges_df.target.isin(nodes)]
                         tmp_results = tmp_results_source.union(tmp_results_target).distinct()
+                    '''
+
                     if edge_results_df is None:
                         edge_results_df = tmp_results
                     else:
