@@ -24,14 +24,14 @@ g.set_working_graph('main')
 
 
 g.set_working_graph('main')
-SubGraph(g).create(title='blockchain_article_super_3_gt', seed=[44065971], cats=True,
+SubGraph(g).create(title='ethereum_article_super_3_gt', seed=[41754003], cats=True,
                    subcats=0, supercats=3)
-g.set_working_graph('blockchain_article_super_3_gt')
+g.set_working_graph('ethereum_article_super_3_gt')
 SubGraphProcessor(g).create_gt_subgraph()
 Snapshots(g).create('snapshot_year')
 SubGraphProcessor(g).internalize_snapshots('snapshot_year')
 
-g.set_working_graph('blockchain_article_super_3_gt')
+g.set_working_graph('ethereum_article_super_3_gt')
 SFDP(g).snapshots('snapshot_year', vsize='cscore', vlabel='title', esize='cscore')
 ARF(g).snapshots('snapshot_year', vsize='cscore', vlabel='title')
 
