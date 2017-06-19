@@ -17,16 +17,118 @@ mp = Project('project')
 mp.load_project()
 
 g = mp.gt_graph_objs['fixed_none__errors_removed']
-g.set_working_graph('bitcoin')
+g.set_working_graph('main')
+#SFDP(g).snapshots('snapshot_year', vsize='cscore', vlabel='title', esize='cscore')
+#SFDP(g).snapshots('snapshot_year', vsize='cscore')
+#ARF(g).snapshots('snapshot_year', vsize='cscore') #, vlabel='title'
 
 
-sgp = SubGraphProcessor(g)
-sgp.create_gt_subgraph()
+g.set_working_graph('main')
+SubGraph(g).create(title='blockchain_article_super_3_gt', seed=[44065971], cats=True,
+                   subcats=0, supercats=3)
+g.set_working_graph('blockchain_article_super_3_gt')
+SubGraphProcessor(g).create_gt_subgraph()
+Snapshots(g).create('snapshot_year')
+SubGraphProcessor(g).internalize_snapshots('snapshot_year')
 
-#sgp.internalize_snapshots('snapshot_year')
+g.set_working_graph('blockchain_article_super_3_gt')
+SFDP(g).snapshots('snapshot_year', vsize='cscore', vlabel='title', esize='cscore')
+ARF(g).snapshots('snapshot_year', vsize='cscore', vlabel='title')
+
+'''
+
+
+g.set_working_graph('bitcoin_supercats_3_gt')
+SFDP(g).snapshots('snapshot_year', vsize='cscore', vlabel='title', esize='cscore')
+ARF(g).snapshots('snapshot_year', vsize='cscore', vlabel='title')
+FR(g).snapshots('snapshot_year', vsize='cscore', vlabel='title')
+
+
+g.set_working_graph('bitcoin_supercats_4_gt')
+SFDP(g).snapshots('snapshot_year', vsize='cscore', vlabel='title', esize='cscore')
+ARF(g).snapshots('snapshot_year', vsize='cscore', vlabel='title')
+FR(g).snapshots('snapshot_year', vsize='cscore', vlabel='title')
+
+
+g.set_working_graph('bitcoin_supercats_2_gt')
+SFDP(g).snapshots('snapshot_year', vsize='cscore', vlabel='title', esize='cscore')
+ARF(g).snapshots('snapshot_year', vsize='cscore', vlabel='title')
+FR(g).snapshots('snapshot_year', vsize='cscore', vlabel='title')
+'''
+
+#g.set_working_graph('bitcoin_subcats_2_gt')
+#SFDP(g).snapshots('snapshot_year', vsize='cscore', vlabel='title', esize='cscore')
+#ARF(g).snapshots('snapshot_year', vsize='cscore', vlabel='title')
+#FR(g).snapshots('snapshot_year', vsize='cscore', vlabel='title')
+
+g.set_working_graph('bitcoin_subcats_3_gt')
+SFDP(g).snapshots('snapshot_year', vsize='cscore', vlabel='title', esize='cscore')
+ARF(g).snapshots('snapshot_year', vsize='cscore', vlabel='title')
+FR(g).snapshots('snapshot_year', vsize='cscore', vlabel='title')
+
+'''
+g.set_working_graph('bitcoin_supercats_5_gt')
+SFDP(g).snapshots('snapshot_year', vsize='cscore', vlabel='title', esize='cscore')
+ARF(g).snapshots('snapshot_year', vsize='cscore', vlabel='title')
+FR(g).snapshots('snapshot_year', vsize='cscore', vlabel='title')
+
+g.set_working_graph('bitcoin_supercats_10_gt')
+SFDP(g).snapshots('snapshot_year', vsize='cscore', vlabel='title', esize='cscore')
+ARF(g).snapshots('snapshot_year', vsize='cscore', vlabel='title')
+FR(g).snapshots('snapshot_year', vsize='cscore', vlabel='title')
+'''
+
+'''
+g.set_working_graph('big_data_subcats')
+#RTL(g).snapshots('snapshot_year', seed=40423498, vsize='cscore', vlabel='title', esize='cscore')
+SFDP(g).snapshots('snapshot_year', vsize='cscore', vlabel='title', esize='cscore')
+ARF(g).snapshots('snapshot_year', vsize='cscore', vlabel='title')
+FR(g).snapshots('snapshot_year', vsize='cscore', vlabel='title')
+
+
+g.set_working_graph('main')
+SubGraph(g).create(title='bitcoin_gt', seed=[39563179], cats=True,
+                   subcats=5, supercats=5)
+g.set_working_graph('bitcoin_gt')
+SubGraphProcessor(g).create_gt_subgraph()
+Snapshots(g).create('snapshot_year')
+SubGraphProcessor(g).internalize_snapshots('snapshot_year')
+'''
+
+
+
 
 
 '''
+#SubGraph(g).create(title='bitcoin_subcats_gt', seed=[39563179], cats=True,
+#                   subcats=5, supercats=0)
+#g.set_working_graph('bitcoin_subcats_gt')
+
+
+
+#SubGraphProcessor(g).create_gt_subgraph()
+
+
+#Snapshots(g).create('snapshot_year')
+#SubGraphProcessor(g).internalize_snapshots('snapshot_year')
+
+#g.set_working_graph('main')
+#SubGraph(g).create('bitcoin_supercats_gt', 'snapshot_year',  seed=[39563179], cats=True,
+#                   subcats=0, supercats=5)
+
+
+
+#ARF(g).snapshots('snapshot_year', vsize='cscore', vlabel='title')
+
+#Snapshots(g).create('snapshot_month', slice='month')
+
+#sgp = SubGraphProcessor(g)
+#sgp.create_gt_subgraph()
+#sgp.internalize_snapshots('snapshot_year')
+
+
+
+
 g.set_working_graph('big_data_subcats')
 #RTL(g).snapshots('snapshot_year', seed=40423498, vsize='cscore', vlabel='title', esize='cscore')
 SFDP(g).snapshots('snapshot_year', vsize='cscore', vlabel='title', esize='cscore')
@@ -120,10 +222,10 @@ pp = pprint.PrettyPrinter(indent=4)
 #g = mp.gt_graph_objs['fixed_none__errors_removed']
 #g.set_working_graph('main')
 #SubGraphViews(g).create('bitcoin_subcats', 'snapshot_year',  seed=[39563179], cats=True,
-#                        subcats=10, supercats=0)
+#                        subcats=5, supercats=0)
 
 #SubGraphViews(g).create('bitcoin_supercats', 'snapshot_year',  seed=[39563179], cats=True,
-#                        subcats=0, supercats=2)
+#                        subcats=0, supercats=5)
 
 
 
@@ -183,6 +285,8 @@ pp = pprint.PrettyPrinter(indent=4)
 
 
 #pp.pprint(mp.pinfo)
+
+
 '''
 # CODE FOR PROJECT CREATION:
 mp = Project('project')

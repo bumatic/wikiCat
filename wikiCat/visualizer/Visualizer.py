@@ -11,6 +11,7 @@ class Visualizer(GtGraphProcessor):
         self.gt = Graph()
         self.data = self.graph.data
         self.working_graph = self.graph.curr_working_graph
+        self.working_graph_path = self.graph.data[self.working_graph]['location']
         self.results_path = os.path.join(self.project.results_path, self.working_graph)
         self.gt_wiki_id_map_path, self.gt_wiki_id_map_file = self.find_gt_wiki_id_map()
         self.gt_wiki_id_map = pd.read_csv(os.path.join(self.gt_wiki_id_map_path, self.gt_wiki_id_map_file),
@@ -21,12 +22,12 @@ class Visualizer(GtGraphProcessor):
                                     vertex_font_size=200,
                                     vertex_font_family='sans-serif',
                                     vertex_color=[1, 1, 1, 0],
-                                    vertex_fill_color='black',
+                                    vertex_fill_color='lightgray',
                                     vertex_size=1,
                                     vertex_pen_width=0.8,
-                                    edge_color='black',
+                                    edge_color='lightgray',
                                     edge_pen_width=1.2)
-        self.output_size = (10000, 10000)
+        self.output_dimension = 1000
 
         # Print all class variables
         #self.pp = pprint.PrettyPrinter(indent=4)
@@ -56,10 +57,12 @@ class Visualizer(GtGraphProcessor):
                            esize=esize)
 
     def create_snapshot_view(self, path, file, stype):
-        prop_map = stype + '_' + str(file[:-4])
+        prop_map = stype + '_' + str(file[:-6])
         if prop_map in self.gt.edge_properties.keys():
-            prop_map = self.gt.ep.prop_map
+            print('PROP MAP EXISTS')
+            prop_map = self.gt.edge_properties[prop_map]
         else:
+            self.gt.list_properties()
             prop_map = self.gt.new_edge_property('bool')
             df = self.load_edges(os.path.join(path, file))
             if len(df.index) > 0:
@@ -143,16 +146,29 @@ class Visualizer(GtGraphProcessor):
         print(vcount)
 
         #Set output size
-        output_dimension = vcount * 100
-        self.output_size = (output_dimension, output_dimension)
+        if vcount <= 25:
+            self.output_dimension = 500
+            vmin = 10
+            vmax = 20
+            emin = 2
+            emax = 8
+            font_size = 8
+        elif (vcount * 5) >= 30000:
+            self.output_dimension = 30000
+            vmin = 3
+            vmax = 10
+            emin = 1
+            emax = 5
+            font_size = 5
+        else:
+            self.output_dimension = vcount * 20
+            vmin = 10
+            vmax = 20
+            emin = 2
+            emax = 8
+            font_size = 8
 
-        vmin = vcount/2
-        vmax = vcount*2
-        emin = vcount/8
-        emax = vcount/2
-
-        self.set_drawing_properties(vertex_font_size=vcount)
-
+        self.set_drawing_properties(vertex_font_size=font_size)
 
         if vsize is not None and type(vsize) == int or type(vsize) == float:
             vertex_size = vsize
@@ -167,10 +183,12 @@ class Visualizer(GtGraphProcessor):
         if vlabel == 'title':
             label = g.vp.title
             self.set_drawing_properties(vertex_text=label)
+        print(color_by_type)
         if color_by_type:
             vertex_color = g.new_vertex_property("string")
-            graph_tool.map_property_values(g.vp.ns, vertex_color, lambda x: 'steelblue' if x == '14.0' else 'crimson')
+            graph_tool.map_property_values(g.vp.ns, vertex_color, lambda x: 'lightsteelblue' if x == '14.0' else 'salmon')
             self.set_drawing_properties(vertex_fill_color=vertex_color)
+            print(vertex_color)
         if esize == 'cscore':
             edge_size = g.new_edge_property("double")
             graph_tool.map_property_values(g.ep.cscore, edge_size, lambda x: x + 0.1)
@@ -188,27 +206,33 @@ class SFDP(Visualizer):
     def visualize(self, graph_view, outfile, outtype, vsize=None, vlabel=None, color_by_type=True, esize=None):
         print('create Viz')
         g = graph_view
-
-        self.process_drawing_properties(g, vsize=vsize, vlabel=vlabel, color_by_type=color_by_type, esize=esize)
-        out = os.path.join(self.results_path, 'sfpd_'+outfile+'.'+outtype)
-        os.makedirs(os.path.dirname(out), exist_ok=True)
-        pos = sfdp_layout(g)
-        graph_draw(g, pos, vprops=self.drawing_props['vprops'], eprops=self.drawing_props['eprops'], vertex_text_position=-2, output_size=self.output_size, output=out)
-
+        try:
+            self.process_drawing_properties(g, vsize=vsize, vlabel=vlabel, color_by_type=color_by_type, esize=esize)
+            out = os.path.join(self.results_path, 'sfpd_'+outfile+'.'+outtype)
+            os.makedirs(os.path.dirname(out), exist_ok=True)
+            pos = sfdp_layout(g)
+            graph_draw(g, pos, vprops=self.drawing_props['vprops'], eprops=self.drawing_props['eprops'], vertex_text_position=-2, output_size=(self.output_dimension, self.output_dimension), output=out)
+        except Exception as e:
+            print(e)
 
 class ARF(Visualizer):
     def __init__(self, graph):
         Visualizer.__init__(self, graph)
 
     def visualize(self, graph_view, outfile, outtype, vsize=None, vlabel=None, color_by_type=True, esize=None):
-        print('create Viz')
+        print('Start creating Viz')
         g = graph_view
-
-        self.process_drawing_properties(g, vsize=vsize, vlabel=vlabel, color_by_type=color_by_type, esize=esize)
-        out = os.path.join(self.results_path, 'arf_'+outfile+'.'+outtype)
-        os.makedirs(os.path.dirname(out), exist_ok=True)
-        pos = arf_layout(g)
-        graph_draw(g, pos, vprops=self.drawing_props['vprops'], eprops=self.drawing_props['eprops'], vertex_text_position=-2, output_size=self.output_size, output=out)
+        try:
+            self.process_drawing_properties(g, vsize=vsize, vlabel=vlabel, color_by_type=color_by_type, esize=esize)
+            out = os.path.join(self.results_path, 'arf_'+outfile+'.'+outtype)
+            os.makedirs(os.path.dirname(out), exist_ok=True)
+            pos = arf_layout(g, max_iter=100, dt=1e-4) #According to https://git.skewed.de/count0/graph-tool/issues/239 setting max_iter and dt fixed cairo error. Check quality?!
+            graph_draw(g, pos, vprops=self.drawing_props['vprops'], eprops=self.drawing_props['eprops'],
+                       vertex_text_position=-2, output_size=(self.output_dimension, self.output_dimension),
+                       fit_view=0.95, output=out) #fit_view=(self.output_dimension/2, self.output_dimension/2, self.output_dimension/2, self.output_dimension/2),
+            print('Viz created: ' + outfile)
+        except Exception as e:
+            print(e)
 
 class FR(Visualizer):
     def __init__(self, graph):
@@ -217,13 +241,14 @@ class FR(Visualizer):
     def visualize(self, graph_view, outfile, outtype, vsize=None, vlabel=None, color_by_type=True, esize=None):
         print('create Viz')
         g = graph_view
-
-        self.process_drawing_properties(g, vsize=vsize, vlabel=vlabel, color_by_type=color_by_type, esize=esize)
-        out = os.path.join(self.results_path, 'fr_'+outfile+'.'+outtype)
-        os.makedirs(os.path.dirname(out), exist_ok=True)
-        pos = fruchterman_reingold_layout(g)
-        graph_draw(g, pos, vprops=self.drawing_props['vprops'], eprops=self.drawing_props['eprops'], vertex_text_position=-2, output_size=self.output_size, output=out)
-
+        try:
+            self.process_drawing_properties(g, vsize=vsize, vlabel=vlabel, color_by_type=color_by_type, esize=esize)
+            out = os.path.join(self.results_path, 'fr_'+outfile+'.'+outtype)
+            os.makedirs(os.path.dirname(out), exist_ok=True)
+            pos = fruchterman_reingold_layout(g)
+            graph_draw(g, pos, vprops=self.drawing_props['vprops'], eprops=self.drawing_props['eprops'], vertex_text_position=-2, output_size=(self.output_dimension, self.output_dimension), output=out)
+        except Exception as e:
+            print(e)
 
 class RTL(Visualizer):
     def __init__(self, graph):
@@ -232,11 +257,14 @@ class RTL(Visualizer):
     def visualize(self, graph_view, seed, outfile, outtype, vsize=None, vlabel=None, color_by_type=True, esize=None):
         print('Create Viz')
         g = graph_view
-        self.process_drawing_properties(g, vsize=vsize, vlabel=vlabel, color_by_type=color_by_type, esize=esize)
-        out = os.path.join(self.results_path, 'RTL_'+outfile+'.'+outtype)
-        os.makedirs(os.path.dirname(out), exist_ok=True)
-        pos = radial_tree_layout(g, seed)
-        graph_draw(g, pos, vprops=self.drawing_props['vprops'], eprops=self.drawing_props['eprops'], vertex_text_position=-2, output_size=self.output_size, output=out)
+        try:
+            self.process_drawing_properties(g, vsize=vsize, vlabel=vlabel, color_by_type=color_by_type, esize=esize)
+            out = os.path.join(self.results_path, 'RTL_'+outfile+'.'+outtype)
+            os.makedirs(os.path.dirname(out), exist_ok=True)
+            pos = radial_tree_layout(g, seed)
+            graph_draw(g, pos, vprops=self.drawing_props['vprops'], eprops=self.drawing_props['eprops'], vertex_text_position=-2, output_size=(self.output_dimension, self.output_dimension), output=out)
+        except Exception as e:
+            print(e)
 
     def snapshots(self, stype, seed=None, outtype='png', vsize=None, vlabel=None, color_by_type=True, esize=None):
         self.load()

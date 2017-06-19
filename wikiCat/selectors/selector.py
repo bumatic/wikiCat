@@ -31,12 +31,27 @@ class Selector(SparkProcessorGraph): #PandasProcessorGraph
 
         SparkProcessorGraph.__init__(self, self.project)
         self.graph_id = self.graph.curr_working_graph
+        self.working_graph = self.graph.curr_working_graph
+        self.working_graph_path = self.graph.data[self.working_graph]['location']
         self.graph_path = self.graph.curr_data_path
         self.source_location = self.graph.source_location
         self.base_path = os.path.split(self.graph_path)[0]
         self.start_date = self.project.start_date.timestamp()
         self.end_date = self.project.dump_date.timestamp()
         self.results = {}
+        self.gt_wiki_id_map_path, self.gt_wiki_id_map_file = self.find_gt_wiki_id_map()
+
+
+    def find_gt_wiki_id_map(self):
+        if 'gt_wiki_id_map' in self.data[self.working_graph].keys():
+            file = self.data[self.working_graph]['gt_wiki_id_map']
+            path = self.working_graph_path
+        else:
+            print('LOAD SUPER MAP')
+            file = self.data['main']['gt_wiki_id_map']
+            path = self.data['main']['location']
+        return path, file
+
 
     def load_pandas_df(self, file, columns):
         df = pd.read_csv(file, header=None, delimiter='\t', names=columns)
@@ -94,8 +109,6 @@ class Snapshots(Selector):
         # Register dataframe for events data
         all_events_df = None
         for file in self.graph.source_events:
-            print(self.source_location)
-            print(self.graph_path)
             events_source = spark.sparkContext.textFile(os.path.join(self.graph.source_events_location, file))
             events = events_source.map(self.mapper_events)
             events_df = spark.createDataFrame(events).cache()
@@ -105,7 +118,7 @@ class Snapshots(Selector):
                 all_events_df = all_events_df.union(events_df)
 
         # Register dataframe for wiki_id to gt_id map
-        id_map_source = spark.sparkContext.textFile(os.path.join(self.graph.gt_wiki_id_map_location, self.graph.gt_wiki_id_map))
+        id_map_source = spark.sparkContext.textFile(os.path.join(self.gt_wiki_id_map_path, self.gt_wiki_id_map_file))
         id_map = id_map_source.map(self.mapper_ids)
         id_map_df = spark.createDataFrame(id_map).cache()
         id_map_df.createOrReplaceTempView("id_map")
@@ -205,19 +218,17 @@ class SubGraph(Selector):
             if subcats is not None:
                 self.results['cats']['subcats'] = subcats
                 for i in range(subcats):
-                    print('subcats iteration ' + str(i))
+                    print('subcats iteration ' + str(i+1))
                     tmp_results = cat_edges_df[cat_edges_df.target.isin(nodes)]
-
                     if edge_results_df is None:
                         edge_results_df = tmp_results
                     else:
                         edge_results_df = edge_results_df.union(tmp_results).distinct()
-                    print('collect new seed nodes')
+                    print('Collect and process new seed nodes: ' + str(tmp_results.select(col('source')).distinct().count()))
                     try:
                         #TODO Implement error handling for end of tree in the other selects as well.
                         if tmp_results.select(col('source')).distinct().count() > 0:
                             tmp_nodes = tmp_results.select(col('source')).distinct().rdd.collect()
-                            print('process list new seed nodes')
                             tmp_nodes = [item for sublist in tmp_nodes for item in sublist]
                             nodes = tmp_nodes
                             nodes = [str(i) for i in nodes] #cast items as str. otherwise results array does not work for spark
@@ -227,19 +238,18 @@ class SubGraph(Selector):
             if supercats is not None:
                 self.results['cats']['supercats'] = supercats
                 for i in range(supercats):
-                    print('supercats iteration ' + str(i))
+                    print('supercats iteration ' + str(i+1))
                     tmp_results = cat_edges_df[cat_edges_df.source.isin(nodes)]
-                    tmp_nodes = tmp_results.select(col('target')).rdd.collect()
                     if edge_results_df is None:
                         edge_results_df = tmp_results
                     else:
                         edge_results_df = edge_results_df.union(tmp_results).distinct()
-                    print('collect new seed nodes')
-                    tmp_nodes = tmp_results.select(col('source')).distinct().rdd.collect()
-                    print('process list new seed nodes')
-                    tmp_nodes = [item for sublist in tmp_nodes for item in sublist]
-                    nodes = tmp_nodes
-                    nodes = [str(i) for i in nodes] #cast items as str. otherwise results array does not work for spark
+                    print('Collect and process new seed nodes: ' + str(tmp_results.select(col('target')).distinct().count()))
+                    if tmp_results.select(col('target')).distinct().count() > 0:
+                        tmp_nodes = tmp_results.select(col('target')).distinct().rdd.collect()
+                        tmp_nodes = [item for sublist in tmp_nodes for item in sublist]
+                        nodes = tmp_nodes
+                        nodes = [str(i) for i in nodes] #cast items as str. otherwise results array does not work for spark
         if links:
             self.results['links'] = {}
             nodes = seed
@@ -355,7 +365,7 @@ class GtEvents(Selector):
 
 
         # Register dataframe for wiki_id to gt_id mapping
-        id_map_source = spark.sparkContext.textFile(os.path.join(self.graph.gt_wiki_id_map_location, self.graph.gt_wiki_id_map))
+        id_map_source = spark.sparkContext.textFile(os.path.join(self.gt_wiki_id_map_path, self.gt_wiki_id_map_file))
         id_map = id_map_source.map(self.mapper_ids)
         id_map_df = spark.createDataFrame(id_map).cache()
 
