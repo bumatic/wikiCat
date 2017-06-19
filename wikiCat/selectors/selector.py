@@ -239,14 +239,20 @@ class SubGraph(Selector):
                 self.results['cats']['supercats'] = supercats
                 for i in range(supercats):
                     print('supercats iteration ' + str(i+1))
-                    tmp_results = cat_edges_df[cat_edges_df.source.isin(nodes)]
+                    tmp_results_source = cat_edges_df[cat_edges_df.source.isin(nodes)]
+                    if i == 0:
+                        #For the first iteration only follow sources
+                        tmp_results = tmp_results_source
+                    else:
+                        tmp_results_target = cat_edges_df[cat_edges_df.target.isin(nodes)]
+                        tmp_results = tmp_results_source.union(tmp_results_target).distinct()
                     if edge_results_df is None:
                         edge_results_df = tmp_results
                     else:
                         edge_results_df = edge_results_df.union(tmp_results).distinct()
                     print('Collect and process new seed nodes: ' + str(tmp_results.select(col('target')).distinct().count()))
-                    if tmp_results.select(col('target')).distinct().count() > 0:
-                        tmp_nodes = tmp_results.select(col('target')).distinct().rdd.collect()
+                    if tmp_results_source.select(col('target')).distinct().count() > 0:
+                        tmp_nodes = tmp_results_source.select(col('target')).distinct().rdd.collect()
                         tmp_nodes = [item for sublist in tmp_nodes for item in sublist]
                         nodes = tmp_nodes
                         nodes = [str(i) for i in nodes] #cast items as str. otherwise results array does not work for spark
