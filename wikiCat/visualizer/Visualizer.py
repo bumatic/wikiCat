@@ -29,6 +29,7 @@ class Visualizer(GtGraphProcessor):
                                     edge_pen_width=1.2)
         self.output_dimension = 1000
 
+
         # Print all class variables
         #self.pp = pprint.PrettyPrinter(indent=4)
         #v = vars(self)
