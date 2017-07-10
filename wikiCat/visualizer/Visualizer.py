@@ -17,17 +17,6 @@ class Visualizer(GtGraphProcessor):
         self.gt_wiki_id_map = pd.read_csv(os.path.join(self.gt_wiki_id_map_path, self.gt_wiki_id_map_file),
                                           header=None, delimiter='\t', names=['wiki_id', 'gt_id'])
         self.drawing_props = {}
-        self.set_drawing_properties(vertex_text=None,
-                                    vertex_text_color='black',
-                                    vertex_font_size=200,
-                                    vertex_font_family='sans-serif',
-                                    vertex_color=[1, 1, 1, 0],
-                                    vertex_fill_color='lightgray',
-                                    vertex_size=1,
-                                    vertex_pen_width=0.8,
-                                    edge_color='lightgray',
-                                    edge_pen_width=1.2)
-        self.output_dimension = 1000
 
 
         # Print all class variables
@@ -196,10 +185,25 @@ class Visualizer(GtGraphProcessor):
     def visualize(self, graph_view, outfile):
         print('visualize function will be implemented in subclass. please make use of subclasses.')
 
-
-class GraphVizVisualizer(Visualizer):
+class StaticVisualizer(Visualizer):
     def __init__(self, graph):
         Visualizer.__init__(self, graph)
+        self.set_drawing_properties(vertex_text=None,
+                                    vertex_text_color='black',
+                                    vertex_font_size=200,
+                                    vertex_font_family='sans-serif',
+                                    vertex_color=[1, 1, 1, 0],
+                                    vertex_fill_color='lightgray',
+                                    vertex_size=1,
+                                    vertex_pen_width=0.8,
+                                    edge_color='lightgray',
+                                    edge_pen_width=1.2)
+        self.output_dimension = 1000
+
+
+class GraphVizVisualizer(StaticVisualizer):
+    def __init__(self, graph):
+        StaticVisualizer.__init__(self, graph)
         self.drawing_props = {}
         self.set_drawing_properties(vertex_text=None,
                                     vertex_text_color='#000000',
@@ -298,9 +302,9 @@ class GraphVizVisualizer(Visualizer):
             self.set_drawing_properties(edge_pen_width=edge_size)
 
 
-class SFDP(Visualizer):
+class SFDP(StaticVisualizer):
     def __init__(self, graph):
-        Visualizer.__init__(self, graph)
+        StaticVisualizer.__init__(self, graph)
 
     def visualize(self, graph_view, outfile, outtype, vsize=None, vlabel=None, color_by_type=True, esize=None):
         print('create Viz')
@@ -316,9 +320,9 @@ class SFDP(Visualizer):
             print(e)
 
 
-class ARF(Visualizer):
+class ARF(StaticVisualizer):
     def __init__(self, graph):
-        Visualizer.__init__(self, graph)
+        StaticVisualizer.__init__(self, graph)
 
     def visualize(self, graph_view, outfile, outtype, vsize=None, vlabel=None, color_by_type=True, esize=None):
         print('Start creating Viz')
@@ -336,9 +340,9 @@ class ARF(Visualizer):
             print(e)
 
 
-class FR(Visualizer):
+class FR(StaticVisualizer):
     def __init__(self, graph):
-        Visualizer.__init__(self, graph)
+        StaticVisualizer.__init__(self, graph)
 
     def visualize(self, graph_view, outfile, outtype, vsize=None, vlabel=None, color_by_type=True, esize=None):
         print('create Viz')
@@ -353,9 +357,9 @@ class FR(Visualizer):
             print(e)
 
 
-class RTL(Visualizer):
+class RTL(StaticVisualizer):
     def __init__(self, graph):
-        Visualizer.__init__(self, graph)
+        StaticVisualizer.__init__(self, graph)
 
     def visualize(self, graph_view, seed, outfile, outtype, vsize=None, vlabel=None, color_by_type=True, esize=None):
         #print('Create Viz')
