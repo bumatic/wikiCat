@@ -49,7 +49,6 @@ class DynVisualizer(Visualizer):
                 yield  self.gt
             elif e[1]['event'] == 'end':
                 tmp = self.gt.edge(e[1]['source'], e[1]['target'])
-                self.cscore[tmp] = e[1]['cscore']
                 self.gt.remove_edge(tmp)
                 self.last_update[tmp] = e[1]['time']
                 yield self.gt
@@ -61,10 +60,24 @@ class DynVisualizer(Visualizer):
         # Machen die Updates zu CSCORE SINN???????? ODER MAche ich hier Etwas MASsiv FaLsch?
         for edge in g.edges():
             delta = self.curr_time - self.last_update[edge]
-            if self.cscore[edge] * math.exp(-1 * self.decay_rate * delta) < 1:
-                self.cscore[edge] = 1
+            #print('curr')
+            #print(self.curr_time)
+            #print('last')
+            #print(self.last_update[edge])
+            print('delta')
+            print(delta)
+            print('before')
+            print(self.cscore[edge])
+            if self.cscore[edge] * math.exp(-1 * self.decay_rate * delta) < 0.1:
+                print('after')
+                print(self.cscore[edge])
+                self.cscore[edge] = 0.1
+                pass
             else:
                 self.cscore[edge] = self.cscore[edge] * math.exp(-1 * self.decay_rate * delta)
+                print('after')
+                print(self.cscore[edge])
+                pass
             exists[edge.source()] = True
             exists[edge.target()] = True
         return g, exists
@@ -114,16 +127,27 @@ class DynVisualizer(Visualizer):
         if vertex_color_by_type:
             vertex_color = self.gt.new_vertex_property("string")
             graph_tool.map_property_values(self.gt.vp.ns, vertex_color, lambda x: '#f9e3da' if x == '14.0' else '#b4bfc5')
-            vprops['color'] = vertex_color
+            vprops['fill_color'] = vertex_color
 
         if edge_size == 'cscore':
             edge_size = self.gt.new_edge_property("double")
             graph_tool.map_property_values(self.gt.ep.cscore, edge_size, lambda x: x + 0.1)
+            #for e in edge_size:
+            #    print(e)
             if edge_min is not None and edge_max is not None and edge_min < edge_max:
+                print('hier')
                 edge_size = graph_tool.draw.prop_to_size(edge_size, mi=edge_min, ma=edge_max, log=False, power=0.5)
             else:
-                edge_size = graph_tool.draw.prop_to_size(edge_size, mi=10, ma=100, log=False, power=0.5)
+                edge_size = graph_tool.draw.prop_to_size(edge_size, mi=1, ma=10, log=False, power=0.5)
             eprops['pen_width'] = edge_size
+
+
+        #TEST
+        #eprops['color'] = 'black'
+        #eprops['pen_width'] = 10
+        #for e in eprops['pen_width']:
+        #    print(e)
+
         self.drawing_props['vprops'] = vprops
         self.drawing_props['eprops'] = eprops
         return
@@ -142,6 +166,7 @@ class ARFVid(DynVisualizer):
 
         g, exists = self.update_graph(g, exists)
         g.set_vertex_filter(exists)
+        self.set_drawing_properties(edge_size='cscore')
         arf_layout(g, pos=self.pos, max_iter=100, dt=1e-4)
 
         # The movement of the vertices may cause them to leave the display area. The
