@@ -2,7 +2,6 @@
 **/spark-warehouse/
 **/.idea/
 **/old_scripts/
-.DS_Store
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -62,3 +61,6 @@ docs/_build/
 
 # PyBuilder
 target/
+
+.DS_Store
+**/.DS_Store
