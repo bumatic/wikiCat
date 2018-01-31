@@ -42,6 +42,7 @@ class DynVisualizer(Visualizer):
     def dynamic_graph_generator(self):
         for e in self.events.iterrows():
             self.curr_time = e[1]['time']
+            print(e[1]['event'])
             if e[1]['event'] == 'start':
                 tmp = self.gt.add_edge(e[1]['source'], e[1]['target'])
                 self.cscore[tmp] = e[1]['cscore']
@@ -49,9 +50,11 @@ class DynVisualizer(Visualizer):
                 yield  self.gt
             elif e[1]['event'] == 'end':
                 tmp = self.gt.edge(e[1]['source'], e[1]['target'])
-                self.gt.remove_edge(tmp)
                 self.last_update[tmp] = e[1]['time']
-                yield self.gt
+                self.gt.remove_edge(tmp)
+                print(e[1]['time'])
+
+                #yield self.gt
 
     def update_state(self):
         pass
@@ -64,19 +67,19 @@ class DynVisualizer(Visualizer):
             #print(self.curr_time)
             #print('last')
             #print(self.last_update[edge])
-            print('delta')
-            print(delta)
-            print('before')
-            print(self.cscore[edge])
+            #print('delta')
+            #print(delta)
+            #print('before')
+            #print(self.cscore[edge])
             if self.cscore[edge] * math.exp(-1 * self.decay_rate * delta) < 0.1:
-                print('after')
-                print(self.cscore[edge])
+                #print('after')
+                #print(self.cscore[edge])
                 self.cscore[edge] = 0.1
                 pass
             else:
                 self.cscore[edge] = self.cscore[edge] * math.exp(-1 * self.decay_rate * delta)
-                print('after')
-                print(self.cscore[edge])
+                #print('after')
+                #print(self.cscore[edge])
                 pass
             exists[edge.source()] = True
             exists[edge.target()] = True
@@ -135,7 +138,7 @@ class DynVisualizer(Visualizer):
             #for e in edge_size:
             #    print(e)
             if edge_min is not None and edge_max is not None and edge_min < edge_max:
-                print('hier')
+                #print('hier')
                 edge_size = graph_tool.draw.prop_to_size(edge_size, mi=edge_min, ma=edge_max, log=False, power=0.5)
             else:
                 edge_size = graph_tool.draw.prop_to_size(edge_size, mi=1, ma=10, log=False, power=0.5)
@@ -160,7 +163,9 @@ class ARFVid(DynVisualizer):
         self.win = None
 
     def update_state(self):
+        print('davor')
         g = self.graph_generator.__next__()
+        #print(g)
         exists = g.new_vertex_property('bool', False)
         reset = g.new_vertex_property('bool', True)
 
@@ -226,5 +231,6 @@ class ARFVid(DynVisualizer):
         self.graph_generator = self.dynamic_graph_generator()
 
         for i in self.graph_generator:
-            print('HIER')
-        #    print(self.graph_generator.__next__())
+            pass
+            #print('HIER')
+            #print(self.graph_generator.__next__())
