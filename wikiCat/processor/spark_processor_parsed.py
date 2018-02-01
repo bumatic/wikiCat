@@ -1,4 +1,5 @@
-from wikiCat.processors.spark_processor import Processor
+from wikiCat.processor.spark_processor import SparkProcessor
+#war mal: from wikiCat.processor.spark_processor import Processor
 from dateutil import parser
 import findspark
 findspark.init()
@@ -7,9 +8,11 @@ import shutil
 import os
 
 
-class SparkProcessorParsed(Processor):
+class SparkProcessorParsed(SparkProcessor):
+    #war mal: class SparkProcessorParsed(Processor)
     def __init__(self, project):
-        Processor.__init__(self, project, 'parsed')
+        SparkProcessor.__init__(self, project, 'parsed')
+        #war mal Processor.__init__(self, project, 'parsed')
 
     # Function to parse node information into a DataFrame
     # Returns DataFrame with Columns: id, title, ns

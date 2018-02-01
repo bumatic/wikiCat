@@ -1,8 +1,9 @@
-from wikiCat.selectors.selector import *
+from wikiCat.selector.selector import *
+from wikiCat.visualizer.arf_vid_visualizer import ARFVid
 from wikiCat.wikiproject import Project
-from wikiCat.processors.GtGraphProcessor import *
-from wikiCat.visualizer.Visualizer import *
-from wikiCat.visualizer.DynVisualizer import *
+from wikiCat.processor.GtGraphProcessor import *
+from wikiCat.visualizer.visualizer import *
+from wikiCat.visualizer.dyn_visualizer import *
 
 
 mp = Project('project')

@@ -1,4 +1,4 @@
-from wikiCat.processors.spark_processor_parsed import SparkProcessorParsed
+from wikiCat.processor.spark_processor_parsed import SparkProcessorParsed
 import findspark
 findspark.init()
 from pyspark.sql import SparkSession
@@ -8,6 +8,7 @@ from pyspark.sql.functions import lit
 # import collections
 import os
 
+
 # TODO For dealing with link data a different approach needs to be implemented. Idea outlined.s
 # First iterate over all files and split them into chunks of x (maybe 1000) source pages
 # It needs to be taken care of that all date for one page ends up in just one file.
@@ -15,6 +16,7 @@ import os
 # store their destination in a tmp list
 # iterate over all results and create a list of all edges and nodes
 # generate nodes and edges results based on that list!
+
 
 class GraphDataGenerator(SparkProcessorParsed):
     def __init__(self, project, link_data_type, fixed='fixed_none', errors='errors_removed'):

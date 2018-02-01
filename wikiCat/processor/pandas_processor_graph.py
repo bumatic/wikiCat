@@ -1,4 +1,4 @@
-from wikiCat.processors.processor import Processor
+from wikiCat.processor.processor import Processor
 import pandas as pd
 import os
 

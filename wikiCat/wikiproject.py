@@ -2,7 +2,7 @@ import os
 import json
 from wikiCat.data.wikidata import WikiData
 from wikiCat.data.wikigraph import WikiGraph
-from wikiCat.processors.oldest_revision import OldestRevision
+from wikiCat.processor.oldest_revision import OldestRevision
 from dateutil import parser
 
 
@@ -237,7 +237,7 @@ class Project:
 
     def find_start_date(self):
         if 'graph' in self.data_desc.keys():
-            # TODO: This needs some testing. Probably an array is returned and the vorrect value needs to be accessed.
+            # TODO: This needs some testing. Probably an array is returned and the correct value needs to be accessed.
             self.start_date = OldestRevision(self).get()
             self.save_project()
         else:

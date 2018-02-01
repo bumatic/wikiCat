@@ -2,6 +2,7 @@ import os
 import csv
 import json
 
+
 class Processor:
     def __init__(self, project, processor_type):
         self.project = project

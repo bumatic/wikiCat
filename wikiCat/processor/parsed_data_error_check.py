@@ -1,4 +1,4 @@
-from wikiCat.processors.spark_processor_parsed import SparkProcessorParsed
+from wikiCat.processor.spark_processor_parsed import SparkProcessorParsed
 import findspark
 findspark.init()
 from pyspark.sql import SparkSession

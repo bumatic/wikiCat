@@ -1,5 +1,5 @@
-from wikiCat.processors.GtGraphProcessor import GtGraphProcessor
-from wikiCat.processors.PandasProcessor import PandasProcessor
+from wikiCat.processor.gt_graph_processor import GtGraphProcessor
+from wikiCat.processor.pandas_processor import PandasProcessor
 import pandas as pd
 import os
 

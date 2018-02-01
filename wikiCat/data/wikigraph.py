@@ -1,5 +1,5 @@
 from wikiCat.data.data import Data
-from wikiCat.selectors.selector import Selector
+from wikiCat.selector.selector import Selector
 from graph_tool.all import *
 import os
 import shutil
@@ -24,7 +24,6 @@ class WikiGraph(Data):
         self.source_location = None
         self.gt_wiki_id_map = None
         self.gt_wiki_id_map_location = None
-        pass
 
     def add_new_graph(self, gt_file=None, gt_type='fixed_none__errors_removed', gt_wiki_id_map=None, gt_source="graph__fixed_none__errors_removed"):
         graph_path = os.path.join(self.data_path, gt_type, 'main')

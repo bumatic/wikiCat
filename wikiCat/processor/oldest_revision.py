@@ -1,4 +1,4 @@
-from wikiCat.processors.spark_processor import SparkProcessorGraph
+from wikiCat.processor.spark_processor_graph import SparkProcessorGraph
 import findspark
 findspark.init()
 from pyspark.sql import SparkSession

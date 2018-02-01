@@ -1,16 +1,17 @@
-from wikiCat.processors.parsed_data_error_check import ParsedDataErrorCheck
-from wikiCat.processors.graph_data_gererator import GraphDataGenerator
-from wikiCat.processors.spark_processor_parsed import SparkProcessorParsed
-from wikiCat.processors.controvercy_score import ControvercyScore
-from wikiCat.processors.oldest_revision import OldestRevision
-from wikiCat.processors.gt_graph_generator import GtGraphGenerator
-from wikiCat.selectors.selector import Selector
+from wikiCat.processor.parsed_data_error_check import ParsedDataErrorCheck
+from wikiCat.processor.graph_data_gererator import GraphDataGenerator
+from wikiCat.processor.spark_processor_parsed import SparkProcessorParsed
+from wikiCat.processor.controvercy_score import ControvercyScore
+from wikiCat.processor.oldest_revision import OldestRevision
+from wikiCat.processor.gt_graph_generator import GtGraphGenerator
+from wikiCat.selector.selector import Selector
 from wikiCat.data.wikigraph import WikiGraph
-from wikiCat.selectors.selector import *
+from wikiCat.selector.selector import *
+from wikiCat.visualizer.arf_vid_visualizer import ARFVid
 from wikiCat.wikiproject import Project
-from wikiCat.processors.GtGraphProcessor import *
-from wikiCat.visualizer.Visualizer import *
-from wikiCat.visualizer.DynVisualizer import *
+from wikiCat.processor.GtGraphProcessor import *
+from wikiCat.visualizer.visualizer import *
+from wikiCat.visualizer.dyn_visualizer import *
 
 
 mp = Project('project')

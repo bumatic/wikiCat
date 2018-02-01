@@ -4,8 +4,8 @@ from pyspark.sql import Row
 from pyspark.sql import SparkSession
 from pyspark import SparkConf, SparkContext
 from pyspark.sql.functions import collect_list, avg
-from wikiCat.processors.pandas_processor_graph import PandasProcessorGraph
-from wikiCat.processors.spark_processor import SparkProcessorGraph
+from wikiCat.processor.pandas_processor_graph import PandasProcessorGraph
+from wikiCat.processor.spark_processor_graph import SparkProcessorGraph
 from dateutil import parser
 import math
 #import datetime

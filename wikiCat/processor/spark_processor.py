@@ -1,4 +1,4 @@
-from wikiCat.processors.processor import Processor
+from wikiCat.processor.processor import Processor
 from dateutil import parser
 import findspark
 findspark.init()
@@ -128,18 +128,3 @@ class SparkProcessor(Processor):
                         except:
                             pass
         shutil.rmtree(os.path.join(os.getcwd(), path))
-
-
-class SparkProcessorParsed(SparkProcessor):
-    def __init__(self, project):
-        Processor.__init__(self, project, 'parsed')
-        self.path = self.project.parsed_data_path
-
-
-class SparkProcessorGraph(SparkProcessor):
-    def __init__(self, project, fixed='fixed_none', errors='errors_removed'):
-        Processor.__init__(self, project, 'graph')
-        self.path = self.project.graph_data_path
-        self.fixed = fixed
-        self.errors = errors
-        self.data_status = 'graph__' + self.fixed + '__' + self.errors

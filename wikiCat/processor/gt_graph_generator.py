@@ -1,4 +1,4 @@
-from wikiCat.processors.pandas_processor_graph import PandasProcessorGraph
+from wikiCat.processor.pandas_processor_graph import PandasProcessorGraph
 from graph_tool.all import *
 import os
 import shutil
