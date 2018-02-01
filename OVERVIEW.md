@@ -1,0 +1,9 @@
+wikiCat/
+	data/
+		data.py		wikidata.py		wikigraph.py
+	processors/
+		controvercy_score.py		graph_data_gererator.py		gt_graph_generator.py		GtGraphProcessor.py		oldest_revision.py		pandas_processor_graph.py		PandasProcessor.py		parsed_data_error_check.py		processor.py		spark_processor_parsed.py		spark_processor.py
+	selectors/
+		selector.py		SelectorCscore.py
+	visualizers/
+		DynVisualizer.py		Visualizer.py

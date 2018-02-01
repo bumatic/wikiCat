@@ -1,5 +1,5 @@
 from wikiCat.data.data import Data
-from wikiCat.selectors.selector import  Selector
+from wikiCat.selectors.selector import Selector
 from graph_tool.all import *
 import os
 import shutil

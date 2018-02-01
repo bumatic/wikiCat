@@ -2,6 +2,7 @@
 **/spark-warehouse/
 **/.idea/
 **/old_scripts/
+**/UML/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

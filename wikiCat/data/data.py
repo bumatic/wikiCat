@@ -1,3 +1,7 @@
+import os
+import bz2
+import shutil
+
 
 class Data:
     def __init__(self, project, data_type):

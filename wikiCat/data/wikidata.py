@@ -1,4 +1,7 @@
 from wikiCat.data.data import Data
+#from dateutil import parser
+import datetime
+
 #import os
 #import bz2
 
@@ -7,9 +10,26 @@ class WikiData(Data):
     def __init__(self, project, data_type):
         Data.__init__(self, project, data_type)
 
-    def add_dump_data(self):
-        print('Add dump data is not yet implemented')
-        # 2DO
+    def add_dump_data(self, dump_list_file, dump_date, override=False):
+        #assert dump_date ata_type in ['dump', 'parsed', 'graph', 'gt_graph', 'error'], \
+        #    'ERROR. Please pass a valid data_type: dump, parsed, graph, gt_graph, error'
+        try:
+            datetime.datetime.strptime(dump_date, '%Y-%m-%d')
+        except ValueError:
+            raise ValueError("Incorrect date format. Should be YYYY-MM-DD")
+        if self.check_files(dump_list_file):
+            if self.data['dump'] in self.data.keys():
+                if self.data['dump'][dump_date] in self.data['dump'].keys() and not override:
+                    print('This type of dump data has already been added. Pass override=True to replace it.')
+                    return
+                else:
+                    self.data['dump'][dump_date] = dump_list_file
+            else:
+                self.data['dump'] = {}
+                self.data['dump'][dump_date] = dump_list_file
+        else:
+            print('dump_list_file file(s) do not exist')
+        print('Add dump data is implemented. But not loading the data... or any other functions')
 
     def add_parsed_data(self, page_info=None, revision_info=None, cat_data=None, link_data=None):
         if page_info is not None:

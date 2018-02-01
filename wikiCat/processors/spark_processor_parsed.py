@@ -11,7 +11,7 @@ class SparkProcessorParsed(Processor):
     def __init__(self, project):
         Processor.__init__(self, project, 'parsed')
 
-    # Function fo parse node information into a DataFrame
+    # Function to parse node information into a DataFrame
     # Returns DataFrame with Columns: id, title, ns
     def mapper_page_info(self, line):
         fields = line.split('\t')
@@ -22,7 +22,7 @@ class SparkProcessorParsed(Processor):
             page_title = page_title[9:]
         return Row(page_id=page_id, page_title=page_title, page_ns=page_ns)
 
-    # Function fo parse edge information into a DataFrame
+    # Function to parse edge information into a DataFrame
     # Returns DataFrame with Columns: source_id, target_title, rev_id
     def mapper_page_data(self, line):
         fields = line.split('\t')
@@ -31,7 +31,7 @@ class SparkProcessorParsed(Processor):
         target_title = str(fields[2])
         return Row(source_id=source_id, target_title=target_title, rev_id=rev_id)
 
-    # Function fo parse revision information into a DataFrame
+    # Function to parse revision information into a DataFrame
     # Returns Key-Value-Pair with the revision ID as key and revision TIME as value
     def mapper_revisions(self, line):
         fields = line.split('\t')
