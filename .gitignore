@@ -11,6 +11,7 @@ _Progress_WikiCat_Reworking
 _OVERVIEW.md
 project.7z
 animationTest.py
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
