@@ -1,4 +1,3 @@
-
 ## How to: Basic Operations
 
 ### Import wikiCat
@@ -19,7 +18,7 @@ To load an existing project. If no path is passed the script assumes that the pr
 
 ```
 mp = Project()
-'''
+```
 
 ### Add Parsed Data (created with wikiDumpParser)
 
