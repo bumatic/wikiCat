@@ -109,3 +109,21 @@ mp.remove_snapshots(subgraph='Simulation_1_sub_1_super_gt', title='Simulation_1_
 ```
 mp.remove_subgraph(subgraph= ...) #untested
 ```
+
+### Create Graph Tool Static Visualization
+
+#### ARF
+```
+mp.create_static_viz('Simulation_1_sub_1_super_gt', 'ARF', snapshots='snapshots_year', drawing_props_file='static.json')
+```
+
+#### SFDP
+```
+mp.create_static_viz('Simulation_1_sub_1_super_gt', 'SFDP', snapshots='snapshots_year', drawing_props_file='static.json')
+```
+
+#### RTL
+```
+mp.create_static_viz('Simulation_1_sub_1_super_gt', 'RTL', snapshots='snapshots_year', drawing_props_file='static.json', seed=7744777)
+```
+
