@@ -34,11 +34,14 @@ class PandasProcessor(Processor):
                                 names=['id', 'title', 'ns', 'cscore'])
         return nodes
 
-    def highest_cscores(self, df, n=100, save=False):
+    def highest_cscores(self, df, n=100, save=False, outfile=None):
         largest = df.nlargest(n, 'cscore')
         if save:
-            print(largest)
-            # ToDo Implement saving
+            if outfile is not None:
+                largest.to_csv(outfile, sep='\t', index=False, header=False, mode='w')
+            else:
+                print('A name for the outfile needs to be passed')
+            #print(largest)
             pass
         else:
             print(largest)

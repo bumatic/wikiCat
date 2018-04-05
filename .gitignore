@@ -2,7 +2,14 @@
 **/spark-warehouse/
 **/.idea/
 **/old_scripts/
-**/UML/
+**/_UML/
+**/tiny_helpers/
+**/_old_project/
+**/_wikiCat_old_removed/
+_oldest_project_info.json
+_Progress_WikiCat_Reworking
+_OVERVIEW.md
+project.7z
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -11,7 +18,7 @@ __pycache__/
 
 # C extensions
 *.so
-
+**/.DS_Store
 # Distribution / packaging
 .Python
 env/

@@ -2,14 +2,19 @@ from wikiCat.data.data import Data
 #from dateutil import parser
 import datetime
 
-#import os
+import os
 #import bz2
 
 
 class WikiData(Data):
-    def __init__(self, project, data_type):
-        Data.__init__(self, project, data_type)
+    def __init__(self, data, data_type, data_path):
+        Data.__init__(self, data, data_type, data_path)
 
+    def add_graph_data(self, data_info):
+        pass
+    # TODO: Check. Wikidata scheint überflüssig zu sein
+
+    '''
     def add_dump_data(self, dump_list_file, dump_date, override=False):
         #assert dump_date ata_type in ['dump', 'parsed', 'graph', 'gt_graph', 'error'], \
         #    'ERROR. Please pass a valid data_type: dump, parsed, graph, gt_graph, error'
@@ -17,20 +22,21 @@ class WikiData(Data):
             datetime.datetime.strptime(dump_date, '%Y-%m-%d')
         except ValueError:
             raise ValueError("Incorrect date format. Should be YYYY-MM-DD")
-        if self.check_files(dump_list_file):
-            if self.data['dump'] in self.data.keys():
-                if self.data['dump'][dump_date] in self.data['dump'].keys() and not override:
-                    print('This type of dump data has already been added. Pass override=True to replace it.')
-                    return
-                else:
-                    self.data['dump'][dump_date] = dump_list_file
+        if self.check_file(dump_list_file):
+            if dump_date in self.data.keys() and not override:
+                print('This type of dump data has already been added. Pass override=True to replace it.')
+                return
             else:
-                self.data['dump'] = {}
-                self.data['dump'][dump_date] = dump_list_file
+                self.data[dump_date] = dump_list_file
+            #else:
+            #    self.data['dump'] = {}
+            #    self.data['dump'][dump_date] = dump_list_file
         else:
             print('dump_list_file file(s) do not exist')
-        print('Add dump data is implemented. But not loading the data... or any other functions')
+        return self.data
+    '''
 
+    '''
     def add_parsed_data(self, page_info=None, revision_info=None, cat_data=None, link_data=None):
         if page_info is not None:
             if self.check_files(page_info):
@@ -93,11 +99,15 @@ class WikiData(Data):
         else:
             self.data[error_type] = error_data
         return self.data
+    '''
 
+    '''
     def init_data(self, data): #ARGS?
         self.data = data
         #self.project.update_data_desc(self.data_type, data)
         # TODO: Low priority: IMPLEMENT CHECK IF EVERYTHING EXISTS?!?!
-
+    '''
+    '''
     def get_data_desc(self):
         return self.data
+    '''

@@ -1,8 +1,7 @@
 import os
-
 import pandas as pd
+import json
 from graph_tool.all import *
-
 from wikiCat.processor.gt_graph_processor import GtGraphProcessor
 
 
@@ -13,18 +12,17 @@ class Visualizer(GtGraphProcessor):
         self.data = self.graph.data
         self.working_graph = self.graph.curr_working_graph
         self.working_graph_path = self.graph.data[self.working_graph]['location']
-        self.results_path = os.path.join(self.project.results_path, self.working_graph)
+        self.results_path = os.path.join(self.project.pinfo['path']['results'], self.working_graph)
         self.gt_wiki_id_map_path, self.gt_wiki_id_map_file = self.find_gt_wiki_id_map()
         self.gt_wiki_id_map = pd.read_csv(os.path.join(self.gt_wiki_id_map_path, self.gt_wiki_id_map_file),
                                           header=None, delimiter='\t', names=['wiki_id', 'gt_id'])
-        self.drawing_props = {}
-
+        #self.drawing_props = {}
 
         # Print all class variables
-        #self.pp = pprint.PrettyPrinter(indent=4)
-        #v = vars(self)
-        #self.pp.pprint(v)
-        #self.pp.pprint(self.drawing_props)
+        # self.pp = pprint.PrettyPrinter(indent=4)
+        # v = vars(self)
+        # self.pp.pprint(v)
+        # self.pp.pprint(self.drawing_props)
         print('Initialized graph visualizer')
 
     def find_gt_wiki_id_map(self):
@@ -36,20 +34,22 @@ class Visualizer(GtGraphProcessor):
             path = self.data['main']['location']
         return path, file
 
-    def snapshots(self, stype, outtype='png', vsize=None, vlabel=None, color_by_type=True, esize=None):
+    def snapshots(self, stype, drawing_props_file=None):
         self.load()
-        print('(Sub) Graph loaded')
         self.results_path = os.path.join(self.results_path, stype)
         snapshot_files = self.data[self.working_graph][stype]['files']
         snapshot_path = os.path.join(self.graph.data[self.working_graph]['location'], stype)
         for file in snapshot_files:
+            if drawing_props_file is not None:
+                drawing_props = self.load_drawing_props(os.path.join(self.project.pinfo['path']['gt_props'], drawing_props_file))
+            else:
+                drawing_props = self.load_drawing_props(os.path.join('wikiCat', 'visualizer', 'drawing_default.json'))
             graph_view = self.create_snapshot_view(snapshot_path, file, stype)
-            self.visualize(graph_view, file[:-4], outtype, vsize=vsize, vlabel=vlabel, color_by_type=color_by_type, esize=esize)
+            self.visualize(graph_view, file[:-4], drawing_props)
 
     def create_snapshot_view(self, path, file, stype):
         prop_map = stype + '_' + str(file[:-6])
         if prop_map in self.gt.edge_properties.keys():
-            #print('PROP MAP EXISTS')
             prop_map = self.gt.edge_properties[prop_map]
         else:
             self.gt.list_properties()
@@ -94,93 +94,84 @@ class Visualizer(GtGraphProcessor):
         df.columns = ['source', 'target', 'type', 'cscore']
         return df
 
-    def set_drawing_properties(self, vertex_text=None, vertex_text_color=None, vertex_font_size=None,
-                               vertex_font_family=None, vertex_color=None, vertex_fill_color=None,
-                               vertex_size=None, vertex_pen_width=None, edge_color=None, edge_pen_width=None):
+    @staticmethod
+    def load_drawing_props(file):
+        with open(os.path.join(os.getcwd(), file), 'r') as f:
+            dprops = json.load(f)
+        return dprops
 
-        if 'vprops' in self.drawing_props.keys():
-            vprops = self.drawing_props['vprops']
-        else:
-            vprops = {}
-        if 'eprops' in self.drawing_props.keys():
-            eprops = self.drawing_props['eprops']
-        else:
-            eprops = {}
-        if vertex_text is not None:
-            vprops['text'] = vertex_text
-        if vertex_text_color is not None:
-            vprops['text_color'] = vertex_text_color
-        if vertex_font_size is not None:
-            vprops['font_size'] = vertex_font_size
-        if vertex_font_family is not None:
-            vprops['font_family'] = vertex_font_family
-        if vertex_color is not None:
-            vprops['color'] = vertex_color
-        if vertex_fill_color is not None:
-            vprops['fill_color'] = vertex_fill_color
-        if vertex_size is not None:
-            vprops['size'] = vertex_size
-        if vertex_pen_width is not None:
-            vprops['pen_width'] = vertex_pen_width
-        if edge_color is not None:
-            eprops['color'] = edge_color
-        if edge_pen_width is not None:
-            eprops['pen_width'] = edge_pen_width
-        self.drawing_props['vprops'] = vprops
-        self.drawing_props['eprops'] = eprops
-        return
-
-    def process_drawing_properties(self, graph, vsize=None, vlabel=None, color_by_type=None, esize=None):
+    @staticmethod
+    def process_drawing_properties(graph, drawing_props):
+        dprops = drawing_props
         g = graph
         vcount = len(list(g.vertices()))
-        print(vcount)
+        if vcount == 0:
+            dprops['vprops'] = {}
+            dprops['eprops'] = {}
+            return dprops
 
-        # Set outputsize
+        vmin = 8
+        vmax = 20
+        emin = 1
+        emax = 2
+        font_size = 8
+        dprops['output_width'] = vcount * 10
+        dprops['output_height'] = vcount * 10
+
+        if dprops['output_width'] < 600:
+            dprops['output_width'] = 600
+            dprops['output_height'] = 600
+        elif dprops['output_width'] >= 30000:
+            dprops['output_width'] = 30000
+            dprops['output_height'] = 30000
+
+
+        '''
         if vcount <= 25:
-            self.output_dimension = 500
-            vmin = 10
+            dprops['output_width'] = vcount * 50
+            dprops['output_height'] = vcount * 50
+            vmin = 8
             vmax = 20
-            emin = 2
-            emax = 8
+            emin = 1
+            emax = 2
+            font_size = 8
+        elif vcount > 25 and (vcount * 10) < 30000:
+            dprops['output_width'] = vcount * 20
+            dprops['output_height'] = vcount * 20
+            vmin = 8
+            vmax = 20
+            emin = 1
+            emax = 2
             font_size = 8
         elif (vcount * 5) >= 30000:
-            self.output_dimension = 30000
-            vmin = 3
-            vmax = 10
-            emin = 1
-            emax = 5
-            font_size = 5
-        else:
-            self.output_dimension = vcount * 20
+            dprops['output_width'] = 30000
+            dprops['output_height'] = 30000
             vmin = 10
-            vmax = 20
+            vmax = 100
             emin = 2
             emax = 8
             font_size = 8
-
-        self.set_drawing_properties(vertex_font_size=font_size)
-
-        if vsize is not None and type(vsize) == int or type(vsize) == float:
-            vertex_size = vsize
-            self.set_drawing_properties(vertex_size=vertex_size)
-        elif vsize == 'cscore':
+        '''
+        dprops['vprops']['font_size'] = font_size
+        if dprops['vprops']['size'] == 'cscore' and vcount > 0:
             vertex_size = g.new_vertex_property("double")
             graph_tool.map_property_values(g.vp.cscore, vertex_size, lambda x: x + 0.1)
             vertex_size = graph_tool.draw.prop_to_size(vertex_size, mi=vmin, ma=vmax, log=False, power=0.5)
-            self.set_drawing_properties(vertex_size=vertex_size)
-        if vlabel == 'title':
+            dprops['vprops']['size'] = vertex_size
+
+        if dprops['vprops']['text'] == 'title':
             label = g.vp.title
-            self.set_drawing_properties(vertex_text=label)
-        if color_by_type:
+            dprops['vprops']['text'] = label
+
+        if dprops['color_by_type']:
             vertex_color = g.new_vertex_property("string")
             graph_tool.map_property_values(g.vp.ns, vertex_color,
-                                           lambda x: 'lightsteelblue' if x == '14.0' else 'salmon')
-            self.set_drawing_properties(vertex_fill_color=vertex_color)
-        if esize == 'cscore':
+                                           lambda x: dprops['cat_color'] if x == '14.0' else
+                                           dprops['link_color'])
+            dprops['vprops']['fill_color'] = vertex_color
+        if dprops['eprops']['pen_width'] == 'cscore':
             edge_size = g.new_edge_property("double")
             graph_tool.map_property_values(g.ep.cscore, edge_size, lambda x: x + 0.1)
             edge_size = graph_tool.draw.prop_to_size(edge_size, mi=emin, ma=emax, log=False, power=0.5)
-            self.set_drawing_properties(edge_pen_width=edge_size)
-
-    def visualize(self, graph_view, outfile):
-        print('visualize function will be implemented in subclass. please make use of subclasses.')
+            dprops['eprops']['pen_width'] = edge_size
+        return dprops

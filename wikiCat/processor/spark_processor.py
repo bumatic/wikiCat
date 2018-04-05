@@ -14,7 +14,8 @@ class SparkProcessor(Processor):
 
     # Function fo parse node information into a DataFrame
     # Returns DataFrame with Columns: id, title, ns
-    def mapper_page_info(self, line):
+    @staticmethod
+    def mapper_page_info(line):
         fields = line.split('\t')
         page_id = int(fields[0])
         page_title = str(fields[1])
@@ -25,7 +26,8 @@ class SparkProcessor(Processor):
 
     # Function fo parse edge information into a DataFrame
     # Returns DataFrame with Columns: source_id, target_title, rev_id
-    def mapper_page_data(self, line):
+    @staticmethod
+    def mapper_page_data(line):
         fields = line.split('\t')
         source_id = int(fields[0])
         rev_id = int(fields[1])
@@ -34,7 +36,8 @@ class SparkProcessor(Processor):
 
     # Function fo parse revision information into a DataFrame
     # Returns Key-Value-Pair with the revision ID as key and revision TIME as value
-    def mapper_revisions(self, line):
+    @staticmethod
+    def mapper_revisions(line):
         fields = line.split('\t')
         rev_id = int(fields[1])
         rev_date = parser.parse(fields[2])
@@ -43,7 +46,8 @@ class SparkProcessor(Processor):
 
     # Function fo parse revision information into a DataFrame
     # Returns Key-Value-Pair with the revision ID as key and revision TIME as value
-    def mapper_nodes(self, line):
+    @staticmethod
+    def mapper_nodes(line):
         fields = line.split('\t')
         if len(fields) == 3:
             id = fields[0]
@@ -57,7 +61,8 @@ class SparkProcessor(Processor):
             cscore = fields[3]
             return Row(id=id, title=title, ns=ns, cscore=cscore)
 
-    def mapper_edges(self, line):
+    @staticmethod
+    def mapper_edges(line):
         fields = line.split('\t')
         if len(fields) == 3:
             source = fields[0]
@@ -71,7 +76,8 @@ class SparkProcessor(Processor):
             cscore = fields[3]
             return Row(source=source, target=target, etype=etype, cscore=cscore)
 
-    def mapper_tmp_cscore_events(self, line):
+    @staticmethod
+    def mapper_tmp_cscore_events(line):
         fields = line.split('\t')
         revision = fields[0]
         source = fields[1]
@@ -79,7 +85,8 @@ class SparkProcessor(Processor):
         cscore = fields[3]
         return Row(revision=revision, source=source, target=target, cscore=cscore)
 
-    def mapper_events(self, line):
+    @staticmethod
+    def mapper_events(line):
         fields = line.split('\t')
         if len(fields) == 4:
             revision = float(fields[0])
@@ -98,13 +105,15 @@ class SparkProcessor(Processor):
             print('Error while mapping events')
             return
 
-    def mapper_ids(self, line):
+    @staticmethod
+    def mapper_ids(line):
         fields = line.split('\t')
         wiki_id = fields[0]
         gt_id = fields[1]
         return Row(wiki_id=wiki_id, gt_id=gt_id)
 
-    def handle_spark_results(self, path, file):
+    @staticmethod
+    def handle_spark_results(path, file):
         spark_path = os.path.join(path, file)
         for filename in os.listdir(spark_path):
             if filename.endswith('.csv'):
@@ -112,7 +121,8 @@ class SparkProcessor(Processor):
                 shutil.rmtree(spark_path)
                 os.rename(os.path.join(path, filename), os.path.join(path, file))
 
-    def assemble_spark_results(self, path, results_file):
+    @staticmethod
+    def assemble_spark_results(path, results_file):
         for file in next(os.walk(os.path.join(os.getcwd(), path)))[2]:
             if file[0] != '.':
                 with open(os.path.join(os.getcwd(), results_file), 'a') as out:

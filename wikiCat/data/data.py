@@ -1,27 +1,28 @@
 import os
 import bz2
 import shutil
+import subprocess
 
 
 class Data:
     def __init__(self, project, data_type):
-        assert data_type in ['dump', 'parsed', 'graph', 'gt_graph', 'error'], \
-            'ERROR. Please pass a valid data_type: dump, parsed, graph, gt_graph, error'
+        assert data_type in ['parsed', 'graph', 'gt_graph'], \
+            'ERROR. Please pass a valid data_type: parsed, graph, gt_graph'
         self.project = project
-        self.path = self.project.path
         self.data_type = data_type
-        if self.data_type == 'dump':
-            self.data_path = self.project.dump_data_path
-        elif self.data_type == 'parsed':
-            self.data_path = self.project.parsed_data_path
-        elif self.data_type == 'graph':
-            self.data_path = self.project.graph_data_path
-        elif self.data_type == 'error':
-            self.data_path = self.project.error_data_path
-        elif self.data_type == 'gt_graph':
-            self.data_path = self.project.gt_graph_path
-        self.data_status = None  # ''
-        self.data = {}
+        self.data_path = self.project.pinfo['path'][data_type]
+        if data_type == 'parsed' or data_type == 'graph':
+            self.data = self.project.pinfo['data'][data_type]
+        elif data_type == 'gt_graph':
+            self.data = self.project.pinfo[data_type]
+
+
+    def check_file(self, file):
+        if os.path.exists(os.path.join(self.data_path, file)):
+            exists = True
+        else:
+            exists = False
+        return exists
 
     def check_files(self, file_list):
         exists = True
@@ -30,51 +31,70 @@ class Data:
                 exists = False
         return exists
 
-    def check_filetype(self, file_list):
+    @staticmethod
+    def check_file_type(file_list):
         new_list = []
         for f in file_list:
             if f[-3:] == 'bz2':
                 new_list.append([f, 'bz2'])
+            elif f[-2:] == '7z':
+                new_list.append([f, '7z'])
             elif f[-3:] == 'csv':
                 new_list.append([f, 'csv'])
             else:
                 new_list.append([f, 'unknown'])
         return new_list
 
-    def file_handling(self, source_file, action):
+    @staticmethod
+    def file_handling(source_file, action):
         if action == 'decompress':
-            file = source_file[:-4]
-            with open(file, 'wb') as new_file, open(source_file, 'rb') as source:
-                decompressor = bz2.BZ2Decompressor()
-                for data in iter(lambda: source.read(1024000), b''):
-                    new_file.write(decompressor.decompress(data))
-            return file
+            if source_file[-3:] == 'bz2':
+                decompressed_file = source_file[:-4]
+                with open(decompressed_file, 'wb') as new_file, open(source_file, 'rb') as source:
+                    decompressor = bz2.BZ2Decompressor()
+                    for data in iter(lambda: source.read(1024000), b''):
+                        new_file.write(decompressor.decompress(data))
+                return decompressed_file
+            elif source_file[-2:] == '7z':
+                subprocess.call(['7z', 'e', source_file])
+                return source_file[:-3]
+            else:
+                return source_file
         elif action == 'compress':
-            file = source_file + '.bz2'
-            with open(source_file, 'rb') as input:
-                with bz2.BZ2File(file, 'wb', compresslevel=9) as output:
-                    shutil.copyfileobj(input, output)
-            return file
+            compressed_file = source_file + '.7z'
+            subprocess.call(['7z', 'a', compressed_file, source_file])
+            # Todo: Check if the file can be removed safely.
+            # os.remove(source_file)
+            return compressed_file
         elif action == 'remove':
             os.remove(source_file)
             return
 
-    def decompress_data_files(self, remove_compressed=False):
-        new_data_dict = {}
-        for type, file_list in self.data.items():
-            new_file_list = []
-            for f in file_list:
-                if f[1] == 'bz2':
-                    new_file = self.file_handling(os.path.join(self.data_path, f[0]), 'decompress')
-                    print(new_file)
-                    new_file_list.append([f[0][:-4], 'csv'])
-                elif f[1] == 'csv':
-                    new_file_list.append([f[0], 'csv'])
-            new_data_dict[type] = new_file_list
-        if remove_compressed:
-            for type, file_list in self.data.items():
+    def process_file_list(self, file_list, action, remove):
+        file_list = self.check_file_type(file_list)
+        new_file_list = []
+        for f in file_list:
+            new_file = self.file_handling(os.path.join(self.data_path, f[0]), action)
+            new_file_list.append([new_file])
+        if remove:
+            if action == 'decompress':
                 for f in file_list:
-                    if f[1] == 'bz2':
+                    if f[1] == 'bz2' or f[1] == '7z':
                         self.file_handling(os.path.join(self.data_path, f[0]), 'remove')
+            elif action == 'compress':
+                if f[1] == 'csv':
+                    self.file_handling(os.path.join(self.data_path, f[0]), 'remove')
+        return new_file_list
+
+    def process_data_files(self, action, remove=False):
+        new_data_dict = {}
+        for key, value in self.data.items():
+            if type(value) == list:
+                new_data_dict[key] = self.process_file_list(value, action, remove)
+            if type(value) == str:
+                new_data_dict[key] = self.file_handling(os.path.join(self.data_path, value), action)
+                if remove:
+                    os.remove(os.path.join(self.data_path, value))
         self.data = new_data_dict
-        return
+        return self.data
+

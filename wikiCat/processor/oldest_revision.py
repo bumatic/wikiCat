@@ -7,24 +7,25 @@ import os
 
 
 class OldestRevision(SparkProcessorGraph):
-    def __init__(self, project, fixed='fixed_none', errors='errors_removed'):
-        SparkProcessorGraph.__init__(self, project, fixed=fixed, errors=errors)
-        if 'events' in self.data_obj.data[self.data_status]:
-            self.events_files = self.data_obj.data[self.data_status]['events']
+    def __init__(self, project): #, fixed='fixed_none', errors='errors_removed'
+        SparkProcessorGraph.__init__(self, project) # , fixed=fixed, errors=errors
+        if 'events' in self.project.pinfo['data']['graph'].keys():  # data_obj.data[self.data_status]:
+            self.events_files = self.project.pinfo['data']['graph']['events']
         else:
             print('No csv with events available')
-        if 'nodes' in self.data_obj.data[self.data_status]:
-            self.nodes_files = self.data_obj.data[self.data_status]['nodes']
+        if 'nodes' in self.project.pinfo['data']['graph'].keys():
+            self.nodes_files = self.project.pinfo['data']['graph']['nodes']
         else:
             print('No csv with nodes available')
-        if 'edges' in self.data_obj.data[self.data_status]:
-            self.edges_files = self.data_obj.data[self.data_status]['edges']
+        if 'edges' in self.project.pinfo['data']['graph'].keys():
+            self.edges_files = self.project.pinfo['data']['graph']['edges']
         else:
             print('No csv with edges available')
-        if 'gt' in self.data_obj.data[self.data_status]:
-            self.gt_file = self.data_obj.data[self.data_status]['gt']
-        else:
-            print('No graph_tool gt file available')
+
+        #if 'gt' in self.data_obj.data[self.data_status]:
+        #    self.gt_file = self.data_obj.data[self.data_status]['gt']
+        #else:
+        #    print('No graph_tool gt file available')
 
     def get(self, seed=None):
         # Create a SparkSession
@@ -42,7 +43,7 @@ class OldestRevision(SparkProcessorGraph):
             revision_info_df = spark.sql('SELECT * FROM revisions '
                                          'WHERE source = ' + str(seed) + ' OR target = ' + str(seed))
 
-        # Get Mininum Revision
+        # Get mininum revision
         minimum = revision_info_df.select('revision').rdd.min()[0]
         minimum = str(datetime.fromtimestamp(minimum))
 

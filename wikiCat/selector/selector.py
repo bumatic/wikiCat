@@ -1,24 +1,27 @@
-import findspark
-findspark.init()
-from pyspark.sql import SparkSession
 from wikiCat.processor.spark_processor_graph import SparkProcessorGraph
 from dateutil import parser
 from datetime import datetime
 import pandas as pd
 import os
+#import findspark
+#findspark.init()
+#from pyspark.sql import SparkSession
+
 
 class Selector(SparkProcessorGraph): #PandasProcessorGraph
-    def __init__(self, graph):
-        self.graph = graph
-        self.data = self.graph.data
+    def __init__(self, project):
+        #self.graph = graph
+        #self.data = self.graph.data
+        self.project = project
+        self.graph = self.project.graph
+        self.data = self.project.pinfo['gt_graph']
         assert self.graph.curr_working_graph is not None, 'Error. Set a current working graph before creating ' \
                                                           'a selector.'
-
-        self.project = graph.project
-        assert self.project.start_date is not None, 'Error. The project has no start date. Please generate it with ' \
-                                                    'wikiCat.wikiproject.Project.find_start_date()'
-        assert self.project.dump_date is not None, 'Error. The project has no start date. Please set it with ' \
-                                                   'wikiCat.wikiproject.Project.set_dump_date(date)'
+        assert 'start_date' in self.project.pinfo.keys(), 'Error. The project has no start date. Please generate' \
+                                                          'it with wikiCat.wikiproject.Project.find_start_date()'
+        assert 'dump_date' in self.project.pinfo.keys() is not None, 'Error. The project has no dump date. Please set ' \
+                                                                     'it with wikiCat.wikiproject.Project.set_' \
+                                                                     'dump_date(date)'
 
         SparkProcessorGraph.__init__(self, self.project)
         self.graph_id = self.graph.curr_working_graph
@@ -27,8 +30,8 @@ class Selector(SparkProcessorGraph): #PandasProcessorGraph
         self.graph_path = self.graph.curr_data_path
         self.source_location = self.graph.source_location
         self.base_path = os.path.split(self.graph_path)[0]
-        self.start_date = self.project.start_date.timestamp()
-        self.end_date = self.project.dump_date.timestamp()
+        self.start_date = parser.parse(self.project.pinfo['start_date']).timestamp()
+        self.end_date = parser.parse(self.project.pinfo['dump_date']).timestamp()
         self.results = {}
         self.gt_wiki_id_map_path, self.gt_wiki_id_map_file = self.find_gt_wiki_id_map()
 
@@ -42,7 +45,8 @@ class Selector(SparkProcessorGraph): #PandasProcessorGraph
             path = self.data['main']['location']
         return path, file
 
-    def load_pandas_df(self, file, columns):
+    @staticmethod
+    def load_pandas_df(file, columns):
         df = pd.read_csv(file, header=None, delimiter='\t', names=columns)
         return df
 

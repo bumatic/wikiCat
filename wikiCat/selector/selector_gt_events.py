@@ -1,7 +1,10 @@
-import os
 from datetime import datetime
-
 from wikiCat.selector.selector import Selector
+import os
+import findspark
+findspark.init()
+from pyspark import SparkConf, SparkContext
+from pyspark.sql import SparkSession
 
 
 class GtEvents(Selector):
@@ -22,7 +25,7 @@ class GtEvents(Selector):
 
         # Create results path and filename
         results_path = os.path.join(self.graph.curr_data_path, str(title))
-        print(results_path)
+        #print(results_path)
         self.check_results_path(results_path)
         events_results_file = str(title) + '_' + self.graph.source_events[0]
 

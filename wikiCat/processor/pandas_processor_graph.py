@@ -4,29 +4,29 @@ import os
 
 
 class PandasProcessorGraph(Processor):
-    #TODO check where this is used
-    def __init__(self, project, fixed='fixed_none', errors='errors_removed'):
+    # TODO check where this is used
+    def __init__(self, project):
         Processor.__init__(self, project, 'graph')
-        self.project = self.project
-        self.path = self.project.graph_data_path
-        self.fixed = fixed
-        self.errors = errors
-        self.data_status = 'graph__' + self.fixed + '__' + self.errors
-        if 'events' in self.data_obj.data[self.data_status]:
-            self.events_files = self.data_obj.data[self.data_status]['events']
+        # self.project = self.project
+        self.path = self.project.pinfo['path']['graph']
+        # self.data_status = 'graph__' + fixed + '__' + errors
+
+        if 'events' in self.project.pinfo['data']['graph'].keys():
+            self.events_files = self.project.pinfo['data']['graph']['events']
             self.events = pd.DataFrame()
         else:
             print('No csv with events available')
-        if 'nodes' in self.data_obj.data[self.data_status]:
-            self.nodes_files = self.data_obj.data[self.data_status]['nodes']
+        if 'nodes' in self.project.pinfo['data']['graph'].keys():
+            self.nodes_files = self.project.pinfo['data']['graph']['nodes']
             self.nodes = pd.DataFrame()
         else:
             print('No csv with nodes available')
-        if 'edges' in self.data_obj.data[self.data_status]:
-            self.edges_files = self.data_obj.data[self.data_status]['edges']
+        if 'edges' in self.project.pinfo['data']['graph'].keys():
+            self.edges_files = self.project.pinfo['data']['graph']['edges']
             self.edges = pd.DataFrame()
         else:
             print('No csv with edges available')
+
         #if 'gt' in self.data_obj.data[self.data_status]:
         #    self.gt_file = self.data_obj.data[self.data_status]['gt']
         #else:
@@ -34,12 +34,12 @@ class PandasProcessorGraph(Processor):
 
     def load_events(self, file, columns=[]):
         # Default events columns: ['source', 'target', 'revision' 'event', ('cscore)]
-        # TODO Implement cscore Handling
         self.events = pd.read_csv(os.path.join(self.path, file), header=None, delimiter='\t',
                                   names=columns)
 
     def load_edges(self, file, columns=[]):
         # Default edge columns ['source', 'target', 'type', ('cscore')]
+        print(self.path)
         self.edges = pd.read_csv(os.path.join(self.path, file), header=None, delimiter='\t',
                                  names=columns)
 

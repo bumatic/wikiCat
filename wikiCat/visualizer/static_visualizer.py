@@ -4,6 +4,8 @@ from wikiCat.visualizer.visualizer import Visualizer
 class StaticVisualizer(Visualizer):
     def __init__(self, graph):
         Visualizer.__init__(self, graph)
+
+        '''
         self.set_drawing_properties(vertex_text=None,
                                     vertex_text_color='black',
                                     vertex_font_size=200,
@@ -15,3 +17,6 @@ class StaticVisualizer(Visualizer):
                                     edge_color='lightgray',
                                     edge_pen_width=1.2)
         self.output_dimension = 1000
+        '''
+        # TODO: ???? LOAD PROPERTIES HERE?
+

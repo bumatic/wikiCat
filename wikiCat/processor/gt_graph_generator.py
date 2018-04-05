@@ -5,12 +5,12 @@ import shutil
 
 
 class GtGraphGenerator(PandasProcessorGraph):
-    def __init__(self, project, fixed='fixed_none', errors='errors_removed'):
+    def __init__(self, project):  # , fixed='fixed_none', errors='errors_removed'
         PandasProcessorGraph.__init__(self, project)
         self.graph = Graph()
-        self.gt_filename = 'gt_graph_' + self.data_status + '.gt'
-        #self.gt_edges_filename = 'gt_edges_'+self.data_status + '.json'
-        self.gt_nodes_filename = 'gt_nodes_' + self.data_status + '.csv'
+        self.gt_filename = 'gt_graph.gt'
+        self.gt_nodes_filename = 'gt_nodes_map.csv'
+        self.data_path = os.path.join(self.data_path, 'main')
 
         # Create and internalize node property maps
         self.node_id = self.graph.new_vertex_property('string')
@@ -31,8 +31,8 @@ class GtGraphGenerator(PandasProcessorGraph):
         self.node_id_list = []
 
     def create_gt_graph(self, cscore=True):
-        self.create_nodes()
-        self.create_edges()
+        self.create_nodes(cscore=cscore)
+        self.create_edges(cscore=cscore)
         self.save_graph_gt()
         self.register_gt_graph()
 
@@ -85,39 +85,13 @@ class GtGraphGenerator(PandasProcessorGraph):
         # registering the file in the project needs to bee implemented.
         self.graph.save(os.path.join(self.data_path, self.gt_filename), fmt='gt')
         self.write_list(os.path.join(self.data_path, self.gt_nodes_filename), self.node_id_list)
-        #self.write_json(os.path.join(self.data_path, self.gt_edges_filename), self.edge_dict)
-        #self.add_gt_graph()
+        # self.write_json(os.path.join(self.data_path, self.gt_edges_filename), self.edge_dict)
+        # self.add_gt_graph()
         pass
 
     def register_gt_graph(self):
-        self.register_results('gt_graph', gt_file=self.gt_filename, gt_wiki_id_map=self.gt_nodes_filename,
-                              gt_source=self.data_status)
-
-
-
-
-#
-#        self.results_path = os.path.join(self.results_path, self.data_status)
-#        if not os.path.isdir(self.results_path):
-#            os.makedirs(self.results_path)
- ##       shutil.move(os.path.join(self.data_path, self.gt_filename), os.path.join(self.results_path, self.gt_filename))
-  #      shutil.move(os.path.join(self.data_path, self.gt_nodes_filename), os.path.join(self.results_path, self.gt_nodes_filename))
-   #     # shutil.move(os.path.join(self.data_path, self.gt_edges_filename), os.path.join(self.results_path, self.gt_edges_filename))
-    #    for file in self.nodes_files:
-     ##       shutil.copy(os.path.join(self.data_path, file), os.path.join(self.results_path, file))
-
-
-        #TODO THIS NEEDS TO BE CHANGED TO REGISTER GT GRAPH AS GRAPH OBJECT
-        #self.register_results('gt_graph', nodes=self.nodes_files, edges=self.edges_files, events=self.events_files,
-        #                      gt=[self.gt_filename, self.gt_nodes_filename, self.gt_edges_filename],
-        #                      fixed=self.fixed, errors=self.errors, override=True)
-       # return
-
-
-
-
-
-
-
-
-
+        results = {
+            'gt_file': self.gt_filename,
+            'gt_nodes_id_map': self.gt_nodes_filename
+        }
+        self.register_gt_results('main', results)

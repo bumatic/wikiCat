@@ -1,11 +1,15 @@
 import os
-
 from wikiCat.selector.selector import Selector
+import findspark
+findspark.init()
+from pyspark.sql import SparkSession
+from pyspark import SparkConf, SparkContext
+from pyspark.sql.functions import col
 
 
 class SubGraph(Selector):
-    def __init__(self, graph):
-        Selector.__init__(self, graph)
+    def __init__(self, project):
+        Selector.__init__(self, project)
 
     def create(self, title=None, seed=None, cats=True, subcats=2, supercats=2, links=False, inlinks=2, outlinks=2):
 

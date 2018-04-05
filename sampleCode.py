@@ -1,5 +1,7 @@
 from wikiCat.wikiproject import Project
 
+# To be included into readme
+
 mp = Project(project_path='old_project')
 
 # Creating a new project

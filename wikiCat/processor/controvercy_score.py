@@ -14,7 +14,7 @@ import os
 
 
 class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
-    def __init__(self, project, fixed='fixed_none', errors='errors_removed'):
+    def __init__(self, project):  # , fixed='fixed_none', errors='errors_removed'
         PandasProcessorGraph.__init__(self, project)
         SparkProcessorGraph.__init__(self, project)
         self.growth_rate = 1
@@ -40,6 +40,11 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
                 cscore = cscore * math.exp(-1 * self.decay_rate * delta) + self.growth_rate
             results.append([ts_list[i], source, target, cscore])
         return results
+
+    def calculate(self):
+        self.calculate_edge_score()
+        self.calculate_avg_edge_score()
+        self.calculate_avg_node_score()
 
     def calculate_edge_score(self):
         # Create a SparkSession
@@ -78,13 +83,12 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
             os.remove(os.path.join(self.data_path, file))
             os.rename(tmp_results_file, results_file)
 
-
     def calculate_avg_node_score(self):
         # TODO Assumes that only one nodes file exists, needs to be fixed for link data
-
         # Create a SparkSession
         # Note: In case its run on Windows and generates errors use (tmp Folder mus exist):
-        # spark = SparkSession.builder.config("spark.sql.warehouse.dir", "file:///C:/temp").appName("Postprocessing").getOrCreate()
+        # spark = SparkSession.builder.config("spark.sql.warehouse.dir", "file:///C:/temp").
+        # appName("Postprocessing").getOrCreate()
         spark = SparkSession.builder.appName("Calculate_Controvercy_Score_Nodes").getOrCreate()
 
         nodes_source = spark.sparkContext.textFile(os.path.join(self.data_path, self.nodes_files[0]))

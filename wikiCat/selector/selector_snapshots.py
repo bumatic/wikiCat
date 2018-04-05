@@ -2,11 +2,15 @@ import os
 from datetime import datetime
 
 from wikiCat.selector.selector import Selector
+import findspark
+findspark.init()
+from pyspark.sql import SparkSession
+from pyspark import SparkConf, SparkContext
 
 
 class Snapshots(Selector):
-    def __init__(self, graph):
-        Selector.__init__(self, graph)
+    def __init__(self, project):
+        Selector.__init__(self, project)
 
     def create(self, title, slice='year', cscore=True, start_date=None, end_date=None):
         # TODO CHECK IF THIS WORKS!

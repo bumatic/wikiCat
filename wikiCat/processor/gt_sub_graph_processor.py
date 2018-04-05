@@ -7,13 +7,12 @@ import os
 class SubGraphProcessor(GtGraphProcessor):
     def __init__(self, graph):
         GtGraphProcessor.__init__(self, graph)
-        #self.graph = graph
         self.gt = Graph()
         self.gt_filename = None
         self.data = self.graph.data
         self.working_graph = self.graph.curr_working_graph
         self.working_graph_path = self.graph.data[self.working_graph]['location']
-        self.results_path = os.path.join(self.project.results_path, self.working_graph)
+        self.results_path = os.path.join(self.project.pinfo['path']['results'], self.working_graph)
         self.gt_wiki_id_map_path, self.gt_wiki_id_map_file = self.find_gt_wiki_id_map()
         self.gt_wiki_id_map = pd.read_csv(os.path.join(self.gt_wiki_id_map_path, self.gt_wiki_id_map_file),
                                           header=None, delimiter='\t', names=['wiki_id', 'gt_id'])
@@ -97,7 +96,7 @@ class SubGraphProcessor(GtGraphProcessor):
                     os.path.join(self.data[self.working_graph]['location'], self.data[self.working_graph]['gt_file']))
                 self.gt_filename = self.data[self.working_graph]['gt_file']
             else:
-                print('Create view from super graph')
+                #print('Create view from super graph')
                 super_graph = self.data[self.working_graph]['derived_from']
                 self.gt.load(os.path.join(self.data[super_graph]['location'], self.data[super_graph]['gt_file']))
                 #print(self.gt)
@@ -106,8 +105,8 @@ class SubGraphProcessor(GtGraphProcessor):
                 self.gt = graph_view
                 #print(self.gt)
         else:
-            print(self.working_graph_path)
-            print(self.data[self.working_graph]['gt_file'])
+            #print(self.working_graph_path)
+            #print(self.data[self.working_graph]['gt_file'])
             self.gt.load(os.path.join(self.data[self.working_graph]['location'], self.data[self.working_graph]['gt_file']))
             self.gt_filename = self.data[self.working_graph]['gt_file']
 
@@ -129,8 +128,8 @@ class SubGraphProcessor(GtGraphProcessor):
         #print(self.gt_wiki_id_map)
         df = pd.merge(df, self.gt_wiki_id_map, how='inner', left_on='source', right_on='wiki_id')
         df = df[['gt_id', 'target']]
-        print('resolved df')
-        print(df)
+        #print('resolved df')
+        #print(df)
         df.columns = ['source', 'target']
         df = pd.merge(df, self.gt_wiki_id_map, how='inner', left_on='target', right_on='wiki_id')
         df = df[['source', 'gt_id']]
@@ -138,7 +137,6 @@ class SubGraphProcessor(GtGraphProcessor):
         return df
 
     def save_gt_graph(self):
-
         self.gt.save(os.path.join(self.working_graph_path, self.gt_filename), fmt='gt')
         self.update_graph_data(self.gt_filename)
 
