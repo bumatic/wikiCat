@@ -46,5 +46,5 @@ class OldestRevision(SparkProcessorGraph):
         # Get mininum revision
         minimum = revision_info_df.select('revision').rdd.min()[0]
         minimum = str(datetime.fromtimestamp(minimum))
-
+        del spark
         return minimum

@@ -50,8 +50,8 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
         # Create a SparkSession
         # Note: In case its run on Windows and generates errors use (tmp Folder mus exist):
         # spark = SparkSession.builder.config("spark.sql.warehouse.dir", "file:///C:/temp").appName("Postprocessing").getOrCreate()
-        conf = SparkConf().setMaster("local[*]").setAppName("Test")
-        sc = SparkContext(conf=conf)
+        #conf = SparkConf().setMaster("local[*]").setAppName("Test")
+        #sc = SparkContext(conf=conf)
         spark = SparkSession(sc).builder.appName("Calculate_Controvercy_Score_Edges").getOrCreate()
 
         for file in self.events_files:
@@ -82,6 +82,7 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
             self.assemble_spark_results(spark_results_path, tmp_results_file)
             os.remove(os.path.join(self.data_path, file))
             os.rename(tmp_results_file, results_file)
+        del spark
 
     def calculate_avg_node_score(self):
         # TODO Assumes that only one nodes file exists, needs to be fixed for link data
@@ -119,6 +120,7 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
             self.assemble_spark_results(spark_results_path, tmp_results_file)
             os.remove(os.path.join(self.data_path, self.nodes_files[0]))
             os.rename(tmp_results_file, results_file)
+        del spark
 
     def calculate_avg_edge_score(self):
         # TODO Assumes that only one edges file exists, needs to be fixed for link data
@@ -153,4 +155,6 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
 
             os.remove(os.path.join(self.data_path, self.edges_files[0]))
             os.rename(tmp_results_file, results_file)
+        del spark
+
 
