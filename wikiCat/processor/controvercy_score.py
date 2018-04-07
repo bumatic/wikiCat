@@ -52,7 +52,8 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
         # spark = SparkSession.builder.config("spark.sql.warehouse.dir", "file:///C:/temp").appName("Postprocessing").getOrCreate()
         #conf = SparkConf().setMaster("local[*]").setAppName("Test")
         #sc = SparkContext(conf=conf)
-        spark = SparkSession(sc).builder.appName("Calculate_Controvercy_Score_Edges").getOrCreate()
+        #spark = SparkSession(sc).builder.appName("Calculate_Controvercy_Score_Edges").getOrCreate()
+        spark = SparkSession.builder.appName("Calculate_Controvercy_Score_Edges").getOrCreate()
 
         for file in self.events_files:
             results_file = os.path.join(self.data_path, file)
