@@ -8,7 +8,7 @@ from wikiCat.wikiproject import Project
 start = datetime.now()
 mp = Project()
 #mp.generate_graph_data(data_type='cats')
-mp.add_graph_data('cats_1_nodes.csv', 'cats_1_edges.csv', 'cats_1_events.csv')
+#mp.add_graph_data('cats_1_nodes.csv', 'cats_1_edges.csv', 'cats_1_events.csv')
 mp.find_start_date()
 mp.calculate_cscores()
 mp.generate_gt_graph()
