@@ -78,7 +78,7 @@ class GraphDataGenerator(SparkProcessorParsed):
         self.register_graph_results('graph', results)
 
     def handle_results(self, results):
-        for key, value in results.keys():
+        for key, value in results.items():
             self.append_data(value['nodes'], 'nodes.csv')
             self.append_data(value['edges'], 'edges.csv')
             self.append_data(value['events'], 'events.csv')
