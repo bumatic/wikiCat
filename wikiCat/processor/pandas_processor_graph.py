@@ -39,7 +39,6 @@ class PandasProcessorGraph(Processor):
 
     def load_edges(self, file, columns=[]):
         # Default edge columns ['source', 'target', 'type', ('cscore')]
-        print(self.path)
         self.edges = pd.read_csv(os.path.join(self.path, file), header=None, delimiter='\t',
                                  names=columns)
 

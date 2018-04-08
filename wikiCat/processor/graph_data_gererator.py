@@ -46,7 +46,7 @@ class GraphDataGenerator(SparkProcessorParsed):
             results_basename = 'cats'
             page_data = self.get_page_data('cat_data')
             results['cats'] = self.generate(edge_type, results_basename, page_data)
-            print(results)
+            #print(results)
         elif create == 'links':
             link_data_type = 'links'
             edge_type = 'links'
@@ -100,7 +100,7 @@ class GraphDataGenerator(SparkProcessorParsed):
 
         # Infer the schema, and register the DataFrames as tables.
         page_info_source = spark.sparkContext.textFile(os.path.join(self.data_path, self.page_info))
-        print(page_info_source)
+        #print(page_info_source)
         page_info = page_info_source.map(self.mapper_page_info)
         page_info_df = spark.createDataFrame(page_info).cache()
         page_info_df.createOrReplaceTempView("info")

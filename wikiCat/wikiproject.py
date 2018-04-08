@@ -23,9 +23,9 @@ class Project:
     def __init__(self, project_path='project', project_info='project_info.json', title='New WikiCat Project',
                  description='This is a WikiCat Project', dump_date=None, init=False):
 
+        gt_props_path = os.path.join(project_path, '00_visualization_properties')
         data_path = os.path.join(project_path, '01_data')
         gt_graphs_path = os.path.join(project_path, '02_gt_graphs')
-        gt_props_path = os.path.join(project_path, '00_visualization_properties')
         results_path = os.path.join(project_path, '03_results')
         data_parsed_path = os.path.join(data_path, '01_parsed')
         data_graph_path = os.path.join(data_path, '02_data_graph')
@@ -340,10 +340,9 @@ class Project:
 
     # Funktioniert noch nicht. Außerdem: MACHT das hier Sinn? Oder doch lieber in graph objekt????
     def create_subgraph(self, title=None, seed=None, cats=True, subcats=1, supercats=1,
-                        links=False, inlinks=1, outlinks=1):
+                        links=False, inlinks=1, outlinks=1, cscore=True):
         self.graph.create_subgraph(title=title, seed=seed, cats=cats, subcats=subcats, supercats=supercats,
-                                   links=links, inlinks=inlinks, outlinks=outlinks, slice=slice, cscore=cscore,
-                                   start_date=start_date, end_date=end_date)
+                                   links=links, inlinks=inlinks, outlinks=outlinks)
 
     def create_snapshots(self, graph=None, title='Snapshots', slice='year', cscore=True,
                          start_date='2003-01-01', end_date=None):

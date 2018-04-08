@@ -5,13 +5,18 @@ from wikiCat.wikiproject import Project
 #mp.set_title = 'WikiCat'
 #mp.set_dump_date = '2018-03-01'
 
-start = datetime.now()
+
 mp = Project()
-#mp.generate_graph_data(data_type='cats')
-#mp.add_graph_data('cats_1_nodes.csv', 'cats_1_edges.csv', 'cats_1_events.csv')
+
+#mp.add_graph_data('test_nodes.csv', 'test_edges.csv', 'test_events.csv')
 #mp.find_start_date()
 #mp.calculate_cscores()
-mp.generate_gt_graph()
+#mp.generate_gt_graph()
+
+#mp.find_start_date()
+mp.create_subgraph('testtest', [10010944])
+#mp.crea
+
 #end = datetime.now()
 #duration = end-start
 #print('Duration:')

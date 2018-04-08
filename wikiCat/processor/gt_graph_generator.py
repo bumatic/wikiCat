@@ -79,12 +79,16 @@ class GtGraphGenerator(PandasProcessorGraph):
 
             else:
                 counter = counter + 1
-        print('Number of Edges not created: '+ str(counter))
+        print('Number of Edges not created: ' + str(counter))
 
     def save_graph_gt(self):
         # registering the file in the project needs to bee implemented.
-        self.graph.save(os.path.join(self.data_path, self.gt_filename), fmt='gt')
-        self.write_list(os.path.join(self.data_path, self.gt_nodes_filename), self.node_id_list)
+
+        if not os.path.isdir(os.path.join(self.project.pinfo['path']['gt_graph'], 'main')):
+            os.mkdir(os.path.join(self.project.pinfo['path']['gt_graph'], 'main'))
+
+        self.graph.save(os.path.join(self.project.pinfo['path']['gt_graph'], 'main', self.gt_filename), fmt='gt')
+        self.write_list(os.path.join(self.project.pinfo['path']['gt_graph'], 'main', self.gt_nodes_filename), self.node_id_list)
         # self.write_json(os.path.join(self.data_path, self.gt_edges_filename), self.edge_dict)
         # self.add_gt_graph()
         pass
@@ -92,6 +96,13 @@ class GtGraphGenerator(PandasProcessorGraph):
     def register_gt_graph(self):
         results = {
             'gt_file': self.gt_filename,
-            'gt_nodes_id_map': self.gt_nodes_filename
+            'gt_wiki_id_map': self.gt_nodes_filename,
+            'location': os.path.join(self.project.pinfo['path']['gt_graph'], 'main'),
+            'source_nodes': self.project.pinfo['data']['graph']['nodes'],
+            'source_events': self.project.pinfo['data']['graph']['events'],
+            'source_edges': self.project.pinfo['data']['graph']['edges'],
+            'source_location': self.project.pinfo['path']['graph']
         }
         self.register_gt_results('main', results)
+
+
