@@ -11,11 +11,9 @@ mp = Project()
 #mp.add_graph_data('test_nodes.csv', 'test_edges.csv', 'test_events.csv')
 #mp.find_start_date()
 #mp.calculate_cscores()
-#mp.generate_gt_graph()
+mp.generate_gt_graph()
 
-#mp.find_start_date()
-mp.create_subgraph('testtest', [10010944])
-#mp.crea
+#mp.create_subgraph('testtest', [10010944])
 
 #end = datetime.now()
 #duration = end-start
