@@ -4,11 +4,11 @@ from wikiCat.wikiproject import Project
 mp = Project()
 
 # All
-mp.create_snapshots(title='first_year_snapshots_month', slice='month', start_date='2003-01-05', end_date='2004-01-04')
-mp.create_static_viz('main', 'SFDP', snapshots='first_year_snapshots_month', drawing_props_file='static.json')
+#mp.create_snapshots(title='first_year_snapshots_month', slice='month', start_date='2003-01-05', end_date='2004-01-04')
+#mp.create_static_viz('main', 'SFDP', snapshots='first_year_snapshots_month', drawing_props_file='static.json')
 
-mp.create_snapshots(title='first_year_snapshots_day', slice='day', start_date='2003-01-05', end_date='2004-01-05')
-mp.create_static_viz('main', 'SFDP', snapshots='first_year_snapshots_day', drawing_props_file='static.json')
+#mp.create_snapshots(title='first_year_snapshots_day', slice='day', start_date='2003-01-05', end_date='2004-01-05')
+#mp.create_static_viz('main', 'SFDP', snapshots='first_year_snapshots_day', drawing_props_file='static.json')
 
 mp.create_snapshots(title='snapshots_year', slice='year')
 #mp.create_static_viz('main', 'SFDP', snapshots='first_year_snapshots_day', drawing_props_file='static.json')

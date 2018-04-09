@@ -345,7 +345,7 @@ class Project:
                                    links=links, inlinks=inlinks, outlinks=outlinks)
 
     def create_snapshots(self, graph=None, title='Snapshots', slice='year', cscore=True,
-                         start_date='2003-01-01', end_date=None):
+                         start_date='2003-01-05', end_date=None):
         self.graph.create_snapshots(graph=graph, title=title, slice=slice, cscore=cscore,
                                     start_date=start_date, end_date=end_date)
 
