@@ -3,6 +3,7 @@ from wikiCat.processor.gt_graph_generator import GtGraphGenerator
 from wikiCat.processor.gt_sub_graph_processor import SubGraphProcessor
 from wikiCat.selector.selector_sub_graph import SubGraph
 from wikiCat.selector.selector_snapshots import Snapshots
+from wikiCat.selector.selector_cscore import SelectorCscore
 from wikiCat.processor.oldest_revision import OldestRevision
 
 
@@ -145,6 +146,9 @@ class WikiGraph(Data):
         assert type(data) is dict, 'Error: Data for updating a graph needs to be passed as dict.'
         self.data = data
         self.project.update_gt_graph_data(self.data) #self.curr_working_graph,
+
+    def get_highest_cscores(self, cscore_type, n=100, cats_only=False, save=True):
+        SelectorCscore(self.graph).get_highest_cscores(cscore_type, n=n, cats_only=cats_only, save=save)
 
 
     '''
