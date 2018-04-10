@@ -302,7 +302,7 @@ class Project:
         return exists
 
     def find_errors_in_parsed(self, data_type='cats', override=False):
-        if 'errors' in self.pinfo['data'].keys():
+        if 'errors' in self.pinfo['data'].keys() and not override:
             print('Error data has already been generated. Pass override=True to replace it.')
             return False
         if data_type == 'cats':
