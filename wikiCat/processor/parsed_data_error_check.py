@@ -8,6 +8,7 @@ import os
 class ParsedDataErrorCheck(SparkProcessorParsed):
     def __init__(self, project, link_data_type):
         SparkProcessorParsed.__init__(self, project)
+        self.project
         self.link_data_type = link_data_type
         self.page_data = self.project.pinfo['data']['parsed'][self.link_data_type]
         self.error_path = self.project.pinfo['path']['errors']
@@ -138,6 +139,6 @@ class ParsedDataErrorCheck(SparkProcessorParsed):
             results[missing_titles_key] = [error_title_filename]
             missing_data_key = self.link_data_type + '_missing_info_titles_data'
             results[missing_data_key] = [error_data_filename]
-            self.register_results('errors', results)
+            self.project.register_results('errors', results)
         return
 

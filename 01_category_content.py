@@ -3,8 +3,6 @@ from wikiCat.wikiproject import Project
 
 mp = Project()
 
-# Find errors in parsed data
-mp.find_errors_in_parsed()
 
 # Contents 1sub 1super
 mp.create_subgraph(title='contents_1sub_1super', seed=[14105005], cats=True,
