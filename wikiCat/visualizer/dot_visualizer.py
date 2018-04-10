@@ -9,6 +9,22 @@ class DOT(GraphVizVisualizer):
     def __init__(self, graph):
         GraphVizVisualizer.__init__(self, graph)
 
+    def visualize(self, graph_view, outfile, drawing_props):
+        print('Is not yet implemented correctly')
+        '''
+        g = graph_view
+        props = self.process_drawing_properties(g, drawing_props)
+        out = os.path.join(self.results_path, 'dot_' + drawing_props['props_type'] + '_' + outfile + '.' + props['fmt'])
+        os.makedirs(os.path.dirname(out), exist_ok=True)
+        pos = sfdp_layout(g)
+        try:
+            
+        except Exception as e:
+            print(e)
+        '''
+
+    '''
+    # OLD IMPLEMENTATION WHICH PROBABLY WAS NOT CORRECT:
     def visualize(self, graph_view, outfile, outtype, vsize=None, vlabel=None, color_by_type=True, esize=None):
         print('create Viz')
         g = graph_view
@@ -36,3 +52,4 @@ class DOT(GraphVizVisualizer):
 
             #vcolor=self.drawing_props['vprops']['fill_color']
             ##2e3436
+    '''

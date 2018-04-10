@@ -13,6 +13,7 @@ project.7z
 animationTest.py
 CHECK IF REMOVE.py
 **/test/
+**/done/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
