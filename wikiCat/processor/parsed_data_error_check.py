@@ -68,7 +68,7 @@ class ParsedDataErrorCheck(SparkProcessorParsed):
                     results = {}
                 missing_ids_key = self.link_data_type + '_missing_info_ids'
                 results[missing_ids_key] = [error_filename]
-                self.register_graph_results('errors', results)
+                self.project.register_results('errors', results)
         return
 
     def find_unresolvable_target_titles(self):
