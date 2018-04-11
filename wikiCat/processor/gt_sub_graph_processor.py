@@ -16,7 +16,9 @@ class SubGraphProcessor(GtGraphProcessor):
         self.gt_wiki_id_map_path, self.gt_wiki_id_map_file = self.find_gt_wiki_id_map()
         self.gt_wiki_id_map = pd.read_csv(os.path.join(self.gt_wiki_id_map_path, self.gt_wiki_id_map_file),
                                           header=None, delimiter='\t', names=['wiki_id', 'gt_id'])
-
+        print(self.gt_wiki_id_map)
+        print(self.gt_wiki_id_map_file)
+        print(self.gt_wiki_id_map_path)
         #Print all class variables
         #self.pp = pprint.PrettyPrinter(indent=4)
         #v = vars(self)
@@ -112,20 +114,21 @@ class SubGraphProcessor(GtGraphProcessor):
     def create_gt_view(self, path, file):
         print('START CREATING GT VIEW FROM SUPER-GRAPH')
         prop_map = self.gt.new_edge_property('bool')
-
-        dtype = {
+        '''
+        dtype = {   
             'source': int,
             'target': int,
             'type': str,
             'cscore': float
         }
+        '''
         print(os.path.join(path, file))
         df = pd.read_csv(os.path.join(path, file), header=None, delimiter='\t',
-                         names=['source', 'target', 'type', 'cscore'], dtype=dtype, na_filter=False)
+                         names=['source', 'target', 'type', 'cscore'], na_filter=False)
         df = df[['source', 'target']]
-        #print(df)
+        print(df)
         df = self.resolve_ids(df)
-        #print(df)
+        print(df)
         for key, item in df.iterrows():
             print(key)
             print(item)
