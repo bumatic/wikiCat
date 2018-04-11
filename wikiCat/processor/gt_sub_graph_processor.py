@@ -119,7 +119,7 @@ class SubGraphProcessor(GtGraphProcessor):
             'type': str,
             'cscore': float
         }
-
+        print(os.path.join(path, file))
         df = pd.read_csv(os.path.join(path, file), header=None, delimiter='\t',
                          names=['source', 'target', 'type', 'cscore'], dtype=dtype, na_filter=False)
         df = df[['source', 'target']]
