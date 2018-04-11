@@ -125,6 +125,10 @@ class WikiGraph(Data):
         self.set_working_graph(key=title)
         SubGraphProcessor(self).create_gt_subgraph()
 
+    def create_gt_subgraph(self, title=None):
+        self.set_working_graph(key=title)
+        SubGraphProcessor(self).create_gt_subgraph()
+
     def create_snapshots(self, graph=None, title='Snapshots', slice='year', cscore=True,
                          start_date='2003-01-01', end_date=None):
         if graph is not None:

@@ -340,9 +340,12 @@ class Project:
 
     # Funktioniert noch nicht. Außerdem: MACHT das hier Sinn? Oder doch lieber in graph objekt????
     def create_subgraph(self, title=None, seed=None, cats=True, subcats=1, supercats=1,
-                        links=False, inlinks=1, outlinks=1, cscore=True):
+                        links=False, inlinks=1, outlinks=1):
         self.graph.create_subgraph(title=title, seed=seed, cats=cats, subcats=subcats, supercats=supercats,
                                    links=links, inlinks=inlinks, outlinks=outlinks)
+
+    def create_gt_subgraph(self, title=None):
+        self.graph.create_gt_subgraph(key=title)
 
     def create_snapshots(self, graph=None, title='Snapshots', slice='year', cscore=True,
                          start_date='2003-01-05', end_date=None):
