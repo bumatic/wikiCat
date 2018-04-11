@@ -62,6 +62,8 @@ class SubGraphProcessor(GtGraphProcessor):
 
     def create_gt_subgraph(self):
         gt_exists = self.check_gt()
+        print('gt exists?')
+        print(gt_exists)
         if not gt_exists:
             self.load()
             print('GRAPH LOADED, START CREATING THE VIEW')
@@ -96,7 +98,7 @@ class SubGraphProcessor(GtGraphProcessor):
                     os.path.join(self.data[self.working_graph]['location'], self.data[self.working_graph]['gt_file']))
                 self.gt_filename = self.data[self.working_graph]['gt_file']
             else:
-                #print('Create view from super graph')
+                print('Create view from super graph')
                 super_graph = self.data[self.working_graph]['derived_from']
                 self.gt.load(os.path.join(self.data[super_graph]['location'], self.data[super_graph]['gt_file']))
                 #print(self.gt)
@@ -111,8 +113,10 @@ class SubGraphProcessor(GtGraphProcessor):
             self.gt_filename = self.data[self.working_graph]['gt_file']
 
     def create_gt_view(self, path, file):
+        print('HIER')
         prop_map = self.gt.new_edge_property('bool')
-        df = pd.read_csv(os.path.join(path, file), header=None, delimiter='\t', names=['source', 'target', 'cscore', 'events'])
+        df = pd.read_csv(os.path.join(path, file), header=None, delimiter='\t',
+                         names=['source', 'target', 'cscore', 'events'], na_filter=False)
         df = df[['source', 'target']]
         #print(df)
         df = self.resolve_ids(df)
