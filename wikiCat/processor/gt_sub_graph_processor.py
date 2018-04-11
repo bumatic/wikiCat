@@ -92,28 +92,27 @@ class SubGraphProcessor(GtGraphProcessor):
             return False
 
     def load(self):
+        print('LOAD')
+        print(self.working_graph)
         if self.working_graph != 'main':
             if 'gt_file' in self.data[self.working_graph].keys():
                 self.gt.load(
                     os.path.join(self.data[self.working_graph]['location'], self.data[self.working_graph]['gt_file']))
                 self.gt_filename = self.data[self.working_graph]['gt_file']
             else:
-                print('Create view from super graph')
+                print('CREATE VIEW FROM SUPER-GRAPH. START LOADING SUPER-GRAPH')
                 super_graph = self.data[self.working_graph]['derived_from']
                 self.gt.load(os.path.join(self.data[super_graph]['location'], self.data[super_graph]['gt_file']))
-                #print(self.gt)
-                #print(self.edges)
+                print('SUPER-GRAPH LOADED.')
                 graph_view = self.create_gt_view(self.edges_location, self.edges[0])
                 self.gt = graph_view
                 #print(self.gt)
         else:
-            #print(self.working_graph_path)
-            #print(self.data[self.working_graph]['gt_file'])
             self.gt.load(os.path.join(self.data[self.working_graph]['location'], self.data[self.working_graph]['gt_file']))
             self.gt_filename = self.data[self.working_graph]['gt_file']
 
     def create_gt_view(self, path, file):
-        print('HIER')
+        print('START CREATING GT VIEW FROM SUPER-GRAPH')
         prop_map = self.gt.new_edge_property('bool')
         df = pd.read_csv(os.path.join(path, file), header=None, delimiter='\t',
                          names=['source', 'target', 'cscore', 'events'], na_filter=False)
