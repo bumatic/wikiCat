@@ -390,5 +390,6 @@ class Project:
             FR(self.graph).snapshots(snapshots, drawing_props_file=drawing_props_file)
 
     def get_highest_cscores(self, cscore_type, n=100, cats_only=False, save=True):
+        print('graph')
         self.graph.get_highest_cscores(cscore_type, n=n, cats_only=cats_only, save=save)
 
