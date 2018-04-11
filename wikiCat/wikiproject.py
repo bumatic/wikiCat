@@ -345,7 +345,7 @@ class Project:
                                    links=links, inlinks=inlinks, outlinks=outlinks)
 
     def create_gt_subgraph(self, title=None):
-        self.graph.create_gt_subgraph(key=title)
+        self.graph.create_gt_subgraph(title=title)
 
     def create_snapshots(self, graph=None, title='Snapshots', slice='year', cscore=True,
                          start_date='2003-01-05', end_date=None):
