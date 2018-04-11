@@ -4,8 +4,9 @@ from wikiCat.processor.pandas_processor import PandasProcessor
 
 class GtGraphProcessor(PandasProcessor):
 #class GtGraphProcessor(PandasProcessorGraph):
-    def __init__(self, graph):
-        self.graph = graph
+    def __init__(self, project):
+        self.project = project
+        self.graph = project.graph
         #self.project = self.graph.project
         PandasProcessor.__init__(self, self.project, 'gt_graph')  # , 'gt_graph'
         #PandasProcessorGraph.__init__(self, self.project) #, 'gt_graph'

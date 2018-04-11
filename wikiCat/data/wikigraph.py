@@ -152,7 +152,7 @@ class WikiGraph(Data):
         self.project.update_gt_graph_data(self.data) #self.curr_working_graph,
 
     def get_highest_cscores(self, cscore_type, n=100, cats_only=False, save=True):
-        SelectorCscore(self.graph).get_highest_cscores(cscore_type, n=n, cats_only=cats_only, save=save)
+        SelectorCscore(self.project).get_highest_cscores(cscore_type, n=n, cats_only=cats_only, save=save)
 
 
     '''

@@ -5,8 +5,8 @@ import os
 
 
 class SelectorCscore(GtGraphProcessor): #(GtGraphProcessor, PandasProcessorGtaph)
-    def __init__(self, graph):
-        GtGraphProcessor.__init__(self, graph)
+    def __init__(self, project):
+        GtGraphProcessor.__init__(self, project)
         #PandasProcessorGraph.__init__(self, self.project)
 
     def get_highest_cscores(self, cscore_type, n=100, cats_only=False, save=False):
@@ -41,7 +41,7 @@ class SelectorCscore(GtGraphProcessor): #(GtGraphProcessor, PandasProcessorGtaph
             df.columns = ['revision', 'title_source', 'title_target', 'event', 'cscore']
 
         df = df.drop_duplicates()
-        outfile = os.path.join(self.graph.pinfo['path']['results'], 'cscore_lists',
+        outfile = os.path.join(self.project.pinfo['path']['results'], 'cscore_lists',
                                self.graph.curr_working_graph + '_' +cscore_type +'_n' + n + '_cats_only_' + cats_only)
         return self.highest_cscores(df, n=n, save=save, outfile=outfile)
 
