@@ -92,15 +92,13 @@ class SubGraphProcessor(GtGraphProcessor):
             return False
 
     def load(self):
-        print('LOAD')
-        print(self.working_graph)
         if self.working_graph != 'main':
             if 'gt_file' in self.data[self.working_graph].keys():
                 self.gt.load(
                     os.path.join(self.data[self.working_graph]['location'], self.data[self.working_graph]['gt_file']))
                 self.gt_filename = self.data[self.working_graph]['gt_file']
             else:
-                print('CREATE VIEW FROM SUPER-GRAPH. START LOADING SUPER-GRAPH')
+                print('CREATE VIEW FROM SUPER-GRAPH. START LOADING SUPER-GRAPH') # print(self.data[self.working_graph]['derived_from'])
                 super_graph = self.data[self.working_graph]['derived_from']
                 self.gt.load(os.path.join(self.data[super_graph]['location'], self.data[super_graph]['gt_file']))
                 print('SUPER-GRAPH LOADED.')
@@ -114,13 +112,23 @@ class SubGraphProcessor(GtGraphProcessor):
     def create_gt_view(self, path, file):
         print('START CREATING GT VIEW FROM SUPER-GRAPH')
         prop_map = self.gt.new_edge_property('bool')
+
+        dtype = {
+            'source': int,
+            'target': int,
+            'type': str,
+            'cscore': float
+        }
+
         df = pd.read_csv(os.path.join(path, file), header=None, delimiter='\t',
-                         names=['source', 'target', 'cscore', 'events'], na_filter=False)
+                         names=['source', 'target', 'type', 'cscore'], dtype=dtype, na_filter=False)
         df = df[['source', 'target']]
         #print(df)
         df = self.resolve_ids(df)
         #print(df)
         for key, item in df.iterrows():
+            print(key)
+            print(item)
             prop_map[self.gt.edge(item['source'], item['target'])] = True
         graph_view = GraphView(self.gt, efilt=prop_map)
         graph_view = GraphView(graph_view, vfilt=lambda v: v.out_degree() > 0 or v.in_degree() > 0)
