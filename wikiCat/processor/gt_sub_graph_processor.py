@@ -2,6 +2,7 @@ from wikiCat.processor.gt_graph_processor import GtGraphProcessor
 from graph_tool.all import *
 import pandas as pd
 import os
+import pprint
 
 
 class SubGraphProcessor(GtGraphProcessor):
@@ -16,13 +17,14 @@ class SubGraphProcessor(GtGraphProcessor):
         self.gt_wiki_id_map_path, self.gt_wiki_id_map_file = self.find_gt_wiki_id_map()
         self.gt_wiki_id_map = pd.read_csv(os.path.join(self.gt_wiki_id_map_path, self.gt_wiki_id_map_file),
                                           header=None, delimiter='\t', names=['wiki_id', 'gt_id'])
-        print(self.gt_wiki_id_map)
-        print(self.gt_wiki_id_map_file)
-        print(self.gt_wiki_id_map_path)
-        #Print all class variables
-        #self.pp = pprint.PrettyPrinter(indent=4)
-        #v = vars(self)
-        #self.pp.pprint(v)
+        #print(self.gt_wiki_id_map)
+        #print(self.gt_wiki_id_map_file)
+        #print(self.gt_wiki_id_map_path)
+
+        # Print all class variables
+        self.pp = pprint.PrettyPrinter(indent=4)
+        v = vars(self)
+        self.pp.pprint(v)
 
     def find_gt_wiki_id_map(self):
         if 'gt_wiki_id_map' in self.data[self.working_graph].keys():
