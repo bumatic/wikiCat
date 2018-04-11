@@ -6,7 +6,7 @@ class GtGraphProcessor(PandasProcessor):
 #class GtGraphProcessor(PandasProcessorGraph):
     def __init__(self, graph):
         self.graph = graph
-        self.project = self.graph.project
+        #self.project = self.graph.project
         PandasProcessor.__init__(self, self.project, 'gt_graph')  # , 'gt_graph'
         #PandasProcessorGraph.__init__(self, self.project) #, 'gt_graph'
         # SetVariables
