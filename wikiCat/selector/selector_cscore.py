@@ -42,7 +42,7 @@ class SelectorCscore(GtGraphProcessor): #(GtGraphProcessor, PandasProcessorGtaph
 
         df = df.drop_duplicates()
         outfile = os.path.join(self.project.pinfo['path']['results'], 'cscore_lists',
-                               self.graph.curr_working_graph + '_' +cscore_type +'_n' + int(n) + '_cats_only_' + cats_only)
+                               self.graph.curr_working_graph + '_' +cscore_type +'_n' + str(n) + '_cats_only_' + str(cats_only))
         return self.highest_cscores(df, n=n, save=save, outfile=outfile)
 
 
