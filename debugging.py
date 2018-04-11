@@ -1,5 +1,6 @@
 #from wikiCat.wikiproject import Project
 import pandas as pd
+import numpy as np
 
 path = 'project/02_gt_graphs/contents_3sub/contents_3sub_cats_1_edges.csv'
 print(path)
