@@ -19,7 +19,6 @@ class SparkProcessorParsed(SparkProcessor):
         page_id = int(fields[0])
         page_title = str(fields[1])
         page_ns = int(fields[2])
-        print(fields[3])
         return Row(page_id=page_id, page_title=page_title, page_ns=page_ns)
 
     # Function to parse edge information into a DataFrame
