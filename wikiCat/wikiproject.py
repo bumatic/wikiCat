@@ -266,6 +266,14 @@ class Project:
         self.save_project()
         pass
 
+    def register_results_errors(self, data):
+        if 'errors' in self.pinfo['data'].keys():
+            for key, value in data.items():
+                self.pinfo['data']['errors'][key] = value
+        else:
+            self.pinfo['data']['errors'] = data
+        self.save_project()
+
     def update_gt_graph_data(self, data): #gt_type,
         # TODO: Needs checking if correct
         self.pinfo['gt_graph'] = data #[gt_type]
