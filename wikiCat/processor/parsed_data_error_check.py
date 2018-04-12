@@ -8,7 +8,7 @@ import os
 class ParsedDataErrorCheck(SparkProcessorParsed):
     def __init__(self, project, link_data_type):
         SparkProcessorParsed.__init__(self, project)
-        self.project
+        self.project = project
         self.link_data_type = link_data_type
         self.page_data = self.project.pinfo['data']['parsed'][self.link_data_type]
         self.error_path = self.project.pinfo['path']['errors']

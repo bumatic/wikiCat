@@ -14,6 +14,7 @@ animationTest.py
 CHECK IF REMOVE.py
 **/test/
 **/protokoll/
+**/_project/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
