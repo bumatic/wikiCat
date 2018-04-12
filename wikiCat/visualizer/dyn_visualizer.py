@@ -11,7 +11,8 @@ class DynVisualizer(Visualizer):
         Visualizer.__init__(self, graph)
         self.events_file = os.path.join(self.working_graph_path, self.data[self.working_graph]['source_events'][0])
         self.events = self.resolve_ids(pd.read_csv(self.events_file, header=None, delimiter='\t',
-                                                   names=['time', 'source', 'target', 'event', 'cscore']))
+                                                   names=['time', 'source', 'target', 'event', 'cscore'],
+                                                   na_filter=False))
         self.events = self.events.sort_values('time')
         self.load()
         self.cscore = self.gt.new_edge_property('double')

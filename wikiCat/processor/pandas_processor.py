@@ -17,7 +17,8 @@ class PandasProcessor(Processor):
                 'cscore': float
             }
             events = pd.read_csv(file, header=None, delimiter='\t',
-                                 names=['revision', 'source', 'target', 'event', 'cscore'], dtype=dtype, na_filter=False)
+                                 names=['revision', 'source', 'target', 'event', 'cscore'],
+                                 dtype=dtype, na_filter=False)
         else:
             dtype = {
                 'revision': float,
@@ -26,7 +27,8 @@ class PandasProcessor(Processor):
                 'event': str
             }
             events = pd.read_csv(file, header=None, delimiter='\t',
-                                 names=['revision', 'source', 'target', 'event'], dtype=dtype, na_filter=False)
+                                 names=['revision', 'source', 'target', 'event'],
+                                 dtype=dtype, na_filter=False)
         return events
 
     def load_edges(self, file, cscore=True):

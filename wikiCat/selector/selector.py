@@ -47,7 +47,7 @@ class Selector(SparkProcessorGraph): #PandasProcessorGraph
 
     @staticmethod
     def load_pandas_df(file, columns):
-        df = pd.read_csv(file, header=None, delimiter='\t', names=columns)
+        df = pd.read_csv(file, header=None, delimiter='\t', names=columns, na_filter=False)
         return df
 
     def check_results_path(self, folder):

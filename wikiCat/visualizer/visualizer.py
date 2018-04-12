@@ -15,7 +15,8 @@ class Visualizer(GtGraphProcessor):
         self.results_path = os.path.join(self.project.pinfo['path']['results'], self.working_graph)
         self.gt_wiki_id_map_path, self.gt_wiki_id_map_file = self.find_gt_wiki_id_map()
         self.gt_wiki_id_map = pd.read_csv(os.path.join(self.gt_wiki_id_map_path, self.gt_wiki_id_map_file),
-                                          header=None, delimiter='\t', names=['wiki_id', 'gt_id'])
+                                          header=None, delimiter='\t', names=['wiki_id', 'gt_id'],
+                                          na_filter=False)
         #self.drawing_props = {}
 
         # Print all class variables

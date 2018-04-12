@@ -35,17 +35,17 @@ class PandasProcessorGraph(Processor):
     def load_events(self, file, columns=[]):
         # Default events columns: ['source', 'target', 'revision' 'event', ('cscore)]
         self.events = pd.read_csv(os.path.join(self.path, file), header=None, delimiter='\t',
-                                  names=columns)
+                                  names=columns, na_filter=False)
 
     def load_edges(self, file, columns=[]):
         # Default edge columns ['source', 'target', 'type', ('cscore')]
         self.edges = pd.read_csv(os.path.join(self.path, file), header=None, delimiter='\t',
-                                 names=columns)
+                                 names=columns, na_filter=False)
 
     def load_nodes(self, file, columns=[]):
         # Default node columns ['id', 'title', 'ns', ('cscore')]
         self.nodes = pd.read_csv(os.path.join(self.path, file), header=None, delimiter='\t',
-                                 names=columns)
+                                 names=columns, na_filter=False)
 
 
 

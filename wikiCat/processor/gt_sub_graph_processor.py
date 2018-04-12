@@ -16,7 +16,7 @@ class SubGraphProcessor(GtGraphProcessor):
         self.results_path = os.path.join(self.project.pinfo['path']['results'], self.working_graph)
         self.gt_wiki_id_map_path, self.gt_wiki_id_map_file = self.find_gt_wiki_id_map()
         self.gt_wiki_id_map = pd.read_csv(os.path.join(self.gt_wiki_id_map_path, self.gt_wiki_id_map_file),
-                                          header=None, delimiter='\t', names=['wiki_id', 'gt_id'])
+                                          header=None, delimiter='\t', names=['wiki_id', 'gt_id'], na_filter=False)
         #print(self.gt_wiki_id_map)
         #print(self.gt_wiki_id_map_file)
         #print(self.gt_wiki_id_map_path)
@@ -48,7 +48,8 @@ class SubGraphProcessor(GtGraphProcessor):
         for file in snapshot_files:
             prop_map = self.gt.new_edge_property('bool')
             property_map_name = stype + '_' + str(file[:-6])
-            df = pd.read_csv(os.path.join(snapshot_path, file), header=None, delimiter='\t', names=['source', 'target'])
+            df = pd.read_csv(os.path.join(snapshot_path, file), header=None, delimiter='\t',
+                             names=['source', 'target'], na_filter=False)
             #TODO Snapshots IDs werden bei erzeugen der Snapshots resolved. dies verusracht fehler, wenn eigener GT Graph erzeugt wird. Dann müssen die SNAPSHOTS NOCHMAL ERSTELLT WERDEN.
             #df = self.resolve_ids(df) # aktuell verursacht das fehler in main, da hier die IDs schon resolved sind.
             #print('RESOLVED IDs')
