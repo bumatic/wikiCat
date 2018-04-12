@@ -314,7 +314,8 @@ class Project:
             print('Error data has already been generated. Pass override=True to replace it.')
             return False
         if data_type == 'cats':
-            ParsedDataErrorCheck(self, 'cat_data').missing_info_source_ids()
+            #TODO AUSKOMMENTIEREN ENTFERNEN
+            #ParsedDataErrorCheck(self, 'cat_data').missing_info_source_ids()
             ParsedDataErrorCheck(self, 'cat_data').find_unresolvable_target_titles()
         if data_type == 'links':
             ParsedDataErrorCheck(self, 'link_data').missing_info_source_ids()

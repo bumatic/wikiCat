@@ -57,7 +57,7 @@ class ParsedDataErrorCheck(SparkProcessorParsed):
                 missing_source_ids_df = missing_source_ids_df.coalesce(1)
                 missing_source_ids_df.write.format('com.databricks.spark.csv').\
                     option('header', 'false').option('delimiter', '\t').save(error_file)
-                print('There is a potential inconsistency! Writing IDs to: ' + error_file)
+                print('Writing missing source_IDs to: ' + error_file)
                 print('Number of source_ids missing in the page_info file: ' + str(number_of_missing_ids))
                 self.handle_spark_results(self.error_path, error_filename)
 
@@ -115,6 +115,20 @@ class ParsedDataErrorCheck(SparkProcessorParsed):
             resolved_titles_df = spark.sql("SELECT d.source_id as source, i.page_id as target, d.target_title, d.rev_id as revision "
                                            "FROM data d LEFT OUTER JOIN info i ON UPPER(d.target_title) = UPPER(i.page_title)")
             resolved_titles_df.createOrReplaceTempView("resolved")
+
+
+            # Einschub Neu: Check WELCHE TITEL AUFGELÖST WERDEN.
+            resolved_titles_all_df = spark.sql("SELECT source, target_title, revision FROM resolved "
+                                              "WHERE target IS NOT NULL")
+            resolved_titles_all_df.createOrReplaceTempView("resolved_titles")
+            resolved_titles_all_df = spark.sql("SELECT target_title FROM resolved_titles").distinct().coalesce(1)
+
+            resolved_title_filename = self.error_basename + '_resolved_titles_' + f
+            resolved_title_file = os.path.join(self.error_path, resolved_title_filename)
+            resolved_titles_all_df.write.format('com.databricks.spark.csv').option('header', 'false').option('delimiter', '\t').save(resolved_title_file)
+
+            resolved_titles_df.createOrReplaceTempView("resolved")
+            #EINSCHUB NEU ENDE
 
             missing_titles_all_df = spark.sql("SELECT source, target_title, revision FROM resolved "
                                               "WHERE target IS NULL")
