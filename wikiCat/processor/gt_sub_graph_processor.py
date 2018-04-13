@@ -6,8 +6,8 @@ import pprint
 
 
 class SubGraphProcessor(GtGraphProcessor):
-    def __init__(self, graph):
-        GtGraphProcessor.__init__(self, graph)
+    def __init__(self, project):
+        GtGraphProcessor.__init__(self, project)
         self.gt = Graph()
         self.gt_filename = None
         self.data = self.graph.data
@@ -22,9 +22,9 @@ class SubGraphProcessor(GtGraphProcessor):
         #print(self.gt_wiki_id_map_path)
 
         # Print all class variables
-        self.pp = pprint.PrettyPrinter(indent=4)
-        v = vars(self)
-        self.pp.pprint(v)
+        #self.pp = pprint.PrettyPrinter(indent=4)
+        #v = vars(self)
+        #self.pp.pprint(v)
 
     def find_gt_wiki_id_map(self):
         if 'gt_wiki_id_map' in self.data[self.working_graph].keys():
@@ -39,7 +39,7 @@ class SubGraphProcessor(GtGraphProcessor):
     def internalize_snapshots(self, stype):
         if self.check_gt():
             self.load()
-            print('GRAPH LOADED')
+            #print('GRAPH LOADED')
         else:
             print('Graph is derived from a super graph. Create a standalone graph first before internalizing views.')
             return

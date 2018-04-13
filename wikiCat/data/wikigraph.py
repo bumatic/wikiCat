@@ -115,26 +115,23 @@ class WikiGraph(Data):
         gt_graph_generator = GtGraphGenerator(self.project)
         gt_graph_generator.create_gt_graph()
 
-    def generate_snapshots(self, slice, cscore=True, start_date=None, end_date=None):
-        pass
-
     def create_subgraph(self, title=None, seed=None, cats=True, subcats=1, supercats=1,
                         links=False, inlinks=2, outlinks=2):
         SubGraph(self.project).create(title=title, seed=seed, cats=cats, subcats=subcats, supercats=supercats,
                                       links=links, inlinks=inlinks, outlinks=outlinks)
         self.set_working_graph(key=title)
-        SubGraphProcessor(self).create_gt_subgraph()
+        SubGraphProcessor(self.project).create_gt_subgraph()
 
     def create_gt_subgraph(self, title=None):
         self.set_working_graph(key=title)
-        SubGraphProcessor(self).create_gt_subgraph()
+        SubGraphProcessor(self.project).create_gt_subgraph()
 
     def create_snapshots(self, graph=None, title='Snapshots', slice='year', cscore=True,
                          start_date='2003-01-01', end_date=None):
         if graph is not None:
             self.set_working_graph(graph)
         Snapshots(self.project).create(title=title, slice=slice, cscore=cscore, start_date=start_date, end_date=end_date)
-        SubGraphProcessor(self).internalize_snapshots(title)
+        SubGraphProcessor(self.project).internalize_snapshots(title)
 
         # Funktioniert noch nicht. Außerdem: MACHT das hier Sinn? Oder doch lieber in graph objekt????
     #def create_subgraph(self, title=None, seed=[], cats=True, subcats=1, supercats=1):
