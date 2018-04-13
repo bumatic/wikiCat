@@ -72,7 +72,7 @@ class GraphDataGenerator(SparkProcessorParsed):
             'nodes': 'nodes.csv',
             'edges': 'edges.csv',
             'events': 'events.csv',
-            'description': create
+            'description': 'Graph data created from parsed data.'
         }
 
         self.register_graph_results('graph', results)
@@ -89,7 +89,7 @@ class GraphDataGenerator(SparkProcessorParsed):
             src_file = os.path.join(self.project.pinfo['path']['graph'], src_file)
             data_new = pd.read_csv(src_file, header=None, delimiter='\t', na_filter=False)
             data_new.to_csv(dest_file, sep='\t', index=False, header=False, mode='a')
-        pass
+            os.remove(src_file)
 
     def generate(self, edge_type, results_basename, page_data):
         # Create a SparkSession
