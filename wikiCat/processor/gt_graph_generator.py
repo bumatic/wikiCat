@@ -39,9 +39,20 @@ class GtGraphGenerator(PandasProcessorGraph):
     def create_nodes(self, cscore=True):
         # TODO Assumes that only one edges file exists. Needs fixing for inclusion of link_data
         if cscore:
-            self.load_nodes(self.nodes_files[0], ['id', 'title', 'ns', 'cscore'])
+            dtype = {
+                'id': int,
+                'title': str,
+                'ns': int,
+                'cscore': float
+            }
+            self.load_nodes(self.nodes_files[0], ['id', 'title', 'ns', 'cscore'], dtype)
         else:
-            self.load_nodes(self.nodes_files[0], ['id', 'title', 'ns'])
+            dtype = {
+                'id': int,
+                'title': str,
+                'ns': int
+            }
+            self.load_nodes(self.nodes_files[0], ['id', 'title', 'ns'], dtype)
         node_count = len(self.nodes.index)
         node_iterator = self.nodes.iterrows()
         nlist = self.graph.add_vertex(node_count)
@@ -61,9 +72,20 @@ class GtGraphGenerator(PandasProcessorGraph):
         #TODO Assumes that only one edges file exists. Needs fixing for inclusion of link_data
         counter = 0
         if cscore:
-            self.load_edges(self.edges_files[0], ['source', 'target', 'type', 'cscore'])
+            dtype = {
+                'source': int,
+                'target': int,
+                'type': str,
+                'cscore': float
+            }
+            self.load_edges(self.edges_files[0], ['source', 'target', 'type', 'cscore'], dtype)
         else:
-            self.load_edges(self.edges_files[0], ['source', 'target', 'type'])
+            dtype = {
+                'source': int,
+                'target': int,
+                'type': str
+            }
+            self.load_edges(self.edges_files[0], ['source', 'target', 'type'], dtype)
         for edge in self.edges.iterrows():
             if edge[1]['source'] in self.node_id_dict.keys() and edge[1]['target'] in self.node_id_dict.keys():
                 #, self.graph.vertex(self.node_id_dict[]
