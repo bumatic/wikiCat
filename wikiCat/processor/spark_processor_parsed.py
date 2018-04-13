@@ -26,7 +26,7 @@ class SparkProcessorParsed(SparkProcessor):
     @staticmethod
     def mapper_page_data(line):
         fields = line.split('\t')
-        source_id = int(fields[0])
+        source_id = int(fields[0]) #todo DEBUGGING NODE CREATION ERROR: Potentially was str
         rev_id = int(fields[1])
         target_title = str(fields[2])
         return Row(source_id=source_id, target_title=target_title, rev_id=rev_id)

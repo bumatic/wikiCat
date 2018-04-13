@@ -41,21 +41,21 @@ class GraphDataGenerator(SparkProcessorParsed):
         results = {}
 
         if create == 'cats':
-            link_data_type = 'cats'
+            #link_data_type = 'cats'
             edge_type = 'cat'
             results_basename = 'cats'
             page_data = self.get_page_data('cat_data')
             results['cats'] = self.generate(edge_type, results_basename, page_data)
             #print(results)
         elif create == 'links':
-            link_data_type = 'links'
+            #link_data_type = 'links'
             edge_type = 'links'
             results_basename = 'links'
             page_data = self.get_page_data('link_data')
             results['links'] = self.generate(edge_type, results_basename, page_data)
             pass
         elif create == 'all':
-            link_data_type = 'cats'
+            #link_data_type = 'cats'
             edge_type = 'cat'
             results_basename = 'cats'
             page_data = self.get_page_data('cat_data')
@@ -161,16 +161,18 @@ class GraphDataGenerator(SparkProcessorParsed):
             self.assemble_spark_results(edges_results_path, edges_results_file)
 
             # 3. GENERATE AND SAVE NODE LIST
-            source_df = spark.sql("SELECT source as id FROM data").distinct()
-            target_df = spark.sql("SELECT target as id FROM data").distinct()
-            nodes_df = source_df.union(target_df).distinct()
-            nodes_df.createOrReplaceTempView('nodes')
+            # TODO: DEBUGGING NODE CREATION ERROR
+            #source_df = spark.sql("SELECT source as id FROM data").distinct()
+            #target_df = spark.sql("SELECT target as id FROM data").distinct()
+            #nodes_df = source_df.union(target_df).distinct()
+            #nodes_df.createOrReplaceTempView('nodes')
 
-            nodes_df = spark.sql('SELECT n.id, i.page_title, i.page_ns FROM nodes n LEFT OUTER JOIN info i '
-                                 'ON n.id=i.page_id').distinct()
-            nodes_df.write.format('com.databricks.spark.csv').option('header', 'false').option('delimiter', '\t')\
-                .save(nodes_results_path)
-            del nodes_df
+            #nodes_df = spark.sql('SELECT n.id, i.page_title, i.page_ns FROM nodes n LEFT OUTER JOIN info i '
+            #                     'ON n.id=i.page_id').distinct()
+            #nodes_df.write.format('com.databricks.spark.csv').option('header', 'false').option('delimiter', '\t')\
+            #    .save(nodes_results_path)
+            page_info_df.select('page_id', 'page_title', 'page_ns').write.format('com.databricks.spark.csv').option('header', 'false').option('delimiter', '\t').save(nodes_results_path)
+            #del nodes_df
             self.assemble_spark_results(nodes_results_path, nodes_results_file)
 
             # 4. CREATE TABLE WITH ALL REVISIONS OF A SOURCE PAGE
