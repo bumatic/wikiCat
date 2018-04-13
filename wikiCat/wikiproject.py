@@ -317,10 +317,10 @@ class Project:
             #TODO AUSKOMMENTIEREN ENTFERNEN
             #ParsedDataErrorCheck(self, 'cat_data').missing_info_source_ids()
             ParsedDataErrorCheck(self, 'cat_data').find_unresolvable_target_titles()
-        if data_type == 'links':
+        elif data_type == 'links':
             ParsedDataErrorCheck(self, 'link_data').missing_info_source_ids()
             ParsedDataErrorCheck(self, 'link_data').find_unresolvable_target_titles()
-        if data_type == 'all':
+        elif data_type == 'all':
             ParsedDataErrorCheck(self, 'cat_data').missing_info_source_ids()
             ParsedDataErrorCheck(self, 'cat_data').find_unresolvable_target_titles()
             ParsedDataErrorCheck(self, 'link_data').missing_info_source_ids()

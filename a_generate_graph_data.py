@@ -1,5 +1,4 @@
-
 from wikiCat.wikiproject import Project
 
 mp = Project()
-mp.find_errors_in_parsed(override=True)
+mp.generate_graph_data()
