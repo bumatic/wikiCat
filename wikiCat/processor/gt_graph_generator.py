@@ -53,6 +53,7 @@ class GtGraphGenerator(PandasProcessorGraph):
                 'ns': int
             }
             self.load_nodes(self.nodes_files[0], ['id', 'title', 'ns'], dtype)
+        print(self.nodes.index)
         node_count = len(self.nodes.index)
         node_iterator = self.nodes.iterrows()
         nlist = self.graph.add_vertex(node_count)
