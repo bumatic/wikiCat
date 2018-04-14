@@ -45,8 +45,9 @@ class PandasProcessorGraph(Processor):
     def load_nodes(self, file, columns=[], dtype=None):
         # Default node columns ['id', 'title', 'ns', ('cscore')]
         self.nodes = pd.read_csv(os.path.join(self.path, file), header=None, delimiter='\t',
-                                 names=columns, dtype=dtype, skip_blank_lines=True, na_filter=False,
+                                 names=columns, skip_blank_lines=True, na_filter=False,  # dtype=dtype, 
                                  error_bad_lines=False, warn_bad_lines=True)
+
         # pd.read_csv(os.path.join(self.path, file), header=None, delimiter='\t',
         #                     names=columns, dtype=dtype, na_filter=False)
 

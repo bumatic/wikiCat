@@ -77,6 +77,7 @@ class GtGraphGenerator(PandasProcessorGraph):
         #TODO Assumes that only one edges file exists. Needs fixing for inclusion of link_data
         counter = 0
         if cscore:
+
             dtype = {
                 'source': int,
                 'target': int,
