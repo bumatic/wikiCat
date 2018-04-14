@@ -91,6 +91,7 @@ class GtGraphGenerator(PandasProcessorGraph):
                 'type': str
             }
             self.load_edges(self.edges_files[0], ['source', 'target', 'type'], dtype)
+        print(self.edges.index)
         for edge in self.edges.iterrows():
             if edge[1]['source'] in self.node_id_dict.keys() and edge[1]['target'] in self.node_id_dict.keys():
                 #, self.graph.vertex(self.node_id_dict[]
