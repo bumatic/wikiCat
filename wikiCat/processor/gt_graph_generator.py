@@ -93,6 +93,14 @@ class GtGraphGenerator(PandasProcessorGraph):
             self.load_edges(self.edges_files[0], ['source', 'target', 'type'], dtype)
         print(self.edges.index)
         for edge in self.edges.iterrows():
+            if not edge[1]['source'] in self.node_id_dict.keys() or not edge[1]['target'] in self.node_id_dict.keys():
+                if not edge[1]['source'] in self.node_id_dict.keys():
+                    print('Source missing')
+                    print(edge[1]['source'])
+                if not edge[1]['target'] in self.node_id_dict.keys():
+                    print('target missing')
+                    print(edge[1]['target'])
+
             if edge[1]['source'] in self.node_id_dict.keys() and edge[1]['target'] in self.node_id_dict.keys():
                 #, self.graph.vertex(self.node_id_dict[]
 
