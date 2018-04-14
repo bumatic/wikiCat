@@ -60,6 +60,11 @@ class GtGraphGenerator(PandasProcessorGraph):
         counter = 0
         for n in nlist:
             counter += 1
+            try:
+                x = counter/10000
+                print(counter)
+            except:
+                pass
             node = node_iterator.__next__()
             self.node_id_list.append([node[1]['id'], int(node[0])])
             self.node_id_dict[node[1]['id']] = int(node[0])
