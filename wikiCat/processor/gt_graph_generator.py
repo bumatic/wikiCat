@@ -57,7 +57,9 @@ class GtGraphGenerator(PandasProcessorGraph):
         node_count = len(self.nodes.index)
         node_iterator = self.nodes.iterrows()
         nlist = self.graph.add_vertex(node_count)
+        counter = 0
         for n in nlist:
+            counter += 1
             node = node_iterator.__next__()
             self.node_id_list.append([node[1]['id'], int(node[0])])
             self.node_id_dict[node[1]['id']] = int(node[0])
@@ -68,6 +70,8 @@ class GtGraphGenerator(PandasProcessorGraph):
                 self.node_cscore[n] = node[1]['cscore']
             else:
                 self.node_cscore[n] = 0
+        print('Nodes created:')
+        print(counter)
 
     def create_edges(self, cscore=True):
         #TODO Assumes that only one edges file exists. Needs fixing for inclusion of link_data
