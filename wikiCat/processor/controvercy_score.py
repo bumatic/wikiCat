@@ -121,6 +121,23 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
             self.assemble_spark_results(spark_results_path, tmp_results_file)
             os.remove(os.path.join(self.data_path, self.nodes_files[0]))
             os.rename(tmp_results_file, results_file)
+
+            #HANDLE Null Values in CSCORE: Replace NULL WITH ZERO Option 1
+            nodes = pd.read_csv(results_file, header=None, delimiter='\t',
+                                names=['id', 'title', 'ns', 'cscore'], skip_blank_lines=True, na_filter=False,
+                                error_bad_lines=False, warn_bad_lines=True)
+            nodes.loc[nodes['cscore'] == "", 'cscore'] = 0.0
+            nodes.to_csv(results_file, sep='\t', index=False, header=False, mode='w')
+
+
+            #OPTION 2: HANDLE Null Values in CSCORE: DROP ROWS
+            '''
+            nodes = pd.read_csv(results_file, header=None, delimiter='\t',
+                                names=['id', 'title', 'ns', 'cscore'], skip_blank_lines=True, na_filter=False,
+                                error_bad_lines=False, warn_bad_lines=True)
+            nodes = nodes[nodes['cscore'] != ""]
+            nodes.to_csv(results_file, sep='\t', index=False, header=False, mode='w')
+            '''
         del spark
 
     def calculate_avg_edge_score(self):
@@ -156,6 +173,15 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
 
             os.remove(os.path.join(self.data_path, self.edges_files[0]))
             os.rename(tmp_results_file, results_file)
+
+
+            #HANDLE Null Values in CSCORE: Replace NULL WITH ZERO
+            edges = pd.read_csv(results_file, header=None, delimiter='\t',
+                                names=['source', 'target', 'type', 'cscore'], skip_blank_lines=True, na_filter=False,
+                                error_bad_lines=False, warn_bad_lines=True)
+            edges.loc[edges['cscore'] == "", 'cscore'] = 0.0
+            edges.to_csv(results_file, sep='\t', index=False, header=False, mode='w')
+
         del spark
 
 
