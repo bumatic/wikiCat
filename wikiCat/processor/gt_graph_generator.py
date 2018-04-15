@@ -52,7 +52,11 @@ class GtGraphGenerator(PandasProcessorGraph):
         edge_target.columns = ['id']
         relevant_ids = edge_source.append(edge_target)
         relevant_ids = relevant_ids.drop_duplicates()
+        print('Total number of nodes:')
+        print(len(self.nodes))
         self.nodes = self.nodes[self.nodes['id'].isin(list(relevant_ids))]
+        print('Number of relevant nodes:')
+        print(len(self.nodes))
 
     def create_nodes(self, cscore=True):
         # TODO Assumes that only one edges file exists. Needs fixing for inclusion of link_data
