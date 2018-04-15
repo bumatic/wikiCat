@@ -80,7 +80,7 @@ class GtGraphGenerator(PandasProcessorGraph):
             self.load_nodes(self.nodes_files[0], ['id', 'title', 'ns'], dtype)
         '''
         self.load_relevant_nodes(cscore=cscore)
-        print(self.nodes.index)
+        #print(self.nodes.index)
         node_count = len(self.nodes.index)
         node_iterator = self.nodes.iterrows()
         nlist = self.graph.add_vertex(node_count)
@@ -103,22 +103,11 @@ class GtGraphGenerator(PandasProcessorGraph):
         #TODO Assumes that only one edges file exists. Needs fixing for inclusion of link_data
         counter = 0
         if cscore:
-
-            dtype = {
-                'source': int,
-                'target': int,
-                'type': str,
-                'cscore': float
-            }
-            self.load_edges(self.edges_files[0], ['source', 'target', 'type', 'cscore'], dtype)
+            self.load_edges(self.edges_files[0], ['source', 'target', 'type', 'cscore'])
         else:
-            dtype = {
-                'source': int,
-                'target': int,
-                'type': str
-            }
-            self.load_edges(self.edges_files[0], ['source', 'target', 'type'], dtype)
-        print(self.edges.index)
+            self.load_edges(self.edges_files[0], ['source', 'target', 'type'])
+        print(self.edges)
+        print(self.node_id_dict)
         for edge in self.edges.iterrows():
             if not edge[1]['source'] in self.node_id_dict.keys() or not edge[1]['target'] in self.node_id_dict.keys():
                 if not edge[1]['source'] in self.node_id_dict.keys():
