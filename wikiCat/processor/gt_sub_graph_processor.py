@@ -54,7 +54,7 @@ class SubGraphProcessor(GtGraphProcessor):
             print(df)
             #TODO Snapshots IDs werden bei erzeugen der Snapshots resolved. dies verusracht fehler, wenn eigener GT Graph erzeugt wird. Dann müssen die SNAPSHOTS NOCHMAL ERSTELLT WERDEN.
             print(self.working_graph)
-            #df = self.resolve_ids(df) # aktuell verursacht das fehler in main, da hier die IDs schon resolved sind.
+            df = self.resolve_ids(df) # aktuell verursacht das fehler in main, da hier die IDs schon resolved sind.
             print('RESOLVED IDs')
             #for v in self.gt.vertices():
             #    print(v)
