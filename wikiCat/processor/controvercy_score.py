@@ -97,6 +97,7 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
         nodes = nodes_source.map(self.mapper_nodes)
         nodes_df = spark.createDataFrame(nodes).cache()
         nodes_df.createOrReplaceTempView("nodes")
+        nodes_df.show()
         print('nodes loaded')
 
         results_file = os.path.join(self.data_path, self.nodes_files[0])
@@ -119,7 +120,6 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
                               "FROM nodes n LEFT OUTER JOIN cscore_nodes c ON n.id = c.node")
 
             print('Nodes assembled')
-            nodes.show()
             nodes.write.format('com.databricks.spark.csv').option('header', 'false').option('delimiter', '\t').save(spark_results_path)
 
             print('nodes written')
