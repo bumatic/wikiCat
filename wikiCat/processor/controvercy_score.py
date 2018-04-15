@@ -97,6 +97,7 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
         nodes = nodes_source.map(self.mapper_nodes)
         nodes_df = spark.createDataFrame(nodes).cache()
         nodes_df.createOrReplaceTempView("nodes")
+        print('nodes loaded')
 
         results_file = os.path.join(self.data_path, self.nodes_files[0])
         tmp_results_file = os.path.join(self.data_path, 'tmp_' + self.nodes_files[0])
@@ -107,7 +108,7 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
             events = events_source.map(self.mapper_events)
             events_df = spark.createDataFrame(events).cache()
             events_df.createOrReplaceTempView("events")
-
+            print('events loaded')
             source_df = spark.sql('SELECT source as node, cscore FROM events')
             target_df = spark.sql('SELECT target as node, cscore FROM events')
             node_cscores_df = source_df.union(target_df)
@@ -118,10 +119,12 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
                               "FROM nodes n LEFT OUTER JOIN cscore_nodes c ON n.id = c.node")
             nodes.write.format('com.databricks.spark.csv').option('header', 'false').option('delimiter', '\t').save(spark_results_path)
 
+            print('nodes written')
             self.assemble_spark_results(spark_results_path, tmp_results_file)
             os.remove(os.path.join(self.data_path, self.nodes_files[0]))
             os.rename(tmp_results_file, results_file)
 
+            print('results assembled')
             #HANDLE Null Values in CSCORE: Replace NULL WITH ZERO Option 1
             print('Handle Cscore Null Values for Nodes')
             nodes = pd.read_csv(results_file, header=None, delimiter='\t',
