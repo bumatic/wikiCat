@@ -68,9 +68,9 @@ class SubGraphProcessor(GtGraphProcessor):
                 #print(item['source'])
                 #print(item['target'])
                 #TODO: NEEDS TESTING: ARE THE RESULTS CORRECT?
-                if self.gt.edge(item['source'], item['target']) is None:
-                    print('edge_created')
-                    self.gt.add_edge(item['source'], item['target'])
+                #if self.gt.edge(item['source'], item['target']) is None:
+                #    print('edge_created')
+                #    self.gt.add_edge(item['source'], item['target'])
                 prop_map[self.gt.edge(item['source'], item['target'])] = True
             self.gt.edge_properties[property_map_name] = prop_map
         if self.gt_filename is None:
