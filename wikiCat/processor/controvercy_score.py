@@ -94,7 +94,7 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
         spark = SparkSession.builder.appName("Calculate_Controvercy_Score_Nodes").getOrCreate()
         print(self.data_path)
         print(self.nodes_files)
-        print(self.data_path, self.nodes_files[0])
+        print(os.path.join(self.data_path, self.nodes_files[0]))
         nodes_source = spark.sparkContext.textFile(os.path.join(self.data_path, self.nodes_files[0]))
         print(nodes_source)
         nodes = nodes_source.map(self.mapper_nodes)
