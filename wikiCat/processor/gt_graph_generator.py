@@ -36,9 +36,29 @@ class GtGraphGenerator(PandasProcessorGraph):
         self.save_graph_gt()
         self.register_gt_graph()
 
+    def load_relevant_nodes(self, cscore=True):
+        if cscore:
+            self.load_nodes(self.nodes_files[0], ['id', 'title', 'ns', 'cscore'])
+        else:
+            self.load_nodes(self.nodes_files[0], ['id', 'title', 'ns'])
+        if cscore:
+            self.load_edges(self.edges_files[0], ['source', 'target', 'type', 'cscore'])
+        else:
+            self.load_edges(self.edges_files[0], ['source', 'target', 'type'])
+
+        edge_source = self.edges['source']
+        edge_source.columns = ['id']
+        edge_target = self.edges['target']
+        edge_target.columns = ['id']
+        relevant_ids = edge_source.append(edge_target)
+        relevant_ids = relevant_ids.drop_duplicates()
+        self.nodes = self.nodes[self.nodes['id'].isin(list(relevant_ids))]
+
     def create_nodes(self, cscore=True):
         # TODO Assumes that only one edges file exists. Needs fixing for inclusion of link_data
+        '''
         if cscore:
+            # dTYPE Currently not used in load.nodes
             dtype = {
                 'id': int,
                 'title': str,
@@ -47,12 +67,15 @@ class GtGraphGenerator(PandasProcessorGraph):
             }
             self.load_nodes(self.nodes_files[0], ['id', 'title', 'ns', 'cscore'], dtype)
         else:
+            # Currently not used in load.nodes
             dtype = {
                 'id': int,
                 'title': str,
                 'ns': int
             }
             self.load_nodes(self.nodes_files[0], ['id', 'title', 'ns'], dtype)
+        '''
+        self.load_relevant_nodes(cscore=cscore)
         print(self.nodes.index)
         node_count = len(self.nodes.index)
         node_iterator = self.nodes.iterrows()

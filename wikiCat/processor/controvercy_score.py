@@ -123,14 +123,16 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
             os.rename(tmp_results_file, results_file)
 
             #HANDLE Null Values in CSCORE: Replace NULL WITH ZERO Option 1
+            print('Handle Cscore Null Values for Nodes')
             nodes = pd.read_csv(results_file, header=None, delimiter='\t',
                                 names=['id', 'title', 'ns', 'cscore'], skip_blank_lines=True, na_filter=False,
                                 error_bad_lines=False, warn_bad_lines=True)
+            print(nodes.loc[nodes['cscore'] == ""])
             nodes.loc[nodes['cscore'] == "", 'cscore'] = 0.0
             nodes.to_csv(results_file, sep='\t', index=False, header=False, mode='w')
 
 
-            #OPTION 2: HANDLE Null Values in CSCORE: DROP ROWS
+            #OPTION 2: HANDLE Null Values in CSCORE: DROP ROWS - Not as good
             '''
             nodes = pd.read_csv(results_file, header=None, delimiter='\t',
                                 names=['id', 'title', 'ns', 'cscore'], skip_blank_lines=True, na_filter=False,
@@ -176,9 +178,11 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
 
 
             #HANDLE Null Values in CSCORE: Replace NULL WITH ZERO
+            print('Handle Cscore Null Values for edges.')
             edges = pd.read_csv(results_file, header=None, delimiter='\t',
                                 names=['source', 'target', 'type', 'cscore'], skip_blank_lines=True, na_filter=False,
                                 error_bad_lines=False, warn_bad_lines=True)
+            print(edges.loc[edges['cscore'] == ""])
             edges.loc[edges['cscore'] == "", 'cscore'] = 0.0
             edges.to_csv(results_file, sep='\t', index=False, header=False, mode='w')
 
