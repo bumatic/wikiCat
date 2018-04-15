@@ -5,7 +5,7 @@ from wikiCat.selector.selector_sub_graph import SubGraph
 from wikiCat.selector.selector_snapshots import Snapshots
 from wikiCat.selector.selector_cscore import SelectorCscore
 from wikiCat.processor.oldest_revision import OldestRevision
-
+import os
 
 # from wikiCat.selector.reworked_selector import Selector
 from graph_tool.all import *
@@ -49,7 +49,7 @@ class WikiGraph(Data):
 
     def load_graph(self, type='main'):
         try:
-            self.graph.load(self.gt_file)
+            self.graph.load(os.path.join(self.curr_data_path, self.gt_file))
         except:
             print('Graph could not be loaded. A valid current working graph needs to be set before loading.')
 

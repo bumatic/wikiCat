@@ -148,8 +148,8 @@ class SubGraphProcessor(GtGraphProcessor):
         return graph_view
 
     def resolve_ids(self, df):
-        #print(df)
-        #print(self.gt_wiki_id_map)
+        print(df)
+        print(self.gt_wiki_id_map)
         df = pd.merge(df, self.gt_wiki_id_map, how='inner', left_on='source', right_on='wiki_id')
         df = df[['gt_id', 'target']]
         #print('resolved df')
