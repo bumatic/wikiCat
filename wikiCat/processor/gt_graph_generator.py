@@ -80,6 +80,7 @@ class GtGraphGenerator(PandasProcessorGraph):
             self.load_nodes(self.nodes_files[0], ['id', 'title', 'ns'], dtype)
         '''
         self.load_relevant_nodes(cscore=cscore)
+        self.nodes = self.nodes.reset_index(drop=True)
         #print(self.nodes.index)
         node_count = len(self.nodes.index)
         node_iterator = self.nodes.iterrows()
@@ -87,14 +88,12 @@ class GtGraphGenerator(PandasProcessorGraph):
         counter = 0
         for n in nlist:
             counter += 1
-            self.nodes = self.nodes.reset_index(drop=True)
             node = node_iterator.__next__()
             #print(node)
 
             self.node_id_list.append([node[1]['id'], int(node[0])])
             self.node_id_dict[node[1]['id']] = int(node[0])
-
-
+            print(node[0])
             self.node_id[n] = node[1]['id']
             self.node_title[n] = node[1]['title']
             self.node_ns[n] = node[1]['ns']
