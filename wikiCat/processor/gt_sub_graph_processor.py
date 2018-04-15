@@ -54,18 +54,23 @@ class SubGraphProcessor(GtGraphProcessor):
             print(df)
             #TODO Snapshots IDs werden bei erzeugen der Snapshots resolved. dies verusracht fehler, wenn eigener GT Graph erzeugt wird. Dann müssen die SNAPSHOTS NOCHMAL ERSTELLT WERDEN.
             print(self.working_graph)
-            df = self.resolve_ids(df) # aktuell verursacht das fehler in main, da hier die IDs schon resolved sind.
-            print('RESOLVED IDs')
+            if self.working_graph != 'main':
+                df = self.resolve_ids(df) # aktuell verursacht das fehler in main, da hier die IDs schon resolved sind.
+            #print('RESOLVED IDs')
             #for v in self.gt.vertices():
             #    print(v)
             #    print(self.gt.vp.id[v])
             #    print(self.gt.vp.title[v])
             #print(df)
             for key, item in df.iterrows():
-                print(key)
-                print(item)
-                print(item['source'])
-                print(item['target'])
+                #print(key)
+                #print(item)
+                #print(item['source'])
+                #print(item['target'])
+                #TODO: NEEDS TESTING: ARE THE RESULTS CORRECT?
+                if self.gt.edge(item['source'], item['target']) is None:
+                    print('edge_created')
+                    self.gt.add_edge(item['source'], item['target'])
                 prop_map[self.gt.edge(item['source'], item['target'])] = True
             self.gt.edge_properties[property_map_name] = prop_map
         if self.gt_filename is None:
@@ -132,11 +137,11 @@ class SubGraphProcessor(GtGraphProcessor):
             'cscore': float
         }
         '''
-        print(os.path.join(path, file))
+        #print(os.path.join(path, file))
         df = pd.read_csv(os.path.join(path, file), header=None, delimiter='\t',
                          names=['source', 'target', 'type', 'cscore'], na_filter=False)
         df = df[['source', 'target']]
-        print(df)
+        #print(df)
         df = self.resolve_ids(df)
         print(df)
         for key, item in df.iterrows():
