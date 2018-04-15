@@ -92,17 +92,10 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
         # spark = SparkSession.builder.config("spark.sql.warehouse.dir", "file:///C:/temp").
         # appName("Postprocessing").getOrCreate()
         spark = SparkSession.builder.appName("Calculate_Controvercy_Score_Nodes").getOrCreate()
-        print(self.data_path)
-        print(self.nodes_files)
-        print(os.path.join(os.getcwd(), self.data_path, self.nodes_files[0]))
         nodes_source = spark.sparkContext.textFile(os.path.join(os.getcwd(), self.data_path, self.nodes_files[0]))
-        print(nodes_source)
         nodes = nodes_source.map(self.mapper_nodes)
         nodes_df = spark.createDataFrame(nodes).cache()
         nodes_df.createOrReplaceTempView("nodes")
-        nodes_df.show()
-        print('nodes loaded')
-
         results_file = os.path.join(self.data_path, self.nodes_files[0])
         tmp_results_file = os.path.join(self.data_path, 'tmp_' + self.nodes_files[0])
         spark_results_path = os.path.join(self.data_path, self.nodes_files[0][:-4])
@@ -112,7 +105,6 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
             events = events_source.map(self.mapper_events)
             events_df = spark.createDataFrame(events).cache()
             events_df.createOrReplaceTempView("events")
-            print('events loaded')
             source_df = spark.sql('SELECT source as node, cscore FROM events')
             target_df = spark.sql('SELECT target as node, cscore FROM events')
             node_cscores_df = source_df.union(target_df)
@@ -122,10 +114,8 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
             nodes = spark.sql("SELECT n.id, n.title, n.ns, c.avg_cscore as cscore "
                               "FROM nodes n LEFT OUTER JOIN cscore_nodes c ON n.id = c.node")
 
-            print('Nodes assembled')
             nodes.write.format('com.databricks.spark.csv').option('header', 'false').option('delimiter', '\t').save(spark_results_path)
 
-            print('nodes written')
             self.assemble_spark_results(spark_results_path, tmp_results_file)
             os.remove(os.path.join(self.data_path, self.nodes_files[0]))
             os.rename(tmp_results_file, results_file)
@@ -136,6 +126,7 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
             nodes = pd.read_csv(results_file, header=None, delimiter='\t',
                                 names=['id', 'title', 'ns', 'cscore'], skip_blank_lines=True, na_filter=False,
                                 error_bad_lines=False, warn_bad_lines=True)
+            print('Number of nodes without cscore')
             print(len(nodes.loc[nodes['cscore'] == ""]))
             nodes.loc[nodes['cscore'] == "", 'cscore'] = 0.0
             nodes.to_csv(results_file, sep='\t', index=False, header=False, mode='w')
@@ -181,6 +172,7 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
             edges = pd.read_csv(results_file, header=None, delimiter='\t',
                                 names=['source', 'target', 'type', 'cscore'], skip_blank_lines=True, na_filter=False,
                                 error_bad_lines=False, warn_bad_lines=True)
+            print('Number of edges without cscore')
             print(len(edges.loc[edges['cscore'] == ""]))
             edges.loc[edges['cscore'] == "", 'cscore'] = 0.0
             edges.to_csv(results_file, sep='\t', index=False, header=False, mode='w')
