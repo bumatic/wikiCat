@@ -62,7 +62,8 @@ class SubGraphProcessor(GtGraphProcessor):
             #print(df)
             for key, item in df.iterrows():
                 print(key)
-                print(item)
+                print(item['source'])
+                print(item['target'])
                 prop_map[self.gt.edge(item['source'], item['target'])] = True
             self.gt.edge_properties[property_map_name] = prop_map
         if self.gt_filename is None:
