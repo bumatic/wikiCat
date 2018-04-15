@@ -88,8 +88,9 @@ class GtGraphGenerator(PandasProcessorGraph):
         for n in nlist:
             counter += 1
             self.nodes = self.nodes.reset_index(drop=True)
+            print(self.nodes)
             node = node_iterator.__next__()
-            print(node)
+            #print(node)
 
             self.node_id_list.append([node[1]['id'], int(node[0])])
             self.node_id_dict[node[1]['id']] = int(node[0])
@@ -112,7 +113,7 @@ class GtGraphGenerator(PandasProcessorGraph):
         else:
             self.load_edges(self.edges_files[0], ['source', 'target', 'type'])
         #print(self.edges)
-        print(self.node_id_dict)
+        #print(self.node_id_dict)
         for edge in self.edges.iterrows():
             print(edge[1]['source'])
             print(type(edge[1]['source']))
