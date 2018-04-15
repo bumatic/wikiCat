@@ -55,6 +55,8 @@ class SparkProcessor(Processor):
             ns = fields[2]
             return Row(id=id, title=title, ns=ns)
         elif len(fields) == 4:
+            print('HIEIEIEIEHHHIER')
+            print(fields)
             id = fields[0]
             title = fields[1]
             ns = fields[2]
