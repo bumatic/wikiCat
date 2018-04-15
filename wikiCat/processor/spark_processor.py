@@ -49,7 +49,6 @@ class SparkProcessor(Processor):
     @staticmethod
     def mapper_nodes(line):
         fields = line.split('\t')
-        print(fields)
         if len(fields) == 3:
             id = fields[0]
             title = fields[1]

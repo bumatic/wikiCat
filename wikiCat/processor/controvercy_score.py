@@ -118,7 +118,8 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
             nodes = spark.sql("SELECT n.id, n.title, n.ns, c.avg_cscore as cscore "
                               "FROM nodes n LEFT OUTER JOIN cscore_nodes c ON n.id = c.node")
 
-            print('Nodes assembles')
+            print('Nodes assembled')
+            nodes.show(20)
             nodes.write.format('com.databricks.spark.csv').option('header', 'false').option('delimiter', '\t').save(spark_results_path)
 
             print('nodes written')
