@@ -92,7 +92,8 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
         # spark = SparkSession.builder.config("spark.sql.warehouse.dir", "file:///C:/temp").
         # appName("Postprocessing").getOrCreate()
         spark = SparkSession.builder.appName("Calculate_Controvercy_Score_Nodes").getOrCreate()
-
+        print(self.data_path)
+        print(self.nodes_files)
         nodes_source = spark.sparkContext.textFile(os.path.join(self.data_path, self.nodes_files[0]))
         nodes = nodes_source.map(self.mapper_nodes)
         nodes_df = spark.createDataFrame(nodes).cache()
