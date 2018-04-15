@@ -1,7 +1,6 @@
 from wikiCat.wikiproject import Project
 
 mp = Project()
-mp.generate_gt_graph()
 
 mp.graph.set_working_graph(key='main')
 mp.create_snapshots(title='snapshots_month', slice='month')
