@@ -42,8 +42,8 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
         return results
 
     def calculate(self):
-        self.calculate_edge_score()
-        self.calculate_avg_edge_score()
+        #self.calculate_edge_score()
+        #self.calculate_avg_edge_score()
         self.calculate_avg_node_score()
 
     def calculate_edge_score(self):
@@ -127,19 +127,9 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
             nodes = pd.read_csv(results_file, header=None, delimiter='\t',
                                 names=['id', 'title', 'ns', 'cscore'], skip_blank_lines=True, na_filter=False,
                                 error_bad_lines=False, warn_bad_lines=True)
-            print(nodes.loc[nodes['cscore'] == ""])
+            print(len(nodes.loc[nodes['cscore'] == ""]))
             nodes.loc[nodes['cscore'] == "", 'cscore'] = 0.0
             nodes.to_csv(results_file, sep='\t', index=False, header=False, mode='w')
-
-
-            #OPTION 2: HANDLE Null Values in CSCORE: DROP ROWS - Not as good
-            '''
-            nodes = pd.read_csv(results_file, header=None, delimiter='\t',
-                                names=['id', 'title', 'ns', 'cscore'], skip_blank_lines=True, na_filter=False,
-                                error_bad_lines=False, warn_bad_lines=True)
-            nodes = nodes[nodes['cscore'] != ""]
-            nodes.to_csv(results_file, sep='\t', index=False, header=False, mode='w')
-            '''
         del spark
 
     def calculate_avg_edge_score(self):
@@ -182,7 +172,7 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
             edges = pd.read_csv(results_file, header=None, delimiter='\t',
                                 names=['source', 'target', 'type', 'cscore'], skip_blank_lines=True, na_filter=False,
                                 error_bad_lines=False, warn_bad_lines=True)
-            print(edges.loc[edges['cscore'] == ""])
+            print(len(edges.loc[edges['cscore'] == ""]))
             edges.loc[edges['cscore'] == "", 'cscore'] = 0.0
             edges.to_csv(results_file, sep='\t', index=False, header=False, mode='w')
 
