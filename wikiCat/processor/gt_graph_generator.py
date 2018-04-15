@@ -93,7 +93,6 @@ class GtGraphGenerator(PandasProcessorGraph):
 
             self.node_id_list.append([node[1]['id'], int(node[0])])
             self.node_id_dict[node[1]['id']] = int(node[0])
-            print(node[0])
             self.node_id[n] = node[1]['id']
             self.node_title[n] = node[1]['title']
             self.node_ns[n] = node[1]['ns']
@@ -120,12 +119,12 @@ class GtGraphGenerator(PandasProcessorGraph):
             #print(self.node_id_dict[edge[1]['source']])
             if not edge[1]['source'] in self.node_id_dict.keys() or not edge[1]['target'] in self.node_id_dict.keys():
                 if not edge[1]['source'] in self.node_id_dict.keys():
-                    print('Source missing')
-                    print(edge[1]['source'])
+                    #print('Source missing')
+                    #print(edge[1]['source'])
                     pass
                 if not edge[1]['target'] in self.node_id_dict.keys():
-                    print('target missing')
-                    print(edge[1]['target'])
+                    #print('target missing')
+                    #print(edge[1]['target'])
                     pass
 
             if edge[1]['source'] in self.node_id_dict.keys() and edge[1]['target'] in self.node_id_dict.keys():
