@@ -90,6 +90,7 @@ class GtGraphGenerator(PandasProcessorGraph):
             node = node_iterator.__next__()
             self.node_id_list.append([node[1]['id'], int(node[0])])
             self.node_id_dict[node[1]['id']] = int(node[0])
+            print(int(node[0]))
             self.node_id[n] = node[1]['id']
             self.node_title[n] = node[1]['title']
             self.node_ns[n] = node[1]['ns']
