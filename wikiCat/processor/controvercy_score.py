@@ -119,7 +119,7 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
                               "FROM nodes n LEFT OUTER JOIN cscore_nodes c ON n.id = c.node")
 
             print('Nodes assembled')
-            nodes.show(20)
+            nodes.show()
             nodes.write.format('com.databricks.spark.csv').option('header', 'false').option('delimiter', '\t').save(spark_results_path)
 
             print('nodes written')
