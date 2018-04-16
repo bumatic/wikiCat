@@ -165,6 +165,7 @@ class Visualizer(GtGraphProcessor):
             dprops['vprops']['text'] = label
 
         if dprops['color_by_type']:
+            print(hier)
             vertex_color = g.new_vertex_property("string")
             graph_tool.map_property_values(g.vp.ns, vertex_color,
                                            lambda x: dprops['cat_color'] if x == '14.0' else
