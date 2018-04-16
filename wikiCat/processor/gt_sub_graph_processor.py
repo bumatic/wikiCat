@@ -143,18 +143,18 @@ class SubGraphProcessor(GtGraphProcessor):
         df = df[['source', 'target']]
         #print(df)
         df = self.resolve_ids(df)
-        print(df)
+        #print(df)
         for key, item in df.iterrows():
-            print(key)
-            print(item)
+            #print(key)
+            #print(item)
             prop_map[self.gt.edge(item['source'], item['target'])] = True
         graph_view = GraphView(self.gt, efilt=prop_map)
         graph_view = GraphView(graph_view, vfilt=lambda v: v.out_degree() > 0 or v.in_degree() > 0)
         return graph_view
 
     def resolve_ids(self, df):
-        print(df)
-        print(self.gt_wiki_id_map)
+        #print(df)
+        #print(self.gt_wiki_id_map)
         df = pd.merge(df, self.gt_wiki_id_map, how='inner', left_on='source', right_on='wiki_id')
         df = df[['gt_id', 'target']]
         #print('resolved df')
