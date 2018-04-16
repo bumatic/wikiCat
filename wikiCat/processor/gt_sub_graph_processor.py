@@ -51,7 +51,7 @@ class SubGraphProcessor(GtGraphProcessor):
             property_map_name = stype + '_' + str(file[:-6])
             df = pd.read_csv(os.path.join(snapshot_path, file), header=None, delimiter='\t',
                              names=['source', 'target']) #, na_filter=False
-            print(df)
+            #print(df)
             #TODO Snapshots IDs werden bei erzeugen der Snapshots resolved. dies verusracht fehler, wenn eigener GT Graph erzeugt wird. Dann müssen die SNAPSHOTS NOCHMAL ERSTELLT WERDEN.
             print(self.working_graph)
             #if self.working_graph != 'main':
