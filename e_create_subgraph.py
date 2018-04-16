@@ -1,6 +1,27 @@
 from wikiCat.wikiproject import Project
-
 mp = Project()
+
+
+
+
+mp.create_static_viz('main', 'SFDP', snapshots='snapshots_month_2004_2005', drawing_props_file='static.json')
+mp.create_static_viz('contents_1sub', 'SFDP', snapshots='snapshots_year', drawing_props_file='static.json')
+mp.create_static_viz('bitcoin_2super', 'SFDP', snapshots='snapshots_year', drawing_props_file='static.json')
+mp.create_static_viz('bitcoin_blockchain_ethereum_2super', 'SFDP', snapshots='snapshots_year', drawing_props_file='static.json')
+mp.create_static_viz('blockchains_cat_1sub_1super', 'SFDP', snapshots='snapshots_year', drawing_props_file='static.json')
+mp.create_static_viz('blockchain_2super', 'SFDP', snapshots='snapshots_year', drawing_props_file='static.json')
+mp.create_static_viz('brexit_2super', 'SFDP', snapshots='snapshots_year', drawing_props_file='static.json')
+mp.create_static_viz('contents_1super', 'SFDP', snapshots='snapshots_year', drawing_props_file='static.json')
+mp.create_static_viz('contents_2sub', 'SFDP', snapshots='snapshots_year', drawing_props_file='static.json')
+
+
+
+
+
+
+
+
+
 
 mp.remove_subgraph('bitcoin_2super')
 mp.graph.set_working_graph(key='main')
