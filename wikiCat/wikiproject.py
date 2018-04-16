@@ -390,13 +390,13 @@ class Project:
         if subgraph is not None:
             self.graph.set_working_graph(subgraph)
         if layout == 'ARF':
-            ARF(self.graph).snapshots(snapshots, drawing_props_file=drawing_props_file)
+            ARF(self).snapshots(snapshots, drawing_props_file=drawing_props_file)
         elif layout == 'SFDP':
             SFDP(self).snapshots(snapshots, drawing_props_file=drawing_props_file)
         elif layout == 'RTL':
-            RTL(self.graph).snapshots(snapshots, drawing_props_file=drawing_props_file, seed=seed)
+            RTL(self).snapshots(snapshots, drawing_props_file=drawing_props_file, seed=seed)
         elif layout == 'FR':
-            FR(self.graph).snapshots(snapshots, drawing_props_file=drawing_props_file)
+            FR(self).snapshots(snapshots, drawing_props_file=drawing_props_file)
 
     def get_highest_cscores(self, cscore_type, n=100, cats_only=False, save=True):
         self.graph.get_highest_cscores(cscore_type, n=n, cats_only=cats_only, save=save)

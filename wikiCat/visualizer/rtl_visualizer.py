@@ -7,8 +7,8 @@ from wikiCat.visualizer.static_visualizer import StaticVisualizer
 
 
 class RTL(StaticVisualizer):
-    def __init__(self, graph):
-        StaticVisualizer.__init__(self, graph)
+    def __init__(self, project):
+        StaticVisualizer.__init__(self, project)
 
     def visualize(self, graph_view, seed, outfile, drawing_props):
         g = graph_view

@@ -116,8 +116,8 @@ class Visualizer(GtGraphProcessor):
         emin = 1
         emax = 2
         font_size = 8
-        dprops['output_width'] = vcount * 10
-        dprops['output_height'] = vcount * 10
+        dprops['output_width'] = vcount * 15
+        dprops['output_height'] = vcount * 15
 
         if dprops['output_width'] < 600:
             dprops['output_width'] = 600
@@ -165,12 +165,10 @@ class Visualizer(GtGraphProcessor):
             dprops['vprops']['text'] = label
 
         if dprops['color_by_type']:
-            print('hier')
             vertex_color = g.new_vertex_property("string")
             graph_tool.map_property_values(g.vp.ns, vertex_color,
                                            lambda x: dprops['cat_color'] if x == '14' or x == '14.0' else
                                            dprops['link_color'])
-            print(vertex_color)
             dprops['vprops']['fill_color'] = vertex_color
         if dprops['eprops']['pen_width'] == 'cscore':
             edge_size = g.new_edge_property("double")
