@@ -392,7 +392,7 @@ class Project:
         if layout == 'ARF':
             ARF(self.graph).snapshots(snapshots, drawing_props_file=drawing_props_file)
         elif layout == 'SFDP':
-            SFDP(self.graph).snapshots(snapshots, drawing_props_file=drawing_props_file)
+            SFDP(self).snapshots(snapshots, drawing_props_file=drawing_props_file)
         elif layout == 'RTL':
             RTL(self.graph).snapshots(snapshots, drawing_props_file=drawing_props_file, seed=seed)
         elif layout == 'FR':

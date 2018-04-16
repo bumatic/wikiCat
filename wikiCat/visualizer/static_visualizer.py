@@ -2,8 +2,8 @@ from wikiCat.visualizer.visualizer import Visualizer
 
 
 class StaticVisualizer(Visualizer):
-    def __init__(self, graph):
-        Visualizer.__init__(self, graph)
+    def __init__(self, project):
+        Visualizer.__init__(self, project)
 
         '''
         self.set_drawing_properties(vertex_text=None,

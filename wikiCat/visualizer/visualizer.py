@@ -6,8 +6,8 @@ from wikiCat.processor.gt_graph_processor import GtGraphProcessor
 
 
 class Visualizer(GtGraphProcessor):
-    def __init__(self, graph):
-        GtGraphProcessor.__init__(self, graph)
+    def __init__(self, project):
+        GtGraphProcessor.__init__(self, project)
         self.gt = Graph()
         self.data = self.graph.data
         self.working_graph = self.graph.curr_working_graph
