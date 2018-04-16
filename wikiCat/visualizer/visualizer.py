@@ -165,11 +165,12 @@ class Visualizer(GtGraphProcessor):
             dprops['vprops']['text'] = label
 
         if dprops['color_by_type']:
-            print(hier)
+            print('hier')
             vertex_color = g.new_vertex_property("string")
             graph_tool.map_property_values(g.vp.ns, vertex_color,
                                            lambda x: dprops['cat_color'] if x == '14.0' else
                                            dprops['link_color'])
+            print(vertex_color)
             dprops['vprops']['fill_color'] = vertex_color
         if dprops['eprops']['pen_width'] == 'cscore':
             edge_size = g.new_edge_property("double")
