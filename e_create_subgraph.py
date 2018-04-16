@@ -22,7 +22,7 @@ mp.create_static_viz('blockchains_cat_1sub_1super', 'SFDP', snapshots='snapshots
 
 
 
-
+'''
 mp.remove_subgraph('bitcoin_2super')
 mp.graph.set_working_graph(key='main')
 mp.create_subgraph(title='bitcoin_2super', seed=[28249265], cats=True,
@@ -46,7 +46,7 @@ mp.graph.set_working_graph(key='main')
 mp.create_subgraph(title='contents_1super', seed=[14105005], cats=True,
                    subcats=0, supercats=1)
 mp.create_snapshots(graph='contents_1super', title='snapshots_year')
-
+'''
 
 '''
 #Interesting Pages/ Categories
