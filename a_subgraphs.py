@@ -6,7 +6,7 @@ mp = Project()
 # https://en.wikipedia.org/wiki/Category:Brexit : 53543636
 
 
-
+'''
 mp.graph.set_working_graph(key='main')
 mp.create_subgraph(title='dh_2super', seed=[3900832], cats=True,
                    subcats=0, supercats=2)
@@ -17,8 +17,9 @@ mp.create_static_viz('dh_2super', 'SFDP', snapshots='snapshots_year', drawing_pr
 mp.graph.set_working_graph(key='main')
 mp.create_subgraph(title='dh_cat_1_sub_1super', seed=[33395167], cats=True,
                    subcats=1, supercats=1)
-mp.create_snapshots(graph='dh_1_sub_1super', title='snapshots_year')
-mp.create_static_viz('dh_1sub_1super', 'SFDP', snapshots='snapshots_year', drawing_props_file='static.json')
+'''
+mp.create_snapshots(graph='dh_cat_1_sub_1super', title='snapshots_year')
+mp.create_static_viz('dh_cat_1sub_1super', 'SFDP', snapshots='snapshots_year', drawing_props_file='static.json')
 
 
 '''
