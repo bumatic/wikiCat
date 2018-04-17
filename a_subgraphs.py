@@ -1,6 +1,32 @@
 from wikiCat.wikiproject import Project
 mp = Project()
 
+
+
+# https://en.wikipedia.org/wiki/Category:Brexit : 53543636
+
+
+cat_brexit_2_sub_1super
+
+mp.graph.set_working_graph(key='main')
+mp.create_subgraph(title='cat_brexit_1_sub_1super', seed=[53543636], cats=True,
+                   subcats=1, supercats=1)
+mp.create_snapshots(graph='cat_brexit_1_sub_1super', title='snapshots_year')
+mp.create_static_viz('cat_brexit_1_sub_1super', 'SFDP', snapshots='snapshots_year', drawing_props_file='static.json')
+
+mp.graph.set_working_graph(key='main')
+mp.create_subgraph(title='cat_brexit_2_sub', seed=[53543636], cats=True,
+                   subcats=2, supercats=0)
+mp.create_snapshots(graph='cat_brexit_2_sub', title='snapshots_year')
+mp.create_static_viz('cat_brexit_2_sub', 'SFDP', snapshots='snapshots_year', drawing_props_file='static.json')
+
+mp.graph.set_working_graph(key='main')
+mp.create_subgraph(title='cat_brexit_2_sub_1super', seed=[53543636], cats=True,
+                   subcats=2, supercats=1)
+mp.create_snapshots(graph='cat_brexit_2_sub_1super', title='snapshots_year')
+mp.create_static_viz('cat_brexit_2_sub_1super', 'SFDP', snapshots='snapshots_year', drawing_props_file='static.json')
+
+
 '''
 mp.graph.set_working_graph(key='main')
 mp.create_subgraph(title='history_of_computing_1super', seed=[1506937], cats=True,
@@ -23,6 +49,7 @@ mp.create_static_viz('algorithms_1sub_1super', 'SFDP', snapshots='snapshots_year
 mp.graph.set_working_graph(key='main')
 mp.create_subgraph(title='artificial_intelligence_1sub_1super', seed=[700355], cats=True,
                    subcats=1, supercats=1)
-'''
+
 mp.create_snapshots(graph='artificial_intelligence_1sub_1super', title='snapshots_year')
 mp.create_static_viz('artificial_intelligence_1sub_1super', 'SFDP', snapshots='snapshots_year', drawing_props_file='static.json')
+'''
