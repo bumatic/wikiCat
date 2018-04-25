@@ -9,10 +9,17 @@ mp = Project()
 #[42678854, 5880301, 987695, 3272685]
 
 mp.graph.set_working_graph(key='main')
-mp.create_subgraph(title='turkey_controvercy_1sub_1super', seed=[42678854, 5880301, 987695, 3272685], cats=True,
-                   subcats=1, supercats=1)
-mp.create_snapshots(graph='turkey_controvercy_1sub_1super', title='snapshots_year')
-mp.create_static_viz('turkey_controvercy_1sub_1super', 'SFDP', snapshots='snapshots_year', drawing_props_file='static.json')
+mp.create_subgraph(title='turkey_controvercy_1sub', seed=[42678854, 5880301, 987695, 3272685], cats=True,
+                   subcats=1, supercats=0)
+mp.create_snapshots(graph='turkey_controvercy_1sub', title='snapshots_year')
+mp.create_static_viz('turkey_controvercy_1sub', 'SFDP', snapshots='snapshots_year', drawing_props_file='static.json')
+
+mp.graph.set_working_graph(key='main')
+mp.create_subgraph(title='turkey_controvercy_2sub', seed=[42678854, 5880301, 987695, 3272685], cats=True,
+                   subcats=2, supercats=0)
+mp.create_snapshots(graph='turkey_controvercy_2sub', title='snapshots_year')
+mp.create_static_viz('turkey_controvercy_2sub', 'SFDP', snapshots='snapshots_year', drawing_props_file='static.json')
+
 
 '''
 mp.graph.set_working_graph(key='main')
