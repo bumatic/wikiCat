@@ -14,6 +14,7 @@ class Processor:
             self.results_type = 'graph'
             self.page_info = self.project.pinfo['data']['parsed']['page_info']
             self.revision_info = self.project.pinfo['data']['parsed']['revision_info']
+            self.author_info = self.project.pinfo['data']['parsed']['author_info']
             self.cat_data = self.project.pinfo['data']['parsed']['cat_data']
             if 'linked_data' in self.project.pinfo['data']['parsed'].keys():
                 self.link_data = self.project.pinfo['data']['parsed']['link_data']

@@ -35,17 +35,27 @@ class SparkProcessor(Processor):
         return Row(source_id=source_id, target_title=target_title, rev_id=rev_id)
 
     # Function fo parse revision information into a DataFrame
-    # Returns Key-Value-Pair with the revision ID as key and revision TIME as value
+    # Returns DataFrame with the Columns: revision ID, revision TIME, revision AUTHOR (its ID)
     @staticmethod
     def mapper_revisions(line):
         fields = line.split('\t')
         rev_id = int(fields[1])
         rev_date = parser.parse(fields[2])
         rev_date = rev_date.timestamp()
-        return Row(rev_id=rev_id, rev_date=rev_date)
+        rev_author = int(fields[3])
+        return Row(rev_id=rev_id, rev_date=rev_date, rev_author=rev_author)
 
-    # Function fo parse revision information into a DataFrame
-    # Returns Key-Value-Pair with the revision ID as key and revision TIME as value
+    # Function fo parse author information into a DataFrame
+    # Returns DataFrame with the Columns: author ID, author NAME
+    @staticmethod
+    def mapper_author_info(line):
+        fields = line.split('\t')
+        author_id = int(fields[0])
+        author_name = str(fields[1])
+        return Row(author_id=author_id, author_name=author_name)
+
+    # Function fo nodes into a DataFrame
+    # Returns DataFrame with the Columns: id, title, ns and potentially cscore
     @staticmethod
     def mapper_nodes(line):
         fields = line.split('\t')

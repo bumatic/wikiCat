@@ -131,11 +131,11 @@ class Project:
             pass
     '''
 
-
-    def add_parsed_data(self, page_info=None, revision_info=None, cat_data=None, link_data=None,
+    def add_parsed_data(self, page_info=None, revision_info=None, author_info=None, cat_data=None, link_data=None,
                         description=None, override=False):
         assert page_info is not None and revision_info is not None \
-               and cat_data is not None, 'Error: Required data is missing. Only link_data is optional.'
+               and cat_data is not None and author_info is not None, 'Error: Required data is missing. ' \
+                                                                     'Only link_data is optional.'
         print('Moving parsed data to its location in the project folder is not yet implemented. '
               'You need put it there manually.')
 
@@ -154,6 +154,7 @@ class Project:
         self.pinfo['data']['parsed'] = {}
         self.pinfo['data']['parsed']['page_info'] = page_info
         self.pinfo['data']['parsed']['revision_info'] = revision_info
+        self.pinfo['data']['parsed']['author_info'] = author_info
         self.pinfo['data']['parsed']['cat_data'] = cat_data
         if link_data is not None:
             self.pinfo['data']['parsed']['link_data'] = link_data

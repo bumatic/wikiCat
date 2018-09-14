@@ -105,6 +105,13 @@ class GraphDataGenerator(SparkProcessorParsed):
         page_info_df = spark.createDataFrame(page_info).cache()
         page_info_df.createOrReplaceTempView("info")
 
+        # Infer the schema, and register the DataFrames as tables.
+        author_info_source = spark.sparkContext.textFile(os.path.join(self.data_path, self.author_info))
+        # print(author_info_source)
+        author_info = author_info_source.map(self.mapper_author_info)
+        author_info_df = spark.createDataFrame(author_info).cache()
+        author_info_df.createOrReplaceTempView("author")
+
         # TODO Remove When Graph Data Generator Works
         # Create DF with only cat_info
         # needs to be replaced/removed when cat_data file has been fixed
@@ -116,6 +123,14 @@ class GraphDataGenerator(SparkProcessorParsed):
         revision_info = revision_info_source.map(self.mapper_revisions)
         revision_info_df = spark.createDataFrame(revision_info).cache()
         revision_info_df.createOrReplaceTempView("revision")
+
+        resolved_authors_df = spark.sql(
+            'SELECT r.rev_id, r.rev_date, a.author_name as rev_author '
+            'FROM revision r LEFT OUTER JOIN author a ON r.rev_author = a.author_id')
+        revision_info_df = resolved_authors_df
+        revision_info_df.createOrReplaceTempView("revision")
+
+
 
         counter = 0
 
@@ -230,7 +245,7 @@ class GraphDataGenerator(SparkProcessorParsed):
             events_df.createOrReplaceTempView("events")
 
             # 10. RESOLVE REVISION_ID TO TIMES, SORT BY TIME, AND STORE
-            events_df = spark.sql('SELECT r.rev_date as revision, e.source, e.target, e.event '
+            events_df = spark.sql('SELECT r.rev_date as revision, e.source, e.target, e.event, r.rev_author as author '
                                   'FROM events e JOIN revision r ON e.revision = r.rev_id').distinct().sort('revision')
             events_df.write.format('com.databricks.spark.csv').option('header', 'false').option('delimiter', '\t')\
                 .save(events_results_path)
