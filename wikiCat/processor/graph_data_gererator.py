@@ -2,6 +2,7 @@ from wikiCat.processor.spark_processor_parsed import SparkProcessorParsed
 import os
 import pandas as pd
 import findspark
+import subprocess
 findspark.init()
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import lit
@@ -45,26 +46,26 @@ class GraphDataGenerator(SparkProcessorParsed):
             edge_type = 'cat'
             results_basename = 'cats'
             page_data = self.get_page_data('cat_data')
-            results['cats'] = self.generate(edge_type, results_basename, page_data)
+            results['cats'] = self.generate(edge_type, results_basename, page_data, 'cats')
             #print(results)
         elif create == 'links':
             #link_data_type = 'links'
             edge_type = 'links'
             results_basename = 'links'
             page_data = self.get_page_data('link_data')
-            results['links'] = self.generate(edge_type, results_basename, page_data)
+            results['links'] = self.generate(edge_type, results_basename, page_data, 'links')
             pass
         elif create == 'all':
             #link_data_type = 'cats'
             edge_type = 'cat'
             results_basename = 'cats'
             page_data = self.get_page_data('cat_data')
-            results['cats'] = self.generate(edge_type, results_basename, page_data)
+            results['cats'] = self.generate(edge_type, results_basename, page_data, 'cats')
 
             edge_type = 'links'
             results_basename = 'links'
             page_data = self.get_page_data('link_data')
-            results['links'] = self.generate(edge_type, results_basename, page_data)
+            results['links'] = self.generate(edge_type, results_basename, page_data, 'links')
 
         self.handle_results(results)
 
@@ -146,6 +147,13 @@ class GraphDataGenerator(SparkProcessorParsed):
 
         for f in page_data:
             counter = counter + 1
+            if f[:-2] == '7z':
+                compressed = True
+                subprocess.call(['7z', 'e', os.path.join(self.data_path, f)])
+                if type == 'cats':
+                    f = 'cats.csv'
+                elif type == 'links':
+                    f = 'links.csv'
 
             # Results files
             edges_results_path = os.path.join(self.results_path, results_basename + '_' + str(counter) + '_edges/')
@@ -258,6 +266,9 @@ class GraphDataGenerator(SparkProcessorParsed):
                 .save(events_results_path)
             del events_df
             self.assemble_spark_results(events_results_path, events_results_file)
+
+            if compressed:
+                os.remove(os.path.join(self.data_path, f))
 
             path, nodes_results_file = os.path.split(nodes_results_file)
             nodes_results.append(nodes_results_file)
