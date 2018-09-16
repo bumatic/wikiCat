@@ -329,9 +329,9 @@ class Project:
         else:
             print('No errors have been calculated. Pass cats, links or all to calculate them.')
 
-    def generate_graph_data(self, data_type='cats'):
+    def generate_graph_data(self, data_type='cats', override=False):
         processor = GraphDataGenerator(self)
-        processor.generate_graph_data(data_type)
+        processor.generate_graph_data(data_type, override=override)
 
     def calculate_cscores(self):
         processor = ControvercyScore(self)
