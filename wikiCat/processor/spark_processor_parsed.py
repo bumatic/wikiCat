@@ -42,7 +42,11 @@ class SparkProcessorParsed(SparkProcessor):
             rev_date = rev_date.timestamp()
         except ValueError as e:
             print("Value Error at TS:", e, " in row", fields)
-
+            try:
+                rev_date = parser.parse(fields[2][:-1])
+                rev_date = rev_date.timestamp()
+            except ValueError as e:
+                return 
         try:
             rev_author = int(float(str(fields[3])))
         except ValueError as e:
