@@ -48,6 +48,8 @@ class SparkProcessorParsed(SparkProcessor):
         except ValueError as e:
             rev_author = -1
             #print("error", e, "for data ", fields)
+        except IndexError as e:
+            rev_author = -1
         return Row(rev_id=rev_id, rev_date=rev_date, rev_author=rev_author)
 
     # Function fo parse author information into a DataFrame
