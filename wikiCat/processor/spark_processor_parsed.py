@@ -39,7 +39,10 @@ class SparkProcessorParsed(SparkProcessor):
         rev_id = int(fields[1])
         rev_date = parser.parse(fields[2])
         rev_date = rev_date.timestamp()
-        rev_author = int(float(str(fields[3])))
+        try:
+            rev_author = int(float(str(fields[3])))
+        except ValueError as e:
+            print("error", e, "for data ", fields )
         return Row(rev_id=rev_id, rev_date=rev_date, rev_author=rev_author)
 
     # Function fo parse author information into a DataFrame
