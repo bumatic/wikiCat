@@ -149,7 +149,7 @@ class GraphDataGenerator(SparkProcessorParsed):
             counter = counter + 1
             print(f)
             print(data_type)
-            if f[:-2] == '7z':
+            if f[-2:] == '7z':
                 compressed = True
                 subprocess.call(['7z', 'e', os.path.join(self.data_path, f)])
                 if data_type == 'cats':
