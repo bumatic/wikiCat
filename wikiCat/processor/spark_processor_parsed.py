@@ -39,7 +39,17 @@ class SparkProcessorParsed(SparkProcessor):
         rev_id = int(fields[1])
         rev_date = parser.parse(fields[2])
         rev_date = rev_date.timestamp()
-        return Row(rev_id=rev_id, rev_date=rev_date)
+        rev_author = int(float(fields[3]))
+        return Row(rev_id=rev_id, rev_date=rev_date, rev_author=rev_author)
+
+    # Function fo parse author information into a DataFrame
+    # Returns DataFrame with the Columns: author ID, author NAME
+    @staticmethod
+    def mapper_author_info(line):
+        fields = line.split('\t')
+        author_id = int(float(fields[0]))
+        author_name = str(fields[1])
+        return Row(author_id=author_id, author_name=author_name)
 
     @staticmethod
     def handle_spark_results(path, file):
