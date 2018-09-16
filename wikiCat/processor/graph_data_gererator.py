@@ -101,14 +101,12 @@ class GraphDataGenerator(SparkProcessorParsed):
 
         # Infer the schema, and register the DataFrames as tables.
         page_info_source = spark.sparkContext.textFile(os.path.join(self.data_path, self.page_info))
-        #print(page_info_source)
         page_info = page_info_source.map(self.mapper_page_info)
         page_info_df = spark.createDataFrame(page_info).cache()
         page_info_df.createOrReplaceTempView("info")
 
         # Infer the schema, and register the DataFrames as tables.
         author_info_source = spark.sparkContext.textFile(os.path.join(self.data_path, self.author_info))
-        # print(author_info_source)
         author_info = author_info_source.map(self.mapper_author_info)
         author_info_df = spark.createDataFrame(author_info).cache()
 
@@ -169,6 +167,7 @@ class GraphDataGenerator(SparkProcessorParsed):
             page_data_source = spark.sparkContext.textFile(os.path.join(self.data_path, f))
             page_data = page_data_source.map(self.mapper_page_data)
             page_data_df = spark.createDataFrame(page_data).cache()
+            page_data_df.show()
             page_data_df.createOrReplaceTempView("data")
 
             # self.data_file_basename = f[0][:-4]
@@ -192,18 +191,8 @@ class GraphDataGenerator(SparkProcessorParsed):
             self.assemble_spark_results(edges_results_path, edges_results_file)
 
             # 3. GENERATE AND SAVE NODE LIST
-            # TODO: DEBUGGING NODE CREATION ERROR
-            #source_df = spark.sql("SELECT source as id FROM data").distinct()
-            #target_df = spark.sql("SELECT target as id FROM data").distinct()
-            #nodes_df = source_df.union(target_df).distinct()
-            #nodes_df.createOrReplaceTempView('nodes')
 
-            #nodes_df = spark.sql('SELECT n.id, i.page_title, i.page_ns FROM nodes n LEFT OUTER JOIN info i '
-            #                     'ON n.id=i.page_id').distinct()
-            #nodes_df.write.format('com.databricks.spark.csv').option('header', 'false').option('delimiter', '\t')\
-            #    .save(nodes_results_path)
             page_info_df.select('page_id', 'page_title', 'page_ns').write.format('com.databricks.spark.csv').option('header', 'false').option('delimiter', '\t').save(nodes_results_path)
-            #del nodes_df
             self.assemble_spark_results(nodes_results_path, nodes_results_file)
 
             # 4. CREATE TABLE WITH ALL REVISIONS OF A SOURCE PAGE
