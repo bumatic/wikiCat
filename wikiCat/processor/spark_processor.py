@@ -50,7 +50,7 @@ class SparkProcessor(Processor):
     @staticmethod
     def mapper_author_info(line):
         fields = line.split('\t')
-        author_id = int(fields[0])
+        author_id = int(float(fields[0]))
         author_name = str(fields[1])
         return Row(author_id=author_id, author_name=author_name)
 
