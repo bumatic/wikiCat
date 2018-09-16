@@ -156,6 +156,7 @@ class GraphDataGenerator(SparkProcessorParsed):
                     f = 'cats.csv'
                 elif data_type == 'links':
                     f = 'links.csv'
+                print(f)
 
             # Results files
             edges_results_path = os.path.join(self.results_path, results_basename + '_' + str(counter) + '_edges/')
