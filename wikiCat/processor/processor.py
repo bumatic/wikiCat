@@ -78,9 +78,9 @@ class Processor:
         return
 
     def remove_old(self, data_type):
-        for files in self.project.pinfo['data'][data_type].keys():
-            if type(files) == str:
-                os.remove(os.path.join(self.project.pinfo['path'][data_type], files))
+        for key in self.project.pinfo['data'][data_type].keys():
+            if type(self.project.pinfo['data'][data_type][key]) == str and not key == 'description':
+                os.remove(os.path.join(self.project.pinfo['path'][data_type], self.project.pinfo['data'][data_type][key]))
             if type(files) == list:
-                for f in files:
+                for f in self.project.pinfo['data'][data_type][key]:
                     os.remove(os.path.join(self.project.pinfo['path'][data_type], f))
