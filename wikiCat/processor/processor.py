@@ -80,7 +80,17 @@ class Processor:
     def remove_old(self, data_type):
         for key in self.project.pinfo['data'][data_type].keys():
             if type(self.project.pinfo['data'][data_type][key]) == str and not key == 'description':
-                os.remove(os.path.join(self.project.pinfo['path'][data_type], self.project.pinfo['data'][data_type][key]))
+                try:
+                    os.remove(os.path.join(self.project.pinfo['path'][data_type], self.project.pinfo['data'][data_type][key]))
+                except FileNotFoundError as e:
+                    print('Error', e, 'for file', self.project.pinfo['data'][data_type][key], 'in data type', data_type)
+
             if type(self.project.pinfo['data'][data_type][key]) == list:
                 for f in self.project.pinfo['data'][data_type][key]:
-                    os.remove(os.path.join(self.project.pinfo['path'][data_type], f))
+                    try:
+                        os.remove(os.path.join(self.project.pinfo['path'][data_type], f))
+                    except FileNotFoundError as e:
+                        print('Error', e, 'for file', self.project.pinfo['data'][data_type][key], 'in data type',
+                              data_type)
+        del self.project.pinfo['data'][data_type]
+        self.project.save_project()
