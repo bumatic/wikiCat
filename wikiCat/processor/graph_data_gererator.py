@@ -147,8 +147,6 @@ class GraphDataGenerator(SparkProcessorParsed):
 
         for f in page_data:
             counter = counter + 1
-            print(f)
-            print(data_type)
             if f[-2:] == '7z':
                 compressed = True
                 subprocess.call(['7z', 'e', os.path.join(self.data_path, f)])
@@ -156,7 +154,6 @@ class GraphDataGenerator(SparkProcessorParsed):
                     f = 'cats.csv'
                 elif data_type == 'links':
                     f = 'links.csv'
-                print(f)
 
             # Results files
             edges_results_path = os.path.join(self.results_path, results_basename + '_' + str(counter) + '_edges/')
