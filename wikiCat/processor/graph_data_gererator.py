@@ -247,6 +247,7 @@ class GraphDataGenerator(SparkProcessorParsed):
             # 10. RESOLVE REVISION_ID TO TIMES, SORT BY TIME, AND STORE
             events_df = spark.sql('SELECT r.rev_date as revision, e.source, e.target, e.event, r.rev_author as author '
                                   'FROM events e JOIN revision r ON e.revision = r.rev_id').distinct().sort('revision')
+            events_df.show().take(5)
             events_df.write.format('com.databricks.spark.csv').option('header', 'false').option('delimiter', '\t')\
                 .save(events_results_path)
             del events_df
