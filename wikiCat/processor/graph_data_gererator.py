@@ -263,7 +263,7 @@ class GraphDataGenerator(SparkProcessorParsed):
             start_events_df.createOrReplaceTempView("start_events")
 
             end_events_df = spark.sql('SELECT source, target, end as revision, event_end as event FROM durations')
-            end_events_df.show()
+            #end_events_df.show()
             end_events_df.createOrReplaceTempView("end_events")
 
             # 9. COMBINE THE TABLES START_EVENTS AND END_EVENTS, SORT BY REVISION
