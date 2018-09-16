@@ -1,3 +1,3 @@
 from wikiCat.wikiproject import Project
 mp = Project()
-mp.generate_graph_data(data_type='cats', override=True)
+mp.generate_graph_data(data_type='links', override=True)
