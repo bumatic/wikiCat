@@ -51,7 +51,11 @@ class SparkProcessorParsed(SparkProcessor):
     @staticmethod
     def mapper_author_info(line):
         fields = line.split('\t')
-        author_id = int(float(str(fields[0])))
+        try:
+            author_id = int(float(str(fields[0])))
+        except ValueError as e:
+            print("error", e, "for data ", fields)
+            author_id = -2
         author_name = str(fields[1])
         return Row(author_id=author_id, author_name=author_name)
 

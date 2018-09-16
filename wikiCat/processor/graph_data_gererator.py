@@ -110,7 +110,13 @@ class GraphDataGenerator(SparkProcessorParsed):
         # print(author_info_source)
         author_info = author_info_source.map(self.mapper_author_info)
         author_info_df = spark.createDataFrame(author_info).cache()
+
+        missing_author_row = spark.createDataFrame([[-1, "NO_AUTHOR_DATA"]])
+        author_info_df = author_info_df.union(missing_author_row)
+        #display(appended)
         author_info_df.createOrReplaceTempView("author")
+
+
 
         # TODO Remove When Graph Data Generator Works
         # Create DF with only cat_info
