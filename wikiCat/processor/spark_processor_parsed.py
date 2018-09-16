@@ -37,13 +37,17 @@ class SparkProcessorParsed(SparkProcessor):
     def mapper_revisions(line):
         fields = line.split('\t')
         rev_id = int(fields[1])
-        rev_date = parser.parse(fields[2])
-        rev_date = rev_date.timestamp()
+        try:
+            rev_date = parser.parse(fields[2])
+            rev_date = rev_date.timestamp()
+        except ValueError as e:
+            print("Value Error at TS:", e, " in row", fields)
+
         try:
             rev_author = int(float(str(fields[3])))
         except ValueError as e:
             rev_author = -1
-            print("error", e, "for data ", fields)
+            #print("error", e, "for data ", fields)
         return Row(rev_id=rev_id, rev_date=rev_date, rev_author=rev_author)
 
     # Function fo parse author information into a DataFrame
