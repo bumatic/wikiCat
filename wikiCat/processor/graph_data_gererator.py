@@ -167,10 +167,7 @@ class GraphDataGenerator(SparkProcessorParsed):
             page_data_source = spark.sparkContext.textFile(os.path.join(self.data_path, f))
             page_data = page_data_source.map(self.mapper_page_data)
             page_data_df = spark.createDataFrame(page_data).cache()
-            page_data_df.show()
             page_data_df.createOrReplaceTempView("data")
-
-            # self.data_file_basename = f[0][:-4]
 
             # 1. RESOLVE PAGE TITLES
             resolved_titles_df = spark.sql(
@@ -197,6 +194,7 @@ class GraphDataGenerator(SparkProcessorParsed):
 
             # 4. CREATE TABLE WITH ALL REVISIONS OF A SOURCE PAGE
             page_revisions_df = spark.sql('SELECT source, revision FROM data').distinct()
+            page_revisions_df.show()
             page_revisions_df.createOrReplaceTempView('page_revisions')
 
             # 4. CREATE TABLE WITH ALL POSSIBLE COMBINATIONS of SOURCE & REV with TARGETS
