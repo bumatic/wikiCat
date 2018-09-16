@@ -36,10 +36,11 @@ class SparkProcessorParsed(SparkProcessor):
     @staticmethod
     def mapper_revisions(line):
         fields = line.split('\t')
+        print(fields)
         rev_id = int(fields[1])
         rev_date = parser.parse(fields[2])
         rev_date = rev_date.timestamp()
-        rev_author = int(float(fields[3]))
+        rev_author = int(float(str(fields[3])))
         return Row(rev_id=rev_id, rev_date=rev_date, rev_author=rev_author)
 
     # Function fo parse author information into a DataFrame
@@ -47,7 +48,8 @@ class SparkProcessorParsed(SparkProcessor):
     @staticmethod
     def mapper_author_info(line):
         fields = line.split('\t')
-        author_id = int(float(fields[0]))
+        print(fields)
+        author_id = int(float(str(fields[0])))
         author_name = str(fields[1])
         return Row(author_id=author_id, author_name=author_name)
 
