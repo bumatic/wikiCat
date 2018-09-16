@@ -92,7 +92,7 @@ class GraphDataGenerator(SparkProcessorParsed):
             data_new.to_csv(dest_file, sep='\t', index=False, header=False, mode='a')
             os.remove(src_file)
 
-    def generate(self, edge_type, results_basename, page_data):
+    def generate(self, edge_type, results_basename, page_data, data_type):
         # Create a SparkSession
         # Note: In case its run on Windows and generates errors use (tmp Folder mus exist):
         # spark = SparkSession.builder.config("spark.sql.warehouse.dir", "file:///C:/temp")
@@ -150,9 +150,9 @@ class GraphDataGenerator(SparkProcessorParsed):
             if f[:-2] == '7z':
                 compressed = True
                 subprocess.call(['7z', 'e', os.path.join(self.data_path, f)])
-                if type == 'cats':
+                if data_type == 'cats':
                     f = 'cats.csv'
-                elif type == 'links':
+                elif data_type == 'links':
                     f = 'links.csv'
 
             # Results files
