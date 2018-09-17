@@ -147,7 +147,7 @@ class GraphDataGenerator(SparkProcessorParsed):
 
         for f in page_data:
             counter = counter + 1
-            print('Processing file '+counter+': '+f)
+            print('Processing file '+str(counter)+': '+str(f))
             compressed = False
             if f[-2:] == '7z':
                 compressed = True
