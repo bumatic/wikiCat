@@ -146,6 +146,9 @@ class GraphDataGenerator(SparkProcessorParsed):
         events_results = []
 
         for f in page_data:
+            print(f)
+            print('')
+            print('')
             counter = counter + 1
             compressed = False
             if f[-2:] == '7z':
