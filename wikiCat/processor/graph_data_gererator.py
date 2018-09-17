@@ -133,8 +133,8 @@ class GraphDataGenerator(SparkProcessorParsed):
             'SELECT r.rev_id, r.rev_date, a.author_name as rev_author '
             'FROM revision r LEFT OUTER JOIN author a ON r.rev_author = a.author_id')
         revision_info_df = resolved_authors_df
-        print('revision')
-        revision_info_df.show()
+        # print('revision')
+        # revision_info_df.show()
         revision_info_df.createOrReplaceTempView("revision")
 
 
@@ -146,14 +146,12 @@ class GraphDataGenerator(SparkProcessorParsed):
         events_results = []
 
         for f in page_data:
-            print(f)
-            print('')
-            print('')
             counter = counter + 1
+            print('Processing file '+counter+': '+f)
             compressed = False
             if f[-2:] == '7z':
                 compressed = True
-                print(compressed)
+                #print(compressed)
                 subprocess.call(['7z', 'e', os.path.join(self.data_path, f), '-o'+self.data_path])
                 if data_type == 'cats':
                     f = 'cats.csv'
@@ -271,15 +269,15 @@ class GraphDataGenerator(SparkProcessorParsed):
 
             # 9. COMBINE THE TABLES START_EVENTS AND END_EVENTS, SORT BY REVISION
             events_df = start_events_df.union(end_events_df).distinct()
-            print('9')
-            events_df.show()
+            #print('9')
+            #events_df.show()
             events_df.createOrReplaceTempView("events")
 
             # 10. RESOLVE REVISION_ID TO TIMES, SORT BY TIME, AND STORE
             events_df = spark.sql('SELECT r.rev_date as revision, e.source, e.target, e.event, r.rev_author as author '
                                   'FROM events e JOIN revision r ON e.revision = r.rev_id').distinct().sort('revision')
-            print('10')
-            events_df.show()
+            #print('10')
+            #events_df.show()
             events_df.write.format('com.databricks.spark.csv').option('header', 'false').option('delimiter', '\t')\
                 .save(events_results_path)
             del events_df
