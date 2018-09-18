@@ -103,7 +103,8 @@ class SparkProcessor(Processor):
             source = fields[1]
             target = fields[2]
             event = fields[3]
-            return Row(revision=revision, source=source, target=target, event=event)
+            author = str(fields[4])
+            return Row(revision=revision, source=source, target=target, event=event, author=author)
         elif len(fields) == 5:
             revision = float(fields[0])
             source = fields[1]

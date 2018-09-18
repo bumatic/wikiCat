@@ -74,7 +74,7 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
             cscore_events_df = spark.createDataFrame(cscore_events).cache()
             cscore_events_df.createOrReplaceTempView("cscore_events")
 
-            resolved_event_type_df = spark.sql('SELECT e.revision, e.source, e.target, e.event, c.cscore FROM '
+            resolved_event_type_df = spark.sql('SELECT e.revision, e.source, e.target, e.event, e.author, c.cscore FROM '
                                                'events e JOIN cscore_events c ON e.source = c.source '
                                                'AND e.target = c.target AND e.revision = c.revision')
 
