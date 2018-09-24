@@ -98,20 +98,21 @@ class SparkProcessor(Processor):
     @staticmethod
     def mapper_events(line):
         fields = line.split('\t')
-        if len(fields) == 4:
+        if len(fields) == 5:
             revision = float(fields[0])
             source = fields[1]
             target = fields[2]
             event = fields[3]
             author = str(fields[4])
             return Row(revision=revision, source=source, target=target, event=event, author=author)
-        elif len(fields) == 5:
+        elif len(fields) == 6:
             revision = float(fields[0])
             source = fields[1]
             target = fields[2]
             event = fields[3]
-            cscore = fields[4]
-            return Row(revision=revision, source=source, target=target, event=event, cscore=cscore)
+            author = fields[4]
+            cscore = fields[5]
+            return Row(revision=revision, source=source, target=target, event=event, author=author, cscore=cscore)
         else:
             print('Error while mapping events')
             return

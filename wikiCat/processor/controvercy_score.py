@@ -42,17 +42,18 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
         return results
 
     def calculate(self):
-        self.calculate_edge_score()
+        self.calculate_event_score()
         self.calculate_avg_edge_score()
         self.calculate_avg_node_score()
 
-    def calculate_edge_score(self):
+    def calculate_event_score(self):
         # Create a SparkSession
         # Note: In case its run on Windows and generates errors use (tmp Folder mus exist):
         # spark = SparkSession.builder.config("spark.sql.warehouse.dir", "file:///C:/temp").appName("Postprocessing").getOrCreate()
         #conf = SparkConf().setMaster("local[*]").setAppName("Test")
         #sc = SparkContext(conf=conf)
         #spark = SparkSession(sc).builder.appName("Calculate_Controvercy_Score_Edges").getOrCreate()
+
         spark = SparkSession.builder.appName("Calculate_Controvercy_Score_Edges").getOrCreate()
 
         for file in self.events_files:
@@ -121,7 +122,7 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
             os.rename(tmp_results_file, results_file)
 
             print('results assembled')
-            #HANDLE Null Values in CSCORE: Replace NULL WITH ZERO Option 1
+            # HANDLE Null Values in CSCORE: Replace NULL WITH ZERO Option 1
             print('Handle Cscore Null Values for Nodes')
             nodes = pd.read_csv(results_file, header=None, delimiter='\t',
                                 names=['id', 'title', 'ns', 'cscore'], skip_blank_lines=True, na_filter=False,
@@ -167,7 +168,7 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
             os.rename(tmp_results_file, results_file)
 
 
-            #HANDLE Null Values in CSCORE: Replace NULL WITH ZERO
+            # HANDLE Null Values in CSCORE: Replace NULL WITH ZERO
             print('Handle Cscore Null Values for edges.')
             edges = pd.read_csv(results_file, header=None, delimiter='\t',
                                 names=['source', 'target', 'type', 'cscore'], skip_blank_lines=True, na_filter=False,
