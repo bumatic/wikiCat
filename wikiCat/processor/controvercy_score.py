@@ -89,16 +89,17 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
             cscore_events_df = spark.createDataFrame(cscore_events).cache()
             cscore_events_df.createOrReplaceTempView("cscore_events")
 
-            resolved_event_type_df = spark.sql('SELECT e.revision, e.source, e.target, e.event, e.author, c.cscore '
+            resolved_event_type_df = spark.sql('SELECT DISTINCT e.revision, e.source, e.target, e.event, e.author, c.cscore '
                                                'FROM events e INNER JOIN cscore_events c '
                                                'ON (e.revision = c.revision AND e.source = c.source '
                                                'AND e.target = c.target)')
 
+            #resolved_event_type_df = resolved_event_type_df.collect()
             resolved_event_type_df.write.format('com.databricks.spark.csv').option('header', 'false').option('delimiter', '\t').save(spark_results_path)
-            os.remove(tmp_results_file)
-            self.assemble_spark_results(spark_results_path, tmp_results_file)
-            os.remove(os.path.join(self.data_path, file))
-            os.rename(tmp_results_file, results_file)
+            #os.remove(tmp_results_file)
+            #self.assemble_spark_results(spark_results_path, tmp_results_file)
+            #os.remove(os.path.join(self.data_path, file))
+            #os.rename(tmp_results_file, results_file)
 
         del spark
 
