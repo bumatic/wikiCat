@@ -66,22 +66,21 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
             events_df = spark.createDataFrame(events).cache()
             events_df.createOrReplaceTempView("events")
 
-            '''
-            events_grouped = events_df.drop('author').collect()
-            events_grouped_df = spark.createDataFrame(events_grouped).cache()
+
+            #events_grouped = events_df.drop('author').collect()
+            #events_grouped_df = spark.createDataFrame(events_grouped).cache()
             #events_grouped_df.createOrReplaceTempView("events_grouped")
             events_grouped_df = events_grouped_df.groupBy('source', 'target').agg(collect_list('revision').alias('revision'))
             cscore_events = events_grouped_df.rdd.map(self.process_spark_list).collect()
             cscore_events = [item for sublist in cscore_events for item in sublist]
             self.write_list(tmp_results_file, cscore_events)
-            '''
             cscore_events_source = spark.sparkContext.textFile(tmp_results_file)
             cscore_events = cscore_events_source.map(self.mapper_tmp_cscore_events)
             cscore_events_df = spark.createDataFrame(cscore_events).cache()
             cscore_events_df.createOrReplaceTempView("cscore_events")
 
             resolved_event_type_df = spark.sql('SELECT e.revision, e.source, e.target, e.event, e.author, c.cscore FROM '
-                                               'events e JOIN cscore_events c ON e.source = c.source '
+                                               'events e INNER JOIN cscore_events c ON e.source = c.source '
                                                'AND e.target = c.target AND e.revision = c.revision')
 
             resolved_event_type_df.write.format('com.databricks.spark.csv').option('header', 'false').option('delimiter', '\t').save(spark_results_path)
