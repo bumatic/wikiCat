@@ -74,6 +74,7 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
             events_grouped_df = events_df.groupBy('source', 'target').agg(collect_list('revision').alias('revision'))
             cscore_events = events_grouped_df.rdd.map(self.process_spark_list).collect()
             cscore_events = [item for sublist in cscore_events for item in sublist]
+            print(type(cscore_events))
             self.write_list(tmp_results_file, cscore_events)
             cscore_events_source = spark.sparkContext.textFile(tmp_results_file)
             cscore_events = cscore_events_source.map(self.mapper_tmp_cscore_events)
