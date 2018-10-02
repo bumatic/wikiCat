@@ -84,10 +84,10 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
                                                'AND e.target = c.target AND e.revision = c.revision')
 
             resolved_event_type_df.write.format('com.databricks.spark.csv').option('header', 'false').option('delimiter', '\t').save(spark_results_path)
-            os.remove(tmp_results_file)
-            self.assemble_spark_results(spark_results_path, tmp_results_file)
-            os.remove(os.path.join(self.data_path, file))
-            os.rename(tmp_results_file, results_file)
+            #os.remove(tmp_results_file)
+            #self.assemble_spark_results(spark_results_path, tmp_results_file)
+            #os.remove(os.path.join(self.data_path, file))
+            #os.rename(tmp_results_file, results_file)
         del spark
 
     def calculate_avg_node_score(self):
