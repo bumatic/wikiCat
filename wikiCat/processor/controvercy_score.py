@@ -43,8 +43,8 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
 
     def calculate(self):
         self.calculate_event_score()
-        self.calculate_avg_edge_score()
-        self.calculate_avg_node_score()
+        #self.calculate_avg_edge_score()
+        #self.calculate_avg_node_score()
 
     def calculate_event_score(self):
         # Create a SparkSession
