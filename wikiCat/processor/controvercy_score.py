@@ -34,7 +34,7 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
         results = []
         for i in range(len(ts_list)):
             if i == 0:
-                cscore = 0
+                cscore = self.growth_rate
             else:
                 delta = ts_list[i] - ts_list[i-1]
                 cscore = cscore * math.exp(-1 * self.decay_rate * delta) + self.growth_rate
@@ -66,16 +66,24 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
             events_df = spark.createDataFrame(events).cache()
             events_df.createOrReplaceTempView("events")
 
-
+            '''
+            Wahrscheinlich überflüssig:
             #events_grouped = events_df.drop('author').collect()
             #events_grouped_df = spark.createDataFrame(events_grouped).cache()
             #events_grouped_df.createOrReplaceTempView("events_grouped")
             #events_grouped_df = events_grouped_df.groupBy('source', 'target').agg(collect_list('revision').alias('revision'))
+            '''
+
+            '''
+            # AUSKOMMENTIERT FÜR SQL DEBUGGING:
             events_grouped_df = events_df.groupBy('source', 'target').agg(collect_list('revision').alias('revision'))
             cscore_events = events_grouped_df.rdd.map(self.process_spark_list).collect()
+
+            # Processing list of cscore events and writing them to tmp file
             cscore_events = [item for sublist in cscore_events for item in sublist]
-            print(type(cscore_events))
+            print(cscore_events[:5])
             self.write_list(tmp_results_file, cscore_events)
+            '''
             cscore_events_source = spark.sparkContext.textFile(tmp_results_file)
             cscore_events = cscore_events_source.map(self.mapper_tmp_cscore_events)
             cscore_events_df = spark.createDataFrame(cscore_events).cache()
@@ -86,6 +94,9 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
                                                'AND e.target = c.target AND e.revision = c.revision')
 
             resolved_event_type_df.write.format('com.databricks.spark.csv').option('header', 'false').option('delimiter', '\t').save(spark_results_path)
+            ''' 
+            Folgendes für debugging auskommentiert.
+            '''
             #os.remove(tmp_results_file)
             #self.assemble_spark_results(spark_results_path, tmp_results_file)
             #os.remove(os.path.join(self.data_path, file))
