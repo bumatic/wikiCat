@@ -1,7 +1,7 @@
-import findspark
-findspark.init()
-from pyspark.sql import Row
-from pyspark.sql import SparkSession
+    import findspark
+    findspark.init()
+    from pyspark.sql import Row
+    from pyspark.sql import SparkSession
 from pyspark import SparkConf, SparkContext
 from pyspark.sql.functions import collect_list, avg, max
 from wikiCat.processor.pandas_processor_graph import PandasProcessorGraph
@@ -55,6 +55,7 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
         #spark = SparkSession(sc).builder.appName("Calculate_Controvercy_Score_Edges").getOrCreate()
 
         spark = SparkSession.builder.appName("Calculate_Controvercy_Score_Edges").getOrCreate()
+        print(spark._conf.getAll())
 
         for file in self.events_files:
             results_file = os.path.join(self.data_path, file)
@@ -81,7 +82,7 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
 
             # Processing list of cscore events and writing them to tmp file
             cscore_events = [item for sublist in cscore_events for item in sublist]
-            print(cscore_events[:5])
+            #print(cscore_events[-5:])
             self.write_list(tmp_results_file, cscore_events)
             #'''
             cscore_events_source = spark.sparkContext.textFile(tmp_results_file)
