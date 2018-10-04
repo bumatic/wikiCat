@@ -1,7 +1,7 @@
-    import findspark
-    findspark.init()
-    from pyspark.sql import Row
-    from pyspark.sql import SparkSession
+import findspark
+findspark.init()
+from pyspark.sql import Row
+from pyspark.sql import SparkSession
 from pyspark import SparkConf, SparkContext
 from pyspark.sql.functions import collect_list, avg, max
 from wikiCat.processor.pandas_processor_graph import PandasProcessorGraph
