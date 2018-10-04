@@ -55,7 +55,7 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
         #spark = SparkSession(sc).builder.appName("Calculate_Controvercy_Score_Edges").getOrCreate()
 
         spark = SparkSession.builder.appName("Calculate_Controvercy_Score_Edges").getOrCreate()
-        print(spark.conf.get("spark.executor.memory"))
+        spark.conf.getAll()
 
         for file in self.events_files:
             results_file = os.path.join(self.data_path, file)
