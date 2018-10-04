@@ -3,7 +3,7 @@ findspark.init()
 from pyspark.sql import Row
 from pyspark.sql import SparkSession
 from pyspark import SparkConf, SparkContext
-from pyspark.sql.functions import collect_list, avg
+from pyspark.sql.functions import collect_list, avg, max
 from wikiCat.processor.pandas_processor_graph import PandasProcessorGraph
 from wikiCat.processor.spark_processor_graph import SparkProcessorGraph
 from dateutil import parser
@@ -74,7 +74,7 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
             #events_grouped_df = events_grouped_df.groupBy('source', 'target').agg(collect_list('revision').alias('revision'))
             '''
 
-            '''
+            #'''
             # AUSKOMMENTIERT FÜR SQL DEBUGGING:
             events_grouped_df = events_df.groupBy('source', 'target').agg(collect_list('revision').alias('revision'))
             cscore_events = events_grouped_df.rdd.map(self.process_spark_list).collect()
@@ -83,16 +83,21 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
             cscore_events = [item for sublist in cscore_events for item in sublist]
             print(cscore_events[:5])
             self.write_list(tmp_results_file, cscore_events)
-            '''
+            #'''
             cscore_events_source = spark.sparkContext.textFile(tmp_results_file)
             cscore_events = cscore_events_source.map(self.mapper_tmp_cscore_events)
             cscore_events_df = spark.createDataFrame(cscore_events).cache()
             cscore_events_df.createOrReplaceTempView("cscore_events")
 
-            resolved_event_type_df = spark.sql('SELECT DISTINCT e.revision, e.source, e.target, e.event, e.author, c.cscore '
+
+            # ggf. nochmal mit Select DISTINCT probieren
+            resolved_event_type_df = spark.sql('SELECT e.revision, e.source, e.target, e.event, e.author, c.cscore '
                                                'FROM events e INNER JOIN cscore_events c '
                                                'ON (e.revision = c.revision AND e.source = c.source '
                                                'AND e.target = c.target)')
+
+            resolved_event_type_df = resolved_event_type_df.groupBy('revision', 'source', 'target', 'event', 'author')\
+                .agg(max('cscore'))
 
             #resolved_event_type_df = resolved_event_type_df.collect()
             resolved_event_type_df.write.format('com.databricks.spark.csv').option('header', 'false').option('delimiter', '\t').save(spark_results_path)
