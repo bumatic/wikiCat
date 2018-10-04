@@ -54,8 +54,15 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
         #sc = SparkContext(conf=conf)
         #spark = SparkSession(sc).builder.appName("Calculate_Controvercy_Score_Edges").getOrCreate()
 
-        spark = SparkSession.builder.appName("Calculate_Controvercy_Score_Edges").getOrCreate()
+        spark = SparkSession\
+            .builder\
+            .appName("Calculate_Controvercy_Score_Edges")\
+            .config("spark.driver.memory", "70g")\
+            .config("spark.driver.maxResultSize", "40g")\
+            .getOrCreate()
+        #spark = SparkSession.builder.appName("Calculate_Controvercy_Score_Edges").getOrCreate()
         print(SparkConf().getAll())
+
 
         for file in self.events_files:
             results_file = os.path.join(self.data_path, file)
