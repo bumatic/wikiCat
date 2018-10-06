@@ -92,7 +92,7 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
             cscore_events = [item for sublist in cscore_events for item in sublist]
             print(cscore_events[-5:])
 
-            '''
+
             self.write_list(tmp_results_file, cscore_events)
             
             cscore_events_source = spark.sparkContext.textFile(tmp_results_file)
@@ -109,7 +109,7 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
 
             resolved_event_type_df = resolved_event_type_df.groupBy('revision', 'source', 'target', 'event', 'author')\
                 .agg(max('cscore'))
-
+            '''
             #resolved_event_type_df = resolved_event_type_df.collect()
             resolved_event_type_df.write.format('com.databricks.spark.csv').option('header', 'false').option('delimiter', '\t').save(spark_results_path)
             os.remove(tmp_results_file)
