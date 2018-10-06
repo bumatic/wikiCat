@@ -108,9 +108,7 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
                                                'AND e.target = c.target)')
 
             resolved_event_type_df = resolved_event_type_df.groupBy('revision', 'source', 'target', 'event', 'author')\
-                .agg(max('cscore'))
-
-            resolved_event_type_df = resolved_event_type_df.orderBy('revision', ascending=True)
+                .agg(max('cscore')).orderBy('revision', ascending=True)
             resolved_event_type_df.show(200)
             '''
             #resolved_event_type_df = resolved_event_type_df.collect()
