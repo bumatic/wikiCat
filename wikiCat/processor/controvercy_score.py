@@ -73,9 +73,9 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
             events = events_source.map(self.mapper_events)
             events_df = spark.createDataFrame(events).cache()
             events_df.createOrReplaceTempView("events")
-            events_df.show()
 
-            '''
+
+
             #Wahrscheinlich überflüssig:
             #events_grouped = events_df.drop('author').collect()
             #events_grouped_df = spark.createDataFrame(events_grouped).cache()
@@ -86,7 +86,8 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
             # AUSKOMMENTIERT FÜR SQL DEBUGGING:
             events_grouped_df = events_df.groupBy('source', 'target').agg(collect_list('revision').alias('revision'))
             cscore_events = events_grouped_df.rdd.map(self.process_spark_list).collect()
-
+            cscore_events.show()
+            '''
             # Processing list of cscore events and writing them to tmp file
             cscore_events = [item for sublist in cscore_events for item in sublist]
             #print(cscore_events[-5:])
