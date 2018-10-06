@@ -73,7 +73,7 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
             events = events_source.map(self.mapper_events)
             events_df = spark.createDataFrame(events).cache()
             events_df.createOrReplaceTempView("events")
-            event.df.show()
+            events_df.show()
 
             '''
             #Wahrscheinlich überflüssig:
