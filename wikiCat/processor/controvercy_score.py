@@ -109,6 +109,7 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
 
             resolved_event_type_df = resolved_event_type_df.groupBy('revision', 'source', 'target', 'event', 'author')\
                 .agg(max('cscore'))
+            resolved_event_type_df.show()
             '''
             #resolved_event_type_df = resolved_event_type_df.collect()
             resolved_event_type_df.write.format('com.databricks.spark.csv').option('header', 'false').option('delimiter', '\t').save(spark_results_path)
