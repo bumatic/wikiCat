@@ -33,5 +33,5 @@ source = spark.sparkContext.textFile(os.path.join('project', '01_data', '01_pars
 events = source.map(mapper_revisions)
 events_df = spark.createDataFrame(events).cache()
 events_df.createOrReplaceTempView("events")
-events_df.filter(events_df.revision == 1.390047722E9).show()
+events_df.filter(events_df.rev_date == 1.390047722E9).show()
 
