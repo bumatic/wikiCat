@@ -73,9 +73,9 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
             events = events_source.map(self.mapper_events)
             events_df = spark.createDataFrame(events).cache()
             events_df.createOrReplaceTempView("events")
+            events_df.filter(events_df.revision == 1.390047722E9).show()
 
-
-
+        '''
             #Wahrscheinlich überflüssig:
             #events_grouped = events_df.drop('author').collect()
             #events_grouped_df = spark.createDataFrame(events_grouped).cache()
@@ -116,6 +116,7 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
             os.remove(os.path.join(self.data_path, file))
             os.rename(tmp_results_file, results_file)
         del spark
+        '''
 
     def calculate_avg_node_score(self):
         # TODO Assumes that only one nodes file exists, needs to be fixed for link data
