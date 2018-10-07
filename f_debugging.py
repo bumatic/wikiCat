@@ -1,3 +1,4 @@
+import os
 import findspark
 findspark.init()
 from pyspark.sql import Row
@@ -7,6 +8,7 @@ from pyspark.sql.functions import collect_list, avg, max
 from wikiCat.processor.pandas_processor_graph import PandasProcessorGraph
 from wikiCat.processor.spark_processor_graph import SparkProcessorGraph
 from dateutil import parser
+
 
 
 def mapper_revisions(line):
@@ -28,7 +30,7 @@ spark = SparkSession\
 print(SparkConf().getAll())
 
 source = spark.sparkContext.textFile(os.path.join('project', '01_data', '01_parsed', 'revisions.csv'))
-events = source.map(self.mapper_revisions)
+events = source.map(mapper_revisions)
 events_df = spark.createDataFrame(events).cache()
 events_df.createOrReplaceTempView("events")
 events_df.filter(events_df.revision == 1.390047722E9).show()
