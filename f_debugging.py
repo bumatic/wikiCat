@@ -19,6 +19,7 @@ def mapper_revisions(line):
     try:
         rev_author = int(float(fields[3]))
     except:
+        rev_author = 0
         print(fields[3])
     return Row(rev_id=rev_id, rev_date=rev_date, rev_author=rev_author)
 
