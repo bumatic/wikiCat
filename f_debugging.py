@@ -21,7 +21,7 @@ def mapper_revisions(line):
     except:
         rev_author = 0
         counter+=1
-        print(fields)
+        #print(fields)
     return Row(rev_id=rev_id, rev_date=rev_date, rev_author=rev_author)
 
 spark = SparkSession\
