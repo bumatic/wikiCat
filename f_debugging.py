@@ -16,7 +16,10 @@ def mapper_revisions(line):
     rev_id = int(fields[1])
     rev_date = parser.parse(fields[2])
     rev_date = rev_date.timestamp()
-    rev_author = int(float(fields[3]))
+    try:
+        rev_author = int(float(fields[3]))
+    except:
+        print(fields[3])
     return Row(rev_id=rev_id, rev_date=rev_date, rev_author=rev_author)
 
 spark = SparkSession\
