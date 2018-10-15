@@ -38,6 +38,12 @@ spark = SparkSession\
 print(SparkConf().getAll())
 
 source = spark.sparkContext.textFile(os.path.join('project', '01_data', '01_parsed', 'revisions.csv'))
+print(source)
+
+
+
+
+'''
 tmp_results_file = os.path.join('project', '01_data', '01_parsed', 'tmp_results.csv')
 
 events = source.map(mapper_revisions)
@@ -48,7 +54,6 @@ print(events_df.count())
 events_df = events_df.filter(events_df.rev_date == 1.390047722E9) #1.030213496E9
 events_df.show()
 
-'''
 events_grouped_df = events_df.groupBy('source', 'target').agg(collect_list('revision').alias('revision'))
 cscore_events = events_grouped_df.rdd.map(self.process_spark_list).collect()
 
