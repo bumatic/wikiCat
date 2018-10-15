@@ -27,9 +27,9 @@ def mapper_revisions(line):
 spark = SparkSession\
     .builder\
     .appName("Calculate_Controvercy_Score_Edges")\
-    .config("spark.driver.maxResultSize", "40g")\
     .getOrCreate()
 
+    # .config("spark.driver.maxResultSize", "40g")\
     # .config("spark.driver.memory", "70g")\
 
 print(SparkConf().getAll())
