@@ -29,7 +29,6 @@ spark = SparkSession\
     .appName("Calculate_Controvercy_Score_Edges")\
     .config("spark.driver.memory", "7g")\
     .config("spark.driver.maxResultSize", "4g")\
-    .config("spark.executor.cores", "8")\
     .getOrCreate()
 
     # .config("spark.driver.memory", "70g")\
