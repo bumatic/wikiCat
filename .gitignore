@@ -17,6 +17,14 @@ CHECK IF REMOVE.py
 **/_project/
 **/test_project/
 **/test_project.bak/
+test_a_create_project Kopie.py
+test_b_add_parsed_data.py
+test_c_generate_graph_data.py
+test_d_add_project_metadata.py
+test_e_calculate_cscores.py
+**/test_project/
+**/test_project_/
+**/test_project_alt/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

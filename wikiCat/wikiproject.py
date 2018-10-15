@@ -147,7 +147,7 @@ class Project:
 
         # TODO Check if files exist in the correct location
         if not self.check_files([page_info, revision_info, cat_data, link_data], self.pinfo['path']['parsed']):
-            print('File do not exists. Make sure you passed the correct file names '
+            print('Files do not exists. Make sure you passed the correct file names '
                   'and that they are the correct folder.')
             return False
 

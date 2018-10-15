@@ -24,6 +24,7 @@ from pyspark.sql.functions import lit
 class GraphDataGenerator(SparkProcessorParsed):
     def __init__(self, project):  # , link_data_type, fixed='fixed_none', errors='errors_removed'
         SparkProcessorParsed.__init__(self, project)
+        self.debugging = False
 
     def get_page_data(self, link_data_type):
         if type(self.project.pinfo['data']['parsed'][link_data_type]) == list:
@@ -113,8 +114,11 @@ class GraphDataGenerator(SparkProcessorParsed):
         missing_author_row = spark.createDataFrame([[-1, "NO_AUTHOR_DATA"]])
         author_info_df = author_info_df.union(missing_author_row)
         #display(appended)
-        author_info_df.createOrReplaceTempView("author")
 
+        author_info_df.createOrReplaceTempView("author")
+        if self.debugging:
+            print('author info')
+            author_info_df.show()
 
 
         # TODO Remove When Graph Data Generator Works
@@ -133,11 +137,10 @@ class GraphDataGenerator(SparkProcessorParsed):
             'SELECT r.rev_id, r.rev_date, a.author_name as rev_author '
             'FROM revision r LEFT OUTER JOIN author a ON r.rev_author = a.author_id')
         revision_info_df = resolved_authors_df
-        # print('revision')
-        # revision_info_df.show()
+        if self.debugging:
+            print('revision info')
+            revision_info_df.show()
         revision_info_df.createOrReplaceTempView("revision")
-
-
 
         counter = 0
 
@@ -197,23 +200,27 @@ class GraphDataGenerator(SparkProcessorParsed):
 
             # 4.1 CREATE TABLE WITH ALL REVISIONS OF A SOURCE PAGE
             page_revisions_df = spark.sql('SELECT source, revision FROM data').distinct()
-
-            #print('4.1 page revisions df')
-            #page_revisions_df.show()
+            if self.debugging:
+                print('4.1 page revisions df')
+                page_revisions_df.show()
             page_revisions_df.createOrReplaceTempView('page_revisions')
 
             # 4.2 CREATE TABLE WITH ALL POSSIBLE COMBINATIONS of SOURCE & REV with TARGETS
             all_possibilities_df = spark.sql('SELECT p.source, d.target, p.revision '
                                              'FROM page_revisions p JOIN data d '
                                              'ON p.source = d.source').distinct()
-            #print('4.2 all possibilities')
-            #all_possibilities_df.show()
+            if self.debugging:
+                print('4.2 all possibilities')
+                all_possibilities_df.show()
 
             # 5. CREATE TABLE WITH ENTRIES FOR WHEN A EDGE DID NOT EXIST AT THE TIME OF A REVISION
             # BY SUBTRACTING EXISTING EDGES FROM ALL_POSSIBILITIES
             negative_edges_df = all_possibilities_df.subtract(page_data_df).sort('source', 'revision')
-            #print('5')
-            #negative_edges_df.show()
+
+            if self.debugging:
+                print('5')
+                negative_edges_df.show()
+
             negative_edges_df.createOrReplaceTempView('negative_edges')
 
             # 6.1 FIRST STEP TO CREATE DURATION RESULTS BY MAKING A LEFT OUTER JOIN OF DATA WITH NEGATIVE EDGES
@@ -223,8 +230,9 @@ class GraphDataGenerator(SparkProcessorParsed):
             durations_df = spark.sql('SELECT d.source, d.target, d.revision as start, n.revision as end '
                                      'FROM data d LEFT OUTER JOIN negative_edges n '
                                      'ON d.source = n.source AND d.target = n.target AND d.revision < n.revision')
-            #print('6.1')
-            #durations_df.show()
+            if self.debugging:
+                print('6.1')
+                durations_df.show()
 
             durations_df.createOrReplaceTempView("durations")
 
@@ -232,54 +240,73 @@ class GraphDataGenerator(SparkProcessorParsed):
             # FOR GROUPS OF SOURCE, TARGET, START
             durations_df = spark.sql('SELECT source, target, start, min(end) as end FROM durations '
                                      'GROUP BY source, target, start')
-            #print('6.2')
-            #durations_df.show()
+            if self.debugging:
+                print('6.2')
+                durations_df.show()
+
             durations_df.createOrReplaceTempView("durations")
 
             # 6.3 THIRD STEP TO CREATE DURATION RESULTS BY KEEPING ONLY MIN START TIMES
             # FOR GROUPS OF SOURCE, TARGET, END
             durations_df = spark.sql('SELECT source, target, min(start) as start, end FROM durations '
                                      'GROUP BY source, target, end').distinct()
-            #print('6.3')
-            #durations_df.show()
+            if self.debugging:
+                print('6.3')
+                durations_df.show()
+
             durations_df.createOrReplaceTempView("durations")
 
             # 7.1 CREATE START COLUMN
             durations_df = durations_df.withColumn('event_start', lit('start'))
 
-            #print('print 7.1')
-            #durations_df.show()
+            if self.debugging:
+                print('print 7.1')
+                durations_df.show()
+
             durations_df.createOrReplaceTempView("durations")
 
             # 7.2 CREATE END COLUMN
             durations_df = durations_df.withColumn('event_end', lit('end'))
-            #print('7.2')
-            #durations_df.show()
+
+            if self.debugging:
+                print('7.2')
+                durations_df.show()
+
             durations_df.createOrReplaceTempView("durations")
 
             # 8. CREATE TABLES FOR START EVENTS AND END EVENTS
             start_events_df = spark.sql('SELECT source, target, start as revision, event_start as event FROM durations')
-            #print('8 - start, end')
-            #start_events_df.show()
-            start_events_df.createOrReplaceTempView("start_events")
 
+            start_events_df.createOrReplaceTempView("start_events")
             end_events_df = spark.sql('SELECT source, target, end as revision, event_end as event FROM durations')
-            #end_events_df.show()
+
+            if self.debugging:
+                print('8 - start, end')
+                start_events_df.show()
+                end_events_df.show()
+
             end_events_df.createOrReplaceTempView("end_events")
 
             # 9. COMBINE THE TABLES START_EVENTS AND END_EVENTS, SORT BY REVISION
             events_df = start_events_df.union(end_events_df).distinct()
-            #print('9')
-            #events_df.show()
+
+            if self.debugging:
+                print('9')
+                events_df.show()
+
             events_df.createOrReplaceTempView("events")
 
             # 10. RESOLVE REVISION_ID TO TIMES, SORT BY TIME, AND STORE
             events_df = spark.sql('SELECT r.rev_date as revision, e.source, e.target, e.event, r.rev_author as author '
                                   'FROM events e JOIN revision r ON e.revision = r.rev_id').distinct().sort('revision')
-            #print('10')
-            #events_df.show()
+
+            if self.debugging:
+                print('10')
+                events_df.show()
+
             events_df.write.format('com.databricks.spark.csv').option('header', 'false').option('delimiter', '\t')\
                 .save(events_results_path)
+
             del events_df
             self.assemble_spark_results(events_results_path, events_results_file)
 

@@ -63,7 +63,6 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
         #spark = SparkSession.builder.appName("Calculate_Controvercy_Score_Edges").getOrCreate()
         print(SparkConf().getAll())
 
-
         for file in self.events_files:
             results_file = os.path.join(self.data_path, file)
             tmp_results_file = os.path.join(self.data_path, 'tmp_' + file)
@@ -73,9 +72,7 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
             events = events_source.map(self.mapper_events)
             events_df = spark.createDataFrame(events).cache()
             events_df.createOrReplaceTempView("events")
-            events_df.filter(events_df.revision == 1.390047722E9).show()
 
-        '''
             #Wahrscheinlich überflüssig:
             #events_grouped = events_df.drop('author').collect()
             #events_grouped_df = spark.createDataFrame(events_grouped).cache()
@@ -87,11 +84,9 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
             events_grouped_df = events_df.groupBy('source', 'target').agg(collect_list('revision').alias('revision'))
             cscore_events = events_grouped_df.rdd.map(self.process_spark_list).collect()
 
-
             # Processing list of cscore events and writing them to tmp file
             cscore_events = [item for sublist in cscore_events for item in sublist]
             print(cscore_events[-5:])
-
 
             self.write_list(tmp_results_file, cscore_events)
             
@@ -110,13 +105,16 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
             resolved_event_type_df = resolved_event_type_df.groupBy('revision', 'source', 'target', 'event', 'author')\
                 .agg(max('cscore')).orderBy('revision', ascending=True)
 
+            resolved_event_type_df.show()
+
+            '''
             resolved_event_type_df.write.format('com.databricks.spark.csv').option('header', 'false').option('delimiter', '\t').save(spark_results_path)
             os.remove(tmp_results_file)
             self.assemble_spark_results(spark_results_path, tmp_results_file)
             os.remove(os.path.join(self.data_path, file))
             os.rename(tmp_results_file, results_file)
+            '''
         del spark
-        '''
 
     def calculate_avg_node_score(self):
         # TODO Assumes that only one nodes file exists, needs to be fixed for link data
