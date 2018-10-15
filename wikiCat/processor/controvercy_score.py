@@ -78,9 +78,7 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
             #events_grouped_df = spark.createDataFrame(events_grouped).cache()
             #events_grouped_df.createOrReplaceTempView("events_grouped")
             #events_grouped_df = events_grouped_df.groupBy('source', 'target').agg(collect_list('revision').alias('revision'))
-            
 
-            # AUSKOMMENTIERT FÜR SQL DEBUGGING:
             events_grouped_df = events_df.groupBy('source', 'target').agg(collect_list('revision').alias('revision'))
             cscore_events = events_grouped_df.rdd.map(self.process_spark_list).collect()
 
