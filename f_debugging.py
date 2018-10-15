@@ -27,10 +27,13 @@ def mapper_revisions(line):
 spark = SparkSession\
     .builder\
     .appName("Calculate_Controvercy_Score_Edges")\
-    .config("spark.driver.memory", "70g")\
-    .config("spark.driver.maxResultSize", "40g")\
+    .config("spark.driver.memory", "7g")\
+    .config("spark.driver.maxResultSize", "4g")\
+    .config("spark.executor.cores", "8")\
     .getOrCreate()
 
+    # .config("spark.driver.memory", "70g")\
+    # .config("spark.driver.maxResultSize", "40g")\
 
 print(SparkConf().getAll())
 
@@ -41,7 +44,8 @@ events = source.map(mapper_revisions)
 events_df = spark.createDataFrame(events).cache()
 events_df.createOrReplaceTempView("events")
 events_df.show()
-events_df = events_df.filter(events_df.rev_date == 1.390047722E9)
+print(events_df.count())
+events_df = events_df.filter(events_df.rev_date == 1.390047722E9) #1.030213496E9
 events_df.show()
 
 '''
