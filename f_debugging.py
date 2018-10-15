@@ -44,8 +44,8 @@ events_df = spark.createDataFrame(events).cache()
 events_df.createOrReplaceTempView("events")
 events_df.show()
 print(events_df.count())
-#events_df = events_df.filter(events_df.rev_date == 1.390047722E9) #1.030213496E9
-#events_df.show()
+events_df = events_df.filter(events_df.rev_date == 1.390047722E9) #1.030213496E9
+events_df.show()
 
 
 '''
