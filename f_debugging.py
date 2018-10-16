@@ -91,11 +91,19 @@ print(events_df.count())
 # Result: 213087340
 '''
 
-
+'''
 # Filter revisions for specific revision date in order to check for inconsistencies
 
 events_filtered_df = events_df.filter(events_df.rev_date == 1.390047722E9) #1.030213496E9
 events_filtered_df.show()
+
+# Results:
+# +----------+-------------+---------+
+# |rev_author|     rev_date|   rev_id|
+# +----------+-------------+---------+
+# |    203786|1.390047722E9|591261883|
+# +----------+-------------+---------+
+'''
 
 
 '''
