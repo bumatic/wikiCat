@@ -61,6 +61,7 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
             .config("spark.driver.maxResultSize", "40g")\
             .getOrCreate()
         #spark = SparkSession.builder.appName("Calculate_Controvercy_Score_Edges").getOrCreate()
+
         print(SparkConf().getAll())
 
         for file in self.events_files:
@@ -99,6 +100,8 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
                                                'FROM events e INNER JOIN cscore_events c '
                                                'ON (e.revision = c.revision AND e.source = c.source '
                                                'AND e.target = c.target)')
+
+            #resolved_event_type_df = events_df.join(cscore_events, )
 
             resolved_event_type_df = resolved_event_type_df.groupBy('revision', 'source', 'target', 'event', 'author')\
                 .agg(max('cscore')).orderBy('revision', ascending=True)
