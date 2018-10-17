@@ -196,6 +196,8 @@ class GraphDataGenerator(SparkProcessorParsed):
             # 3. GENERATE AND SAVE NODE LIST
 
             page_info_df.select('page_id', 'page_title', 'page_ns').write.format('com.databricks.spark.csv').option('header', 'false').option('delimiter', '\t').save(nodes_results_path)
+            #TODO: Check if possible to delete page_info_df here?
+            # del page_info_df
             self.assemble_spark_results(nodes_results_path, nodes_results_file)
 
             # 4.1 CREATE TABLE WITH ALL REVISIONS OF A SOURCE PAGE
