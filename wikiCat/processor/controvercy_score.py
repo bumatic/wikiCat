@@ -32,6 +32,7 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
         ts_list = row[2]
         ts_list.sort()
         results = []
+
         for i in range(len(ts_list)):
             if i == 0:
                 cscore = self.growth_rate
@@ -54,13 +55,14 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
         #sc = SparkContext(conf=conf)
         #spark = SparkSession(sc).builder.appName("Calculate_Controvercy_Score_Edges").getOrCreate()
 
+
         spark = SparkSession\
             .builder\
             .appName("Calculate_Controvercy_Score_Edges")\
             .config("spark.driver.memory", "70g")\
             .config("spark.driver.maxResultSize", "40g")\
             .getOrCreate()
-        #spark = SparkSession.builder.appName("Calculate_Controvercy_Score_Edges").getOrCreate()
+
 
         print(SparkConf().getAll())
 
@@ -81,14 +83,20 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
             #events_grouped_df = events_grouped_df.groupBy('source', 'target').agg(collect_list('revision').alias('revision'))
 
             events_grouped_df = events_df.groupBy('source', 'target').agg(collect_list('revision').alias('revision'))
-            cscore_events = events_grouped_df.rdd.map(self.process_spark_list).collect()
+            events_grouped_df.show()
+
+            cscore_events = events_grouped_df.rdd.map(self.process_spark_list)
+            cscore_events = cscore_events.collect()
+
+            #cscore_events.show() #= cscore_events.collect()
 
             # Processing list of cscore events and writing them to tmp file
             cscore_events = [item for sublist in cscore_events for item in sublist]
-            print(cscore_events[-5:])
+            #print(cscore_events)
 
             self.write_list(tmp_results_file, cscore_events)
-            
+
+
             cscore_events_source = spark.sparkContext.textFile(tmp_results_file)
             cscore_events = cscore_events_source.map(self.mapper_tmp_cscore_events)
             cscore_events_df = spark.createDataFrame(cscore_events).cache()
