@@ -59,7 +59,7 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
         spark = SparkSession\
             .builder\
             .appName("Calculate_Controvercy_Score_Edges")\
-            .config("spark.driver.memory", "70g")\
+            .config("spark.driver.memory", "40g")\
             .config("spark.driver.maxResultSize", "40g")\
             .getOrCreate()
 
