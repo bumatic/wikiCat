@@ -48,13 +48,11 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
         self.calculate_avg_node_score()
 
     def calculate_event_score(self):
+        print('============================')
+        print('Calculate cScores for Events')
+        print('============================')
         # Create a SparkSession
         # Note: In case its run on Windows and generates errors use (tmp Folder mus exist):
-        # spark = SparkSession.builder.config("spark.sql.warehouse.dir", "file:///C:/temp").appName("Postprocessing").getOrCreate()
-        #conf = SparkConf().setMaster("local[*]").setAppName("Test")
-        #sc = SparkContext(conf=conf)
-        #spark = SparkSession(sc).builder.appName("Calculate_Controvercy_Score_Edges").getOrCreate()
-
 
         spark = SparkSession\
             .builder\
@@ -83,16 +81,15 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
             #events_grouped_df = events_grouped_df.groupBy('source', 'target').agg(collect_list('revision').alias('revision'))
 
             events_grouped_df = events_df.groupBy('source', 'target').agg(collect_list('revision').alias('revision'))
-            events_grouped_df.show()
+            #events_grouped_df.show()
+            initial_events = events_df.count()
+            print("Number of events to be processed:", str(initial_events))
 
             cscore_events = events_grouped_df.rdd.map(self.process_spark_list)
             cscore_events = cscore_events.collect()
 
-            #cscore_events.show() #= cscore_events.collect()
-
             # Processing list of cscore events and writing them to tmp file
             cscore_events = [item for sublist in cscore_events for item in sublist]
-            #print(cscore_events)
 
             self.write_list(tmp_results_file, cscore_events)
 
@@ -109,36 +106,54 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
                                                'ON (e.revision = c.revision AND e.source = c.source '
                                                'AND e.target = c.target)')
 
-            #resolved_event_type_df = events_df.join(cscore_events, )
-
             resolved_event_type_df = resolved_event_type_df.groupBy('revision', 'source', 'target', 'event', 'author')\
                 .agg(max('cscore')).orderBy('revision', ascending=True)
 
-            print('Resolved events:')
-            resolved_event_type_df.show()
-
+            # resolved_event_type_df.show()
             resolved_event_type_df.write.format('com.databricks.spark.csv').option('header', 'false').option('delimiter', '\t').save(spark_results_path)
             os.remove(tmp_results_file)
             self.assemble_spark_results(spark_results_path, tmp_results_file)
-            #os.remove(os.path.join(self.data_path, file))
-            #os.rename(tmp_results_file, results_file)
+            os.remove(os.path.join(self.data_path, file))
+            os.rename(tmp_results_file, results_file)
+
+            processed_events = resolved_event_type_df.count()
+            print('Number of processed and resolved events: ', str(processed_events))
+            print("Status: ", initial_events == processed_events, '\n')
+
         del spark
 
     def calculate_avg_node_score(self):
-        # TODO Assumes that only one nodes file exists, needs to be fixed for link data
+        print('===================================')
+        print('Calculate average cScores for Nodes')
+        print('===================================')
+        # TODO Handling of multiple Events files is probably not very performant
         # Create a SparkSession
         # Note: In case its run on Windows and generates errors use (tmp Folder mus exist):
         # spark = SparkSession.builder.config("spark.sql.warehouse.dir", "file:///C:/temp").
         # appName("Postprocessing").getOrCreate()
-        spark = SparkSession.builder.appName("Calculate_Controvercy_Score_Nodes").getOrCreate()
+        #spark = SparkSession.builder.appName("Calculate_Controvercy_Score_Nodes").getOrCreate()
+
+        spark = SparkSession \
+            .builder \
+            .appName("Calculate_Controvercy_Score_Edges") \
+            .config("spark.driver.memory", "40g") \
+            .config("spark.driver.maxResultSize", "40g") \
+            .getOrCreate()
+
+
         nodes_source = spark.sparkContext.textFile(os.path.join(os.getcwd(), self.data_path, self.nodes_files[0]))
         nodes = nodes_source.map(self.mapper_nodes)
         nodes_df = spark.createDataFrame(nodes).cache()
         nodes_df.createOrReplaceTempView("nodes")
+
+        initial_nodes = nodes_df.count()
+        print("Number of nodes to be processed:", str(initial_nodes))
+
         results_file = os.path.join(self.data_path, self.nodes_files[0])
         tmp_results_file = os.path.join(self.data_path, 'tmp_' + self.nodes_files[0])
         spark_results_path = os.path.join(self.data_path, self.nodes_files[0][:-4])
 
+        init = True
         for file in self.events_files:
             events_source = spark.sparkContext.textFile(os.path.join(self.data_path, file))
             events = events_source.map(self.mapper_events)
@@ -147,75 +162,110 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
             source_df = spark.sql('SELECT source as node, cscore FROM events')
             target_df = spark.sql('SELECT target as node, cscore FROM events')
             node_cscores_df = source_df.union(target_df)
-            avg_node_cscores_df = node_cscores_df.groupby('node').agg(avg('cscore').alias('avg_cscore'))
-            avg_node_cscores_df.createOrReplaceTempView("cscore_nodes")
+            if init:
+                init = False
+                node_cscores_all = node_cscores_df
+            else:
+                node_cscores_all = node_cscores_all.union(node_cscores_df)
 
-            nodes = spark.sql("SELECT n.id, n.title, n.ns, c.avg_cscore as cscore "
-                              "FROM nodes n LEFT OUTER JOIN cscore_nodes c ON n.id = c.node")
 
-            nodes.write.format('com.databricks.spark.csv').option('header', 'false').option('delimiter', '\t').save(spark_results_path)
 
-            self.assemble_spark_results(spark_results_path, tmp_results_file)
-            os.remove(os.path.join(self.data_path, self.nodes_files[0]))
-            os.rename(tmp_results_file, results_file)
+        avg_node_cscores_df = node_cscores_all.groupby('node').agg(avg('cscore').alias('avg_cscore'))
+        avg_node_cscores_df.createOrReplaceTempView("cscore_nodes")
 
-            print('results assembled')
-            # HANDLE Null Values in CSCORE: Replace NULL WITH ZERO Option 1
-            print('Handle Cscore Null Values for Nodes')
-            nodes = pd.read_csv(results_file, header=None, delimiter='\t',
-                                names=['id', 'title', 'ns', 'cscore'], skip_blank_lines=True, na_filter=False,
-                                error_bad_lines=False, warn_bad_lines=True)
-            print('Number of nodes without cscore')
-            print(len(nodes.loc[nodes['cscore'] == ""]))
-            nodes.loc[nodes['cscore'] == "", 'cscore'] = 0.0
-            nodes.to_csv(results_file, sep='\t', index=False, header=False, mode='w')
+        nodes = spark.sql("SELECT n.id, n.title, n.ns, c.avg_cscore as cscore "
+                          "FROM nodes n LEFT OUTER JOIN cscore_nodes c ON n.id = c.node")
+
+        nodes.write.format('com.databricks.spark.csv').option('header', 'false').option('delimiter', '\t').save(spark_results_path)
+
+        self.assemble_spark_results(spark_results_path, tmp_results_file)
+        os.remove(os.path.join(self.data_path, self.nodes_files[0]))
+        os.rename(tmp_results_file, results_file)
+
+        processed_nodes = nodes.count()
+        print('Number of processed and resolved nodes: ', str(processed_nodes))
+        print("Status: ", initial_nodes == processed_nodes, '\n')
+
+        '''
+        print('results assembled')
+        # HANDLE Null Values in CSCORE: Replace NULL WITH ZERO Option 1
+        print('Handle Cscore Null Values for Nodes')
+        nodes = pd.read_csv(results_file, header=None, delimiter='\t',
+                            names=['id', 'title', 'ns', 'cscore'], skip_blank_lines=True, na_filter=False,
+                            error_bad_lines=False, warn_bad_lines=True)
+        print('Number of nodes without cscore')
+        print(len(nodes.loc[nodes['cscore'] == ""]))
+        nodes.loc[nodes['cscore'] == "", 'cscore'] = 0.0
+        nodes.to_csv(results_file, sep='\t', index=False, header=False, mode='w')
+        '''
         del spark
 
     def calculate_avg_edge_score(self):
-        # TODO Assumes that only one edges file exists, needs to be fixed for link data
+        print('===================================')
+        print('Calculate average cScores for Edges')
+        print('===================================')
+        # TODO Handling of multiple Events files is probably not very performant
         # Create a SparkSession
         # Note: In case its run on Windows and generates errors use (tmp Folder mus exist):
         # spark = SparkSession.builder.config("spark.sql.warehouse.dir", "file:///C:/temp").appName("Postprocessing").getOrCreate()
-        spark = SparkSession.builder.appName("Calculate_Controvercy_Score_Edges").getOrCreate()
+        #spark = SparkSession.builder.appName("Calculate_Controvercy_Score_Edges").getOrCreate()
+
+        spark = SparkSession\
+            .builder\
+            .appName("Calculate_Controvercy_Score_Edges")\
+            .config("spark.driver.memory", "40g")\
+            .config("spark.driver.maxResultSize", "40g")\
+            .getOrCreate()
 
         edges_source = spark.sparkContext.textFile(os.path.join(self.data_path, self.edges_files[0]))
         edges = edges_source.map(self.mapper_edges)
         edges_df = spark.createDataFrame(edges).cache()
         edges_df.createOrReplaceTempView("edges")
 
+        initial_edges = edges_df.count()
+        print("Number of edges to be processed:", str(initial_edges))
+
         results_file = os.path.join(self.data_path, self.edges_files[0])
         tmp_results_file = os.path.join(self.data_path, 'tmp_' + self.edges_files[0])
         spark_results_path = os.path.join(self.data_path, self.edges_files[0][:-4])
 
+        init = True
         for file in self.events_files:
             events_source = spark.sparkContext.textFile(os.path.join(self.data_path, file))
             events = events_source.map(self.mapper_events)
             events_df = spark.createDataFrame(events).cache()
             events_df.createOrReplaceTempView("events")
+            if init:
+                init=False
+                events_all = events_df
+            else:
+                events_all = events_all.union(events_df)
 
-            avg_edge_cscores_df = events_df.groupby('source', 'target').agg(avg('cscore').alias('avg_cscore'))
-            avg_edge_cscores_df.createOrReplaceTempView("cscore_edges")
-            edges = spark.sql("SELECT e.source, e.target, e.etype, c.avg_cscore as cscore "
-                              "FROM edges e LEFT OUTER JOIN cscore_edges c "
-                              "ON e.source = c.source AND e.target = c.target")
-            edges.write.format('com.databricks.spark.csv').option('header', 'false').option('delimiter', '\t').save(spark_results_path)
+        avg_edge_cscores_df = events_all.groupby('source', 'target').agg(avg('cscore').alias('avg_cscore'))
+        avg_edge_cscores_df.createOrReplaceTempView("cscore_edges")
+        edges = spark.sql("SELECT e.source, e.target, e.etype, c.avg_cscore as cscore "
+                          "FROM edges e LEFT OUTER JOIN cscore_edges c "
+                          "ON e.source = c.source AND e.target = c.target")
+        edges.write.format('com.databricks.spark.csv').option('header', 'false').option('delimiter', '\t').save(spark_results_path)
 
-            self.assemble_spark_results(spark_results_path, tmp_results_file)
+        self.assemble_spark_results(spark_results_path, tmp_results_file)
 
-            os.remove(os.path.join(self.data_path, self.edges_files[0]))
-            os.rename(tmp_results_file, results_file)
+        os.remove(os.path.join(self.data_path, self.edges_files[0]))
+        os.rename(tmp_results_file, results_file)
 
+        processed_edges = edges.count()
+        print('Number of processed and resolved edges: ', str(processed_edges))
+        print("Status: ", initial_edges == processed_edges, '\n')
 
-            # HANDLE Null Values in CSCORE: Replace NULL WITH ZERO
-            print('Handle Cscore Null Values for edges.')
-            edges = pd.read_csv(results_file, header=None, delimiter='\t',
-                                names=['source', 'target', 'type', 'cscore'], skip_blank_lines=True, na_filter=False,
-                                error_bad_lines=False, warn_bad_lines=True)
-            print('Number of edges without cscore')
-            print(len(edges.loc[edges['cscore'] == ""]))
-            edges.loc[edges['cscore'] == "", 'cscore'] = 0.0
-            edges.to_csv(results_file, sep='\t', index=False, header=False, mode='w')
-
+        '''
+        # HANDLE Null Values in CSCORE: Replace NULL WITH ZERO
+        print('Handle Cscore Null Values for edges.')
+        edges = pd.read_csv(results_file, header=None, delimiter='\t',
+                            names=['source', 'target', 'type', 'cscore'], skip_blank_lines=True, na_filter=False,
+                            error_bad_lines=False, warn_bad_lines=True)
+        print('Number of edges without cscore')
+        print(len(edges[edges['cscore'] == '']))
+        edges.loc[edges['cscore'] == '', 'cscore'] = 0.0
+        edges.to_csv(results_file, sep='\t', index=False, header=False, mode='w')
+        '''
         del spark
-
-
