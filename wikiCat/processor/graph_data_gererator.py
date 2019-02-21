@@ -106,8 +106,9 @@ class GraphDataGenerator(SparkProcessorParsed):
             .appName("Generate_Graph_Data") \
             .config("spark.driver.memory", "40g") \
             .config("spark.driver.maxResultSize", "40g") \
-            .config("spark.executor.cores", "12") \
             .getOrCreate()
+
+            #    .config("spark.executor.cores", "12") \
 
         print(SparkConf().getAll())
 
