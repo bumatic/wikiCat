@@ -108,6 +108,8 @@ class GraphDataGenerator(SparkProcessorParsed):
             .config("spark.executor.cores", "12") \
             .getOrCreate()
 
+        print(SparkConf().getAll())
+
         # Infer the schema, and register the DataFrames as tables.
         page_info_source = spark.sparkContext.textFile(os.path.join(self.data_path, self.page_info))
         page_info = page_info_source.map(self.mapper_page_info)
