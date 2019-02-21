@@ -98,7 +98,14 @@ class GraphDataGenerator(SparkProcessorParsed):
         # Note: In case its run on Windows and generates errors use (tmp Folder mus exist):
         # spark = SparkSession.builder.config("spark.sql.warehouse.dir", "file:///C:/temp")
         # .appName("Postprocessing").getOrCreate()
-        spark = SparkSession.builder.appName("Generate_Graph_Data").getOrCreate()
+
+
+        spark = SparkSession \
+            .builder \
+            .appName("Generate_Graph_Data") \
+            .config("spark.driver.memory", "40g") \
+            .config("spark.driver.maxResultSize", "40g") \
+            .getOrCreate()
 
         # Infer the schema, and register the DataFrames as tables.
         page_info_source = spark.sparkContext.textFile(os.path.join(self.data_path, self.page_info))
