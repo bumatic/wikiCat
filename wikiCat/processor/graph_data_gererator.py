@@ -4,6 +4,7 @@ import pandas as pd
 import findspark
 import subprocess
 findspark.init()
+from pyspark import SparkConf, SparkContext
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import lit
 # from pyspark.sql import Row
