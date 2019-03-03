@@ -43,32 +43,66 @@ class GraphDataGenerator(SparkProcessorParsed):
 
         results = {}
 
+        if 'processing' not in self.project.pinfo.keys():
+            self.project.pinfo['processing'] = {}
+        if 'graph_data' not in self.project.pinfo['processing'].keys():
+            self.project.pinfo['processing']['graph_data'] = {}
+            self.project.pinfo['processing']['graph_data']['cats'] = {}
+            self.project.pinfo['processing']['graph_data']['links'] = {}
+            cats = self.get_page_data('cat_data')
+            for cat in cats:
+                self.project.pinfo['processing']['graph_data']['cats'][cat] = 'init'
+            links = self.get_page_data('link_data')
+            for link in links:
+                self.project.pinfo['processing']['graph_data']['links'][link] = 'init'
+
+            self.project.pinfo['processing']['graph_data']['page_info'] = 'init'
+
         if create == 'cats':
-            #link_data_type = 'cats'
-            edge_type = 'cat'
-            results_basename = 'cats'
-            page_data = self.get_page_data('cat_data')
-            results['cats'] = self.generate(edge_type, results_basename, page_data, 'cats')
-            #print(results)
+            create_cats = True
+            create_links = False
         elif create == 'links':
-            #link_data_type = 'links'
-            edge_type = 'links'
-            results_basename = 'links'
-            page_data = self.get_page_data('link_data')
-            results['links'] = self.generate(edge_type, results_basename, page_data, 'links')
-            pass
-        elif create == 'all':
-            #link_data_type = 'cats'
-            edge_type = 'cat'
+            create_cats = False
+            create_links = True
+        if create == 'all':
+            create_cats = True
+            create_links = True
+
+        if self.project.pinfo['processing']['graph_data']['page_info'] == 'init':
+            self.project.pinfo['processing']['graph_data']['page_info'] == self.generate_page_info()
+
+        if create_cats:
+            edge_type = 'cats'
             results_basename = 'cats'
-            page_data = self.get_page_data('cat_data')
-            results['cats'] = self.generate(edge_type, results_basename, page_data, 'cats')
-
+            for cat in self.project.pinfo['processing']['graph_data']['cats'].keys():
+                if self.project.pinfo['processing']['graph_data']['cats'][cat] == 'init':
+                    self.project.pinfo['processing']['graph_data']['cats'][cat] = 'started'
+                    self.project.pinfo['processing']['graph_data']['cats'][cat] = \
+                        self.generate(edge_type, cat)
+                elif self.project.pinfo['processing']['graph_data']['cats'][cat] == 'started':
+                    all_done = False
+                    print('Handling errors needs to be implemented')
+        if create_links:
             edge_type = 'links'
             results_basename = 'links'
-            page_data = self.get_page_data('link_data')
-            results['links'] = self.generate(edge_type, results_basename, page_data, 'links')
+            for link in self.project.pinfo['processing']['graph_data']['links'].keys():
+                if self.project.pinfo['processing']['graph_data']['links'][link] == 'init':
+                    self.project.pinfo['processing']['graph_data']['links'][link] = 'started'
+                    self.project.pinfo['processing']['graph_data']['links'][link] = \
+                        self.generate(edge_type, link)
+                elif self.project.pinfo['processing']['graph_data']['links'][link] == 'started':
+                    all_done = False
+                    print('Handling errors needs to be implemented')
 
+        print('All files done:')
+        print(all_done)
+
+        print('postprocessing needs to be implemented required')
+
+
+        '''
+        # needs to be reworked
+        
         self.handle_results(results)
 
         results = {
@@ -79,6 +113,8 @@ class GraphDataGenerator(SparkProcessorParsed):
         }
 
         self.register_graph_results('graph', results)
+        
+        '''
 
     def handle_results(self, results):
         for key, value in results.items():
@@ -94,7 +130,266 @@ class GraphDataGenerator(SparkProcessorParsed):
             data_new.to_csv(dest_file, sep='\t', index=False, header=False, mode='a')
             os.remove(src_file)
 
-    def generate(self, edge_type, results_basename, page_data, data_type):
+    def generate_page_info(self):
+        # Create a SparkSession
+        # Note: In case its run on Windows and generates errors use (tmp Folder mus exist):
+        # spark = SparkSession.builder.config("spark.sql.warehouse.dir", "file:///C:/temp")
+        # .appName("Postprocessing").getOrCreate()
+
+        spark = SparkSession \
+            .builder \
+            .appName("Generate_Graph_Data") \
+            .config("spark.driver.memory", "40g") \
+            .config("spark.driver.maxResultSize", "40g") \
+            .getOrCreate()
+
+        print(SparkConf().getAll())
+        print()
+        print('Generate page info.')
+
+        # Infer the schema, and register the DataFrames as tables.
+        page_info_source = spark.sparkContext.textFile(os.path.join(self.data_path, self.page_info))
+        page_info = page_info_source.map(self.mapper_page_info)
+        page_info_df = spark.createDataFrame(page_info).cache()
+        page_info_df.createOrReplaceTempView("info")
+
+        # Results file
+        nodes_results_path = os.path.join(self.results_path, 'nodes/')
+        nodes_results_file = os.path.join(self.results_path, 'nodes.csv')
+
+        # GENERATE AND SAVE NODE LIST
+        page_info_df.select('page_id', 'page_title', 'page_ns').write.format('com.databricks.spark.csv').option('header', 'false').option('delimiter', '\t').save(nodes_results_path)
+        del spark
+
+        self.assemble_spark_results(nodes_results_path, nodes_results_file)
+        path, nodes_results_file = os.path.split(nodes_results_file)
+
+        return nodes_results_file
+
+
+    def generate(self, edge_type, page_data):
+        # Create a SparkSession
+        # Note: In case its run on Windows and generates errors use (tmp Folder mus exist):
+        # spark = SparkSession.builder.config("spark.sql.warehouse.dir", "file:///C:/temp")
+        # .appName("Postprocessing").getOrCreate()
+
+
+        spark = SparkSession \
+            .builder \
+            .appName("Generate_Graph_Data") \
+            .config("spark.driver.memory", "40g") \
+            .config("spark.driver.maxResultSize", "40g") \
+            .getOrCreate()
+
+            #    .config("spark.executor.cores", "12") \
+
+        print(SparkConf().getAll())
+
+        # Infer the schema, and register the DataFrames as tables.
+        page_info_source = spark.sparkContext.textFile(os.path.join(self.results_path, 'nodes.csv'))
+        page_info = page_info_source.map(self.mapper_page_info)
+        page_info_df = spark.createDataFrame(page_info).cache()
+        page_info_df.createOrReplaceTempView("info")
+
+        # Infer the schema, and register the DataFrames as tables.
+        author_info_source = spark.sparkContext.textFile(os.path.join(self.data_path, self.author_info))
+        author_info = author_info_source.map(self.mapper_author_info)
+        author_info_df = spark.createDataFrame(author_info).cache()
+
+        missing_author_row = spark.createDataFrame([[-1, "NO_AUTHOR_DATA"]])
+        author_info_df = author_info_df.union(missing_author_row)
+        #display(appended)
+
+        author_info_df.createOrReplaceTempView("author")
+        if self.debugging:
+            print('author info')
+            author_info_df.show()
+
+        # Infer the schema, and register the DataFrames as tables.
+        revision_info_source = spark.sparkContext.textFile(os.path.join(self.data_path, self.revision_info))
+        revision_info = revision_info_source.map(self.mapper_revisions)
+        revision_info_df = spark.createDataFrame(revision_info).cache()
+        revision_info_df.createOrReplaceTempView("revision")
+
+        resolved_authors_df = spark.sql(
+            'SELECT r.rev_id, r.rev_date, a.author_name as rev_author '
+            'FROM revision r LEFT OUTER JOIN author a ON r.rev_author = a.author_id')
+        revision_info_df = resolved_authors_df
+        if self.debugging:
+            print('revision info')
+            revision_info_df.show()
+        revision_info_df.createOrReplaceTempView("revision")
+
+        compressed = False
+        if page_data[-2:] == '7z':
+            compressed = True
+        if compressed:
+            subprocess.call(['7z', 'e', os.path.join(self.data_path, page_data), '-o'+self.data_path])
+        if edge_type == 'cats':
+            f = 'cats.csv'
+            results_basename = 'cats.csv'
+        elif edge_type == 'links':
+            f = 'links.csv'
+            results_basename = page_data[:-7]
+
+        print('Processing file:' + str(results_basename))
+
+        # Results files
+        edges_results_path = os.path.join(self.results_path, results_basename + '_edges/')
+        edges_results_file = os.path.join(self.results_path, results_basename + '_edges.csv')
+        events_results_path = os.path.join(self.results_path, results_basename + '_events/')
+        events_results_file = os.path.join(self.results_path, results_basename + '_events.csv')
+
+        # Infer the schema, and register the DataFrames as tables.
+        page_data_source = spark.sparkContext.textFile(os.path.join(self.data_path, f))
+        page_data = page_data_source.map(self.mapper_page_data)
+        page_data_df = spark.createDataFrame(page_data).cache()
+        page_data_df.createOrReplaceTempView("data")
+
+        # 1. RESOLVE PAGE TITLES
+        resolved_titles_df = spark.sql(
+            'SELECT d.source_id as source, i.page_id as target, d.target_title, d.rev_id as revision '
+            'FROM data d LEFT OUTER JOIN info i ON UPPER(d.target_title) = UPPER(i.page_title)')
+        resolved_titles_df.createOrReplaceTempView('resolved')
+
+        page_data_df = spark.sql('SELECT r.source, r.target, r.revision FROM resolved r WHERE r.target IS NOT NULL')
+        page_data_df.createOrReplaceTempView('data')
+
+        # 2. GENERATE, ADD EDGE TYPE AND SAVE EDGE LIST
+        edges_df = spark.sql('SELECT source, target FROM data').distinct()
+        edges_df = edges_df.withColumn('type', lit(edge_type))
+        edges_df = edges_df
+        edges_df.write.format('com.databricks.spark.csv').option('header', 'false').option('delimiter', '\t')\
+            .save(edges_results_path)
+        del edges_df
+        self.assemble_spark_results(edges_results_path, edges_results_file)
+
+
+        # 3.1 CREATE TABLE WITH ALL REVISIONS OF A SOURCE PAGE
+        page_revisions_df = spark.sql('SELECT source, revision FROM data').distinct()
+        if self.debugging:
+            print('4.1 page revisions df')
+            page_revisions_df.show()
+        page_revisions_df.createOrReplaceTempView('page_revisions')
+
+        # 3.2 CREATE TABLE WITH ALL POSSIBLE COMBINATIONS of SOURCE & REV with TARGETS
+        all_possibilities_df = spark.sql('SELECT p.source, d.target, p.revision '
+                                         'FROM page_revisions p JOIN data d '
+                                         'ON p.source = d.source').distinct()
+        if self.debugging:
+            print('4.2 all possibilities')
+            all_possibilities_df.show()
+
+        # 4. CREATE TABLE WITH ENTRIES FOR WHEN A EDGE DID NOT EXIST AT THE TIME OF A REVISION
+        # BY SUBTRACTING EXISTING EDGES FROM ALL_POSSIBILITIES
+        negative_edges_df = all_possibilities_df.subtract(page_data_df).sort('source', 'revision')
+
+        if self.debugging:
+            print('4')
+            negative_edges_df.show()
+
+        negative_edges_df.createOrReplaceTempView('negative_edges')
+
+        # 5.1 FIRST STEP TO CREATE DURATION RESULTS BY MAKING A LEFT OUTER JOIN OF DATA WITH NEGATIVE EDGES
+        # ON SOURCE = TARGET AND DATA.REVISION < NEGATIVE_EDGES.REVISION
+        # INCLUDES ALL RESULTS FROM START TIMES TO POTENTIAL LATER END TIMES
+
+        durations_df = spark.sql('SELECT d.source, d.target, d.revision as start, n.revision as end '
+                                 'FROM data d LEFT OUTER JOIN negative_edges n '
+                                 'ON d.source = n.source AND d.target = n.target AND d.revision < n.revision')
+        if self.debugging:
+            print('5.1')
+            durations_df.show()
+
+        durations_df.createOrReplaceTempView("durations")
+
+        # 5.2 SECOND STEP TO CREATE DURATION RESULTS BY KEEPING ONLY MIN END TIMES
+        # FOR GROUPS OF SOURCE, TARGET, START
+        durations_df = spark.sql('SELECT source, target, start, min(end) as end FROM durations '
+                                 'GROUP BY source, target, start')
+        if self.debugging:
+            print('5.2')
+            durations_df.show()
+
+        durations_df.createOrReplaceTempView("durations")
+
+        # 5.3 THIRD STEP TO CREATE DURATION RESULTS BY KEEPING ONLY MIN START TIMES
+        # FOR GROUPS OF SOURCE, TARGET, END
+        durations_df = spark.sql('SELECT source, target, min(start) as start, end FROM durations '
+                                 'GROUP BY source, target, end').distinct()
+        if self.debugging:
+            print('5.3')
+            durations_df.show()
+
+        durations_df.createOrReplaceTempView("durations")
+
+        # 6.1 CREATE START COLUMN
+        durations_df = durations_df.withColumn('event_start', lit('start'))
+
+        if self.debugging:
+            print('print 6.1')
+            durations_df.show()
+
+        durations_df.createOrReplaceTempView("durations")
+
+        # 6.2 CREATE END COLUMN
+        durations_df = durations_df.withColumn('event_end', lit('end'))
+
+        if self.debugging:
+            print('6.2')
+            durations_df.show()
+
+        durations_df.createOrReplaceTempView("durations")
+
+        # 7. CREATE TABLES FOR START EVENTS AND END EVENTS
+        start_events_df = spark.sql('SELECT source, target, start as revision, event_start as event FROM durations')
+        start_events_df.createOrReplaceTempView("start_events")
+        end_events_df = spark.sql('SELECT source, target, end as revision, event_end as event FROM durations')
+
+        if self.debugging:
+            print('7 - start, end')
+            start_events_df.show()
+            end_events_df.show()
+
+        end_events_df.createOrReplaceTempView("end_events")
+
+        # 8. COMBINE THE TABLES START_EVENTS AND END_EVENTS, SORT BY REVISION
+        events_df = start_events_df.union(end_events_df).distinct()
+
+        if self.debugging:
+            print('8')
+            events_df.show()
+
+        events_df.createOrReplaceTempView("events")
+
+        # 9. RESOLVE REVISION_ID TO TIMES, SORT BY TIME, AND STORE
+        events_df = spark.sql('SELECT r.rev_date as revision, e.source, e.target, e.event, r.rev_author as author '
+                              'FROM events e JOIN revision r ON e.revision = r.rev_id').distinct().sort('revision')
+
+        if self.debugging:
+            print('9')
+            events_df.show()
+
+        events_df.write.format('com.databricks.spark.csv').option('header', 'false').option('delimiter', '\t')\
+            .save(events_results_path)
+        del events_df
+        self.assemble_spark_results(events_results_path, events_results_file)
+
+        if compressed:
+            os.remove(os.path.join(self.data_path, f))
+
+        path, edges_results_file = os.path.split(edges_results_file)
+        path, events_results_file = os.path.split(events_results_file)
+
+        results = {
+            'edges': edges_results_file,
+            'events': events_results_file
+        }
+        del spark
+        return results
+
+
+    def generate_backup(self, edge_type, results_basename, page_data, data_type):
         # Create a SparkSession
         # Note: In case its run on Windows and generates errors use (tmp Folder mus exist):
         # spark = SparkSession.builder.config("spark.sql.warehouse.dir", "file:///C:/temp")
@@ -341,3 +636,9 @@ class GraphDataGenerator(SparkProcessorParsed):
         }
 
         return results
+
+
+
+
+
+
