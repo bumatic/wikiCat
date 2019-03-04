@@ -69,37 +69,46 @@ class GraphDataGenerator(SparkProcessorParsed):
             create_links = True
 
         if self.project.pinfo['processing']['graph_data']['page_info'] == 'init':
-            self.project.pinfo['processing']['graph_data']['page_info'] == self.generate_page_info()
-            self.project.save_project()
+            try:
+                self.project.pinfo['processing']['graph_data']['page_info'] == self.generate_page_info()
+                self.project.save_project()
+            except:
+                print('Generating nodes failed')
 
         if create_cats:
             edge_type = 'cats'
             results_basename = 'cats'
             for cat in self.project.pinfo['processing']['graph_data']['cats'].keys():
-                if self.project.pinfo['processing']['graph_data']['cats'][cat] == 'init':
-                    self.project.pinfo['processing']['graph_data']['cats'][cat] = 'started'
-                    self.project.save_project()
-                    self.project.pinfo['processing']['graph_data']['cats'][cat] = \
-                        self.generate(edge_type, cat)
-                elif self.project.pinfo['processing']['graph_data']['cats'][cat] == 'started':
-                    all_done = False
-                    print('Handling errors needs to be implemented')
+                try:
+                    if self.project.pinfo['processing']['graph_data']['cats'][cat] == 'init':
+                        self.project.pinfo['processing']['graph_data']['cats'][cat] = 'started'
+                        self.project.save_project()
+                        self.project.pinfo['processing']['graph_data']['cats'][cat] = \
+                            self.generate(edge_type, cat)
+                    elif self.project.pinfo['processing']['graph_data']['cats'][cat] == 'started':
+                        all_done = False
+                        print('Handling errors needs to be implemented')
+                except:
+                    print('Generating cats failed for: ' + str(cat))
+
         if create_links:
             edge_type = 'links'
             results_basename = 'links'
             for link in self.project.pinfo['processing']['graph_data']['links'].keys():
-                if self.project.pinfo['processing']['graph_data']['links'][link] == 'init':
-                    self.project.pinfo['processing']['graph_data']['links'][link] = 'started'
-                    self.project.save_project()
-                    self.project.pinfo['processing']['graph_data']['links'][link] = \
-                        self.generate(edge_type, link)
-                elif self.project.pinfo['processing']['graph_data']['links'][link] == 'started':
-                    all_done = False
-                    print('Handling errors needs to be implemented')
+                try:
+                    if self.project.pinfo['processing']['graph_data']['links'][link] == 'init':
+                        self.project.pinfo['processing']['graph_data']['links'][link] = 'started'
+                        self.project.save_project()
+                        self.project.pinfo['processing']['graph_data']['links'][link] = \
+                            self.generate(edge_type, link)
+                    elif self.project.pinfo['processing']['graph_data']['links'][link] == 'started':
+                        all_done = False
+                        print('Handling errors needs to be implemented')
+                except:
+                    print('Generating links failed for: ' + str(link))
 
         print('All files done:')
         print(all_done)
-
         print('postprocessing needs to be implemented required')
 
 
