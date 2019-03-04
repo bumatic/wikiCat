@@ -41,10 +41,9 @@ class GraphDataGenerator(SparkProcessorParsed):
         elif 'graph' in self.project.pinfo['data'].keys() and override:
             self.remove_old('graph')
 
-        results = {}
-
         if 'processing' not in self.project.pinfo.keys():
             self.project.pinfo['processing'] = {}
+            self.project.save_project()
         if 'graph_data' not in self.project.pinfo['processing'].keys():
             self.project.pinfo['processing']['graph_data'] = {}
             self.project.pinfo['processing']['graph_data']['cats'] = {}
@@ -57,6 +56,7 @@ class GraphDataGenerator(SparkProcessorParsed):
                 self.project.pinfo['processing']['graph_data']['links'][link] = 'init'
 
             self.project.pinfo['processing']['graph_data']['page_info'] = 'init'
+            self.project.save_project()
 
         if create == 'cats':
             create_cats = True
@@ -70,6 +70,7 @@ class GraphDataGenerator(SparkProcessorParsed):
 
         if self.project.pinfo['processing']['graph_data']['page_info'] == 'init':
             self.project.pinfo['processing']['graph_data']['page_info'] == self.generate_page_info()
+            self.project.save_project()
 
         if create_cats:
             edge_type = 'cats'
@@ -77,6 +78,7 @@ class GraphDataGenerator(SparkProcessorParsed):
             for cat in self.project.pinfo['processing']['graph_data']['cats'].keys():
                 if self.project.pinfo['processing']['graph_data']['cats'][cat] == 'init':
                     self.project.pinfo['processing']['graph_data']['cats'][cat] = 'started'
+                    self.project.save_project()
                     self.project.pinfo['processing']['graph_data']['cats'][cat] = \
                         self.generate(edge_type, cat)
                 elif self.project.pinfo['processing']['graph_data']['cats'][cat] == 'started':
@@ -88,6 +90,7 @@ class GraphDataGenerator(SparkProcessorParsed):
             for link in self.project.pinfo['processing']['graph_data']['links'].keys():
                 if self.project.pinfo['processing']['graph_data']['links'][link] == 'init':
                     self.project.pinfo['processing']['graph_data']['links'][link] = 'started'
+                    self.project.save_project()
                     self.project.pinfo['processing']['graph_data']['links'][link] = \
                         self.generate(edge_type, link)
                 elif self.project.pinfo['processing']['graph_data']['links'][link] == 'started':
