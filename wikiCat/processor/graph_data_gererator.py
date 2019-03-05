@@ -70,7 +70,7 @@ class GraphDataGenerator(SparkProcessorParsed):
 
         if self.project.pinfo['processing']['graph_data']['page_info'] == 'init':
             try:
-                self.project.pinfo['processing']['graph_data']['page_info'] == self.generate_page_info()
+                self.project.pinfo['processing']['graph_data']['page_info'] = self.generate_page_info()
                 self.project.save_project()
             except:
                 print('Generating nodes failed')
