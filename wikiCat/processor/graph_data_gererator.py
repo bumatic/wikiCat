@@ -236,7 +236,7 @@ class GraphDataGenerator(SparkProcessorParsed):
         if page_data[-2:] == '7z':
             compressed = True
         if compressed:
-            subprocess.call(['7z', 'e', os.path.join(self.data_path, page_data), '-o'+self.data_path])
+            subprocess.call(['7z', 'e', os.path.join(self.data_path, page_data), '-o'+self.data_path, '-y'])
         if edge_type == 'cats':
             f = 'cats.csv'
             results_basename = 'cats.csv'
