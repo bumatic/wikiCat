@@ -88,6 +88,7 @@ class GraphDataGenerator(SparkProcessorParsed):
                         self.project.save_project()
                     elif self.project.pinfo['processing']['graph_data']['cats'][cat] == 'started':
                         self.project.pinfo['processing']['graph_data']['cats'][cat] = 'init'
+                        self.project.save_project()
                         all_done = False
                         print('Handling errors needs to be implemented')
                 except:
