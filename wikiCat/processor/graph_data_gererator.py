@@ -87,6 +87,7 @@ class GraphDataGenerator(SparkProcessorParsed):
                             self.generate(edge_type, cat)
                         self.project.save_project()
                     elif self.project.pinfo['processing']['graph_data']['cats'][cat] == 'started':
+                        self.project.pinfo['processing']['graph_data']['cats'][cat] = 'init'
                         all_done = False
                         print('Handling errors needs to be implemented')
                 except:
@@ -172,7 +173,7 @@ class GraphDataGenerator(SparkProcessorParsed):
 
         # GENERATE AND SAVE NODE LIST
         page_info_df.select('page_id', 'page_title', 'page_ns').write.format('com.databricks.spark.csv').option('header', 'false').option('delimiter', '\t').save(nodes_results_path)
-        del spark
+        spark.stop()
 
         self.assemble_spark_results(nodes_results_path, nodes_results_file)
         path, nodes_results_file = os.path.split(nodes_results_file)
@@ -398,7 +399,7 @@ class GraphDataGenerator(SparkProcessorParsed):
             'edges': edges_results_file,
             'events': events_results_file
         }
-        del spark
+        spark.stop()
         return results
 
 
