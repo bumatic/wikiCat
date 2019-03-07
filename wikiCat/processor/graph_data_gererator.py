@@ -87,8 +87,6 @@ class GraphDataGenerator(SparkProcessorParsed):
                             self.generate(edge_type, cat)
                         self.project.save_project()
                     elif self.project.pinfo['processing']['graph_data']['cats'][cat] == 'started':
-                        self.project.pinfo['processing']['graph_data']['cats'][cat] = 'init'
-                        self.project.save_project()
                         all_done = False
                         print('Handling errors needs to be implemented')
                 except:
@@ -105,6 +103,8 @@ class GraphDataGenerator(SparkProcessorParsed):
                         self.project.pinfo['processing']['graph_data']['links'][link] = \
                             self.generate(edge_type, link)
                     elif self.project.pinfo['processing']['graph_data']['links'][link] == 'started':
+                        self.project.pinfo['processing']['graph_data']['links'][link] = 'init'
+                        self.project.save_project()
                         all_done = False
                         print('Handling errors needs to be implemented')
                 except:
