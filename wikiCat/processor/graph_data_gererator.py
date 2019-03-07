@@ -103,8 +103,8 @@ class GraphDataGenerator(SparkProcessorParsed):
                         self.project.pinfo['processing']['graph_data']['links'][link] = \
                             self.generate(edge_type, link)
                     elif self.project.pinfo['processing']['graph_data']['links'][link] == 'started':
-                        self.project.pinfo['processing']['graph_data']['links'][link] = 'init'
-                        self.project.save_project()
+                        #self.project.pinfo['processing']['graph_data']['links'][link] = 'init'
+                        #self.project.save_project()
                         all_done = False
                         print('Handling errors needs to be implemented')
                 except:
@@ -192,8 +192,8 @@ class GraphDataGenerator(SparkProcessorParsed):
         spark = SparkSession \
             .builder \
             .appName("Generate_Graph_Data") \
-            .config("spark.driver.memory", "40g") \
-            .config("spark.driver.maxResultSize", "40g") \
+            .config("spark.driver.memory", "60g") \
+            .config("spark.driver.maxResultSize", "60g") \
             .getOrCreate()
 
             #    .config("spark.executor.cores", "12") \
