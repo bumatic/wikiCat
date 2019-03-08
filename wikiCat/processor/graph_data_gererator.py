@@ -25,7 +25,7 @@ from pyspark.sql.functions import lit
 class GraphDataGenerator(SparkProcessorParsed):
     def __init__(self, project):  # , link_data_type, fixed='fixed_none', errors='errors_removed'
         SparkProcessorParsed.__init__(self, project)
-        self.debugging = False
+        self.debugging = True
 
     def get_page_data(self, link_data_type):
         if type(self.project.pinfo['data']['parsed'][link_data_type]) == list:
@@ -174,7 +174,8 @@ class GraphDataGenerator(SparkProcessorParsed):
 
         # GENERATE AND SAVE NODE LIST
         page_info_df.select('page_id', 'page_title', 'page_ns').write.format('com.databricks.spark.csv').option('header', 'false').option('delimiter', '\t').save(nodes_results_path)
-        spark.stop()
+        #spark.stop()
+        del spark
 
         self.assemble_spark_results(nodes_results_path, nodes_results_file)
         path, nodes_results_file = os.path.split(nodes_results_file)
@@ -400,7 +401,8 @@ class GraphDataGenerator(SparkProcessorParsed):
             'edges': edges_results_file,
             'events': events_results_file
         }
-        spark.stop()
+        #spark.stop()
+        del spark
         return results
 
 
