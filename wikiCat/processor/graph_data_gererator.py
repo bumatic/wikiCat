@@ -25,7 +25,7 @@ from pyspark.sql.functions import lit
 class GraphDataGenerator(SparkProcessorParsed):
     def __init__(self, project):  # , link_data_type, fixed='fixed_none', errors='errors_removed'
         SparkProcessorParsed.__init__(self, project)
-        self.debugging = True
+        self.debugging = False
 
     def get_page_data(self, link_data_type):
         if type(self.project.pinfo['data']['parsed'][link_data_type]) == list:
