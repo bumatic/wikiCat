@@ -26,7 +26,7 @@ for revs in pd.read_csv(file, header=None, sep='\t', names=names, chunksize=chun
     #revs['datetime'] = revs['date'].apply(lambda x: parser.parse(x).timestamp())
     #if len(revs[revs['datetime'] == date]) > 0:
     if len(revs[revs['date'] == date]) > 0:
-        print(revs[revs['datetime'] == date])
+        print(revs[revs['date'] == date])
         revisions = revisions.append(revs[revs['date'] == date])
     else:
         print(False)
