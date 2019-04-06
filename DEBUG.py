@@ -9,7 +9,7 @@ date = 1016010777.0
 date = '2002-03-13T09:12:57Z'
 
 names = ['source', 'rev', 'date', 'author']
-chunksize = 1000000
+chunksize = 10000000
 
 test = False
 
