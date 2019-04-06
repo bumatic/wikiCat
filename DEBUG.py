@@ -5,6 +5,9 @@ from dateutil import parser
 #  Debugging
 file = os.path.join('project', '01_data', '01_parsed', 'revisions.csv')
 date = 1016010777.0
+# Wednesday, 13. March 2002 09:12:57
+date = '2002-03-13T09:12:57Z'
+
 names = ['source', 'rev', 'date', 'author']
 chunksize = 1000000
 
@@ -20,8 +23,9 @@ if test:
 
 revisions = pd.DataFrame()
 for revs in pd.read_csv(file, header=None, sep='\t', names=names, chunksize=chunksize):
-    revs['datetime'] = revs['date'].apply(lambda x: parser.parse(x).timestamp())
-    if len(revs[revs['datetime'] == date]) > 0:
+    #revs['datetime'] = revs['date'].apply(lambda x: parser.parse(x).timestamp())
+    #if len(revs[revs['datetime'] == date]) > 0:
+    if len(revs[revs['date'] == date]) > 0:
         print(revs[revs['datetime'] == date])
         revisions = revisions.append(revs[revs['datetime'] == date])
     else:
