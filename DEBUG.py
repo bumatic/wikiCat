@@ -87,7 +87,7 @@ spark = SparkSession\
     .config("spark.driver.maxResultSize", "60g") \
     .getOrCreate()
 
-author_file = os.path.join('project', '01_data', '01_parsed', 'authors.csv')
+author_file = os.path.join('project', '01_data', '01_parsed', 'author_info.csv')
 
 author_info_source = spark.sparkContext.textFile(os.path.join(author_file))
 author_info = author_info_source.map(mapper_author_info)
