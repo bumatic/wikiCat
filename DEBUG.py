@@ -102,6 +102,7 @@ revision_info_df = spark.createDataFrame(revision_info).cache()
 revision_info_df.createOrReplaceTempView("revision")
 
 revision_info_df = spark.sql("SELECT * FROM revision WHERE rev_author = 76.0")
+revision_info_df.show()
 revision_info_df.createOrReplaceTempView("revision")
 
 resolved_authors_df = spark.sql('SELECT r.rev_id, r.rev_date, rev_author, a.author_name as rev_author_name '
