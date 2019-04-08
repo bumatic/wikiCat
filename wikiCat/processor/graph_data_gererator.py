@@ -25,7 +25,7 @@ from pyspark.sql.functions import *
 class GraphDataGenerator(SparkProcessorParsed):
     def __init__(self, project):  # , link_data_type, fixed='fixed_none', errors='errors_removed'
         SparkProcessorParsed.__init__(self, project)
-        self.debugging = True
+        self.debugging = False
 
     def get_page_data(self, link_data_type):
         if type(self.project.pinfo['data']['parsed'][link_data_type]) == list:
@@ -99,16 +99,11 @@ class GraphDataGenerator(SparkProcessorParsed):
             all_done = True
             for link in self.project.pinfo['processing']['graph_data']['links'].keys():
                 try:
-                    print('1')
                     if self.project.pinfo['processing']['graph_data']['links'][link] == 'init':
-                        print('2')
                         self.project.pinfo['processing']['graph_data']['links'][link] = 'started'
-                        print('3')
                         self.project.save_project()
-                        print('4')
                         self.project.pinfo['processing']['graph_data']['links'][link] = \
                             self.generate(edge_type, link, resolve_authors=resolve_authors)
-                        print('5')
                     elif self.project.pinfo['processing']['graph_data']['links'][link] == 'started':
                         #self.project.pinfo['processing']['graph_data']['links'][link] = 'init'
                         #self.project.save_project()
@@ -266,8 +261,6 @@ class GraphDataGenerator(SparkProcessorParsed):
         edges_results_file = os.path.join(self.results_path, results_basename + '_edges.csv')
         events_results_path = os.path.join(self.results_path, results_basename + '_events/')
         events_results_file = os.path.join(self.results_path, results_basename + '_events.csv')
-
-        print('hier')
 
         # Infer the schema, and register the DataFrames as tables.
         page_data_source = spark.sparkContext.textFile(os.path.join(self.data_path, f))
