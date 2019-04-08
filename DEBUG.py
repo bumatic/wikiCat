@@ -114,7 +114,7 @@ resolved_authors_df = spark.sql(
 resolved_authors_df.show()
 '''
 
-author_info_df = author_info_df.groupBy("author_id").agg(concat_ws(" | ", collect_list(col("author_name")))).alias("author_name")
+author_info_df = author_info_df.groupBy("author_id").agg(concat_ws(" | ", collect_list(col("author_name")))).as("author_name")
 author_info_df.createOrReplaceTempView("author")
 
 authors_reduced_df = spark.sql('SELECT * FROM author WHERE author_id = 76.0')
