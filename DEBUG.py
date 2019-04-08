@@ -98,6 +98,8 @@ missing_author_row = spark.createDataFrame([[-1, "NO_AUTHOR_DATA"]])
 author_info_df = author_info_df.union(missing_author_row)
 author_info_df.createOrReplaceTempView("author")
 
+
+
 author_info_df = author_info_df.groupBy("author_id").agg(concat_ws(" | ", collect_list(col("author_name"))).alias("author_name"))
 author_info_df.createOrReplaceTempView("author")
 

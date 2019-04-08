@@ -6,7 +6,7 @@ import subprocess
 findspark.init()
 from pyspark import SparkConf, SparkContext
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import lit
+from pyspark.sql.functions import *
 # from pyspark.sql import Row
 # from dateutil import parser
 # import collections
@@ -34,7 +34,7 @@ class GraphDataGenerator(SparkProcessorParsed):
             page_data = [self.project.pinfo['data']['parsed'][link_data_type]]
         return page_data
 
-    def generate_graph_data(self, create, override=False):
+    def generate_graph_data(self, create, override=False, resolve_authors=False):
         if 'graph' in self.project.pinfo['data'].keys() and not override:
             print('Graph Data already exists in project. Pass override to replace it.')
             return False
@@ -84,7 +84,7 @@ class GraphDataGenerator(SparkProcessorParsed):
                         self.project.pinfo['processing']['graph_data']['cats'][cat] = 'started'
                         self.project.save_project()
                         self.project.pinfo['processing']['graph_data']['cats'][cat] = \
-                            self.generate(edge_type, cat)
+                            self.generate(edge_type, cat, resolve_authors=resolve_authors)
                         self.project.save_project()
                     elif self.project.pinfo['processing']['graph_data']['cats'][cat] == 'started':
                         all_done = False
@@ -101,7 +101,7 @@ class GraphDataGenerator(SparkProcessorParsed):
                         self.project.pinfo['processing']['graph_data']['links'][link] = 'started'
                         self.project.save_project()
                         self.project.pinfo['processing']['graph_data']['links'][link] = \
-                            self.generate(edge_type, link)
+                            self.generate(edge_type, link, resolve_authors=resolve_authors)
                     elif self.project.pinfo['processing']['graph_data']['links'][link] == 'started':
                         #self.project.pinfo['processing']['graph_data']['links'][link] = 'init'
                         #self.project.save_project()
@@ -183,7 +183,7 @@ class GraphDataGenerator(SparkProcessorParsed):
         return nodes_results_file
 
 
-    def generate(self, edge_type, page_data):
+    def generate(self, edge_type, page_data, resolve_authors=False):
         # Create a SparkSession
         # Note: In case its run on Windows and generates errors use (tmp Folder mus exist):
         # spark = SparkSession.builder.config("spark.sql.warehouse.dir", "file:///C:/temp")
@@ -208,33 +208,37 @@ class GraphDataGenerator(SparkProcessorParsed):
         page_info_df.createOrReplaceTempView("info")
 
         # Infer the schema, and register the DataFrames as tables.
-        author_info_source = spark.sparkContext.textFile(os.path.join(self.data_path, self.author_info))
-        author_info = author_info_source.map(self.mapper_author_info)
-        author_info_df = spark.createDataFrame(author_info).cache()
-
-        missing_author_row = spark.createDataFrame([[-1, "NO_AUTHOR_DATA"]])
-        author_info_df = author_info_df.union(missing_author_row)
-        #display(appended)
-
-        author_info_df.createOrReplaceTempView("author")
-        if self.debugging:
-            print('author info')
-            author_info_df.show()
-
-        # Infer the schema, and register the DataFrames as tables.
         revision_info_source = spark.sparkContext.textFile(os.path.join(self.data_path, self.revision_info))
         revision_info = revision_info_source.map(self.mapper_revisions)
         revision_info_df = spark.createDataFrame(revision_info).cache()
         revision_info_df.createOrReplaceTempView("revision")
 
-        resolved_authors_df = spark.sql(
-            'SELECT r.rev_id, r.rev_date, a.author_name as rev_author '
-            'FROM revision r LEFT OUTER JOIN author a ON r.rev_author = a.author_id')
-        revision_info_df = resolved_authors_df
-        if self.debugging:
-            print('revision info')
-            revision_info_df.show()
-        revision_info_df.createOrReplaceTempView("revision")
+
+        if resolve_authors:
+            # Infer the schema, and register the DataFrames as tables.
+            author_info_source = spark.sparkContext.textFile(os.path.join(self.data_path, self.author_info))
+            author_info = author_info_source.map(self.mapper_author_info)
+            author_info_df = spark.createDataFrame(author_info).cache()
+
+            missing_author_row = spark.createDataFrame([[-1, "NO_AUTHOR_DATA"]])
+            author_info_df = author_info_df.union(missing_author_row)
+
+            author_info_df = author_info_df.groupBy("author_id").agg(concat_ws(" | ", collect_list(col("author_name"))).alias("author_name"))
+            author_info_df.createOrReplaceTempView("author").cache()
+
+            author_info_df.createOrReplaceTempView("author")
+            if self.debugging:
+                print('author info')
+                author_info_df.show()
+
+            resolved_authors_df = spark.sql(
+                'SELECT r.rev_id, r.rev_date, a.author_name as rev_author '
+                'FROM revision r LEFT OUTER JOIN author a ON r.rev_author = a.author_id')
+            revision_info_df = resolved_authors_df
+            if self.debugging:
+                print('revision info')
+                revision_info_df.show()
+            revision_info_df.createOrReplaceTempView("revision")
 
         compressed = False
         if page_data[-2:] == '7z':
