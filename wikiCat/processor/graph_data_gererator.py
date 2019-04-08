@@ -267,6 +267,8 @@ class GraphDataGenerator(SparkProcessorParsed):
         events_results_path = os.path.join(self.results_path, results_basename + '_events/')
         events_results_file = os.path.join(self.results_path, results_basename + '_events.csv')
 
+        print('hier')
+
         # Infer the schema, and register the DataFrames as tables.
         page_data_source = spark.sparkContext.textFile(os.path.join(self.data_path, f))
         page_data = page_data_source.map(self.mapper_page_data)
