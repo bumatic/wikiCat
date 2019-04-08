@@ -41,8 +41,8 @@ import findspark
 findspark.init()
 from pyspark import SparkConf, SparkContext
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import lit
-import org.apache.spark.sql.functions._
+#from pyspark.sql.functions import lit
+import pyspark.sql.functions._
 from pyspark.sql import Row
 from dateutil import parser
 #import shutil
