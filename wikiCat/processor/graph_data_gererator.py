@@ -80,6 +80,7 @@ class GraphDataGenerator(SparkProcessorParsed):
             #results_basename = 'cats'
             all_done = True
             for cat in self.project.pinfo['processing']['graph_data']['cats'].keys():
+                print(self.project.pinfo['processing']['graph_data']['cats'][cat])
                 try:
                     if self.project.pinfo['processing']['graph_data']['cats'][cat] == 'init':
                         self.project.pinfo['processing']['graph_data']['cats'][cat] = 'started'
