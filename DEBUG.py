@@ -98,7 +98,12 @@ missing_author_row = spark.createDataFrame([[-1, "NO_AUTHOR_DATA"]])
 author_info_df = author_info_df.union(missing_author_row)
 author_info_df.createOrReplaceTempView("author")
 
-'''
+author_info_df = author_info_df.groupBy("author_id").agg(concat_ws(" | ", collect_list(col("author_name"))).alias("author_name"))
+author_info_df.createOrReplaceTempView("author")
+
+authors_reduced_df = spark.sql('SELECT * FROM author WHERE author_id = 76.0')
+authors_reduced_df.show()
+
 revision_info_source = spark.sparkContext.textFile(rev_file)
 revision_info = revision_info_source.map(mapper_revisions)
 revision_info_df = spark.createDataFrame(revision_info).cache()
@@ -112,10 +117,3 @@ resolved_authors_df = spark.sql(
             'SELECT r.rev_id, r.rev_date, a.author_name as rev_author, a.author_id as rev_author_id '
             'FROM revision r LEFT OUTER JOIN author a ON r.rev_author = a.author_id')
 resolved_authors_df.show()
-'''
-
-author_info_df = author_info_df.groupBy("author_id").agg(concat_ws(" | ", collect_list(col("author_name")))).as("author_name")
-author_info_df.createOrReplaceTempView("author")
-
-authors_reduced_df = spark.sql('SELECT * FROM author WHERE author_id = 76.0')
-authors_reduced_df.show()
