@@ -25,7 +25,7 @@ from pyspark.sql.functions import *
 class GraphDataGenerator(SparkProcessorParsed):
     def __init__(self, project):  # , link_data_type, fixed='fixed_none', errors='errors_removed'
         SparkProcessorParsed.__init__(self, project)
-        self.debugging = False
+        self.debugging = True
 
     def get_page_data(self, link_data_type):
         if type(self.project.pinfo['data']['parsed'][link_data_type]) == list:
@@ -77,7 +77,7 @@ class GraphDataGenerator(SparkProcessorParsed):
 
         if create_cats:
             edge_type = 'cats'
-            #results_basename = 'cats'
+            results_basename = 'cats'
             all_done = True
             for cat in self.project.pinfo['processing']['graph_data']['cats'].keys():
                 print(self.project.pinfo['processing']['graph_data']['cats'][cat])
@@ -99,11 +99,16 @@ class GraphDataGenerator(SparkProcessorParsed):
             all_done = True
             for link in self.project.pinfo['processing']['graph_data']['links'].keys():
                 try:
+                    print('1')
                     if self.project.pinfo['processing']['graph_data']['links'][link] == 'init':
+                        print('2')
                         self.project.pinfo['processing']['graph_data']['links'][link] = 'started'
+                        print('3')
                         self.project.save_project()
+                        print('4')
                         self.project.pinfo['processing']['graph_data']['links'][link] = \
                             self.generate(edge_type, link, resolve_authors=resolve_authors)
+                        print('5')
                     elif self.project.pinfo['processing']['graph_data']['links'][link] == 'started':
                         #self.project.pinfo['processing']['graph_data']['links'][link] = 'init'
                         #self.project.save_project()
