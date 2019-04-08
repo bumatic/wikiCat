@@ -97,6 +97,9 @@ class GraphDataGenerator(SparkProcessorParsed):
             results_basename = 'links'
             for link in self.project.pinfo['processing']['graph_data']['links'].keys():
                 try:
+                    self.project.pinfo['processing']['graph_data']['links'][link] = 'init'
+                    self.project.save_project()
+                    '''
                     if self.project.pinfo['processing']['graph_data']['links'][link] == 'init':
                         self.project.pinfo['processing']['graph_data']['links'][link] = 'started'
                         self.project.save_project()
@@ -107,6 +110,7 @@ class GraphDataGenerator(SparkProcessorParsed):
                         #self.project.save_project()
                         all_done = False
                         print('Handling errors needs to be implemented')
+                    '''
                 except:
                     print('Generating links failed for: ' + str(link))
 
