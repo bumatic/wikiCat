@@ -42,6 +42,7 @@ findspark.init()
 from pyspark import SparkConf, SparkContext
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import lit
+import org.apache.spark.sql.functions._
 from pyspark.sql import Row
 from dateutil import parser
 #import shutil
@@ -113,5 +114,10 @@ resolved_authors_df = spark.sql(
 resolved_authors_df.show()
 '''
 
+author_info_df = author_info_df.groupBy("author_id").agg(concat_ws(" | ", collect_list(col("author_name"))))
+author_info_df.createOrReplaceTempView("author")
+
 authors_reduced_df = spark.sql('SELECT * FROM author WHERE author_id = 76.0')
 authors_reduced_df.show()
+
+
