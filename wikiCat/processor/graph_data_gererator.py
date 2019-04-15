@@ -99,23 +99,23 @@ class GraphDataGenerator(SparkProcessorParsed):
             all_done = True
             for link in self.project.pinfo['processing']['graph_data']['links'].keys():
                 try:
-                    '''
-                    if self.project.pinfo['processing']['graph_data']['links'][link] == 'init':
-                        self.project.pinfo['processing']['graph_data']['links'][link] = 'started'
-                        self.project.save_project()
-                        self.project.pinfo['processing']['graph_data']['links'][link] = \
-                            self.generate(edge_type, link, resolve_authors=resolve_authors)
-                    elif self.project.pinfo['processing']['graph_data']['links'][link] == 'started':
+                    if self.project.pinfo['processing']['graph_data']['links'][link] == 'started':
                         self.project.pinfo['processing']['graph_data']['links'][link] = 'init'
                         self.project.save_project()
                         all_done = False
                         print('Handling errors needs to be implemented')
+                    elif self.project.pinfo['processing']['graph_data']['links'][link] == 'init':
+                        self.project.pinfo['processing']['graph_data']['links'][link] = 'started'
+                        self.project.save_project()
+                        self.project.pinfo['processing']['graph_data']['links'][link] = \
+                            self.generate(edge_type, link, resolve_authors=resolve_authors)
                     '''
                     if self.project.pinfo['processing']['graph_data']['links'][link] == 'started':
                         self.project.pinfo['processing']['graph_data']['links'][link] = 'init'
                         self.project.save_project()
                         all_done = False
                         print('Handling errors needs to be implemented')
+                    '''
                 except:
                     print('Generating links failed for: ' + str(link))
 
@@ -202,8 +202,8 @@ class GraphDataGenerator(SparkProcessorParsed):
         spark = SparkSession \
             .builder \
             .appName("Generate_Graph_Data") \
-            .config("spark.driver.memory", "60g") \
-            .config("spark.driver.maxResultSize", "60g") \
+            .config("spark.driver.memory", "80g") \
+            .config("spark.driver.maxResultSize", "80g") \
             .getOrCreate()
 
             #    .config("spark.executor.cores", "12") \
