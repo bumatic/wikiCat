@@ -105,11 +105,7 @@ class GraphDataGenerator(SparkProcessorParsed):
                 except:
                     print('Generating links failed for: ' + str(link))
 
-        print('All files done:')
-        print(all_done)
-        print('postprocessing needs to be implemented required')
-
-
+        print('All files done:' + str(all_done))
 
         # TODO Handling results needs to be implemented
         # combine edges to one file
@@ -160,21 +156,7 @@ class GraphDataGenerator(SparkProcessorParsed):
         #   'events'
 
 
-        '''
         # needs to be reworked
-        
-        self.handle_results(results)
-
-        results = {
-            'nodes': 'nodes.csv',
-            'edges': 'edges.csv',
-            'events': 'events.csv',
-            'description': 'Graph data created from parsed data.'
-        }
-
-        self.register_graph_results('graph', results)
-        
-        '''
 
 
 
