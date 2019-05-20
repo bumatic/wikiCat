@@ -135,7 +135,7 @@ class GraphDataGenerator(SparkProcessorParsed):
                 tmp_nodes = tmp_nodes[0]
 
 
-            '''
+
             self.append_data(tmp_edges, 'edges.csv')
 
             results = {
@@ -146,11 +146,11 @@ class GraphDataGenerator(SparkProcessorParsed):
             }
 
             self.register_graph_results('graph', results)
-            '''
 
-            print(tmp_events)
-            print(tmp_edges)
-            print(tmp_nodes)
+
+            #print(tmp_events)
+            #print(tmp_edges)
+            #print(tmp_nodes)
 
 
         #
