@@ -162,7 +162,7 @@ class GraphDataGenerator(SparkProcessorParsed):
             src_file = os.path.join(self.project.pinfo['path']['graph'], src_file)
             data_new = pd.read_csv(src_file, header=None, delimiter='\t', na_filter=False)
             data_new.to_csv(dest_file, sep='\t', index=False, header=False, mode='a')
-            #os.remove(src_file)
+            os.remove(src_file)
 
     def generate_page_info(self):
         # Create a SparkSession
