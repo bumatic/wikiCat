@@ -124,11 +124,11 @@ class GraphDataGenerator(SparkProcessorParsed):
         if all_done:
             for t in self.project.pinfo['processing']['graph_data'].keys():
                 if t == 'page_info':
-                    tmp_nodes = tmp_nodes.append(self.project.pinfo['processing']['graph_data'][t])
+                    tmp_nodes.append(self.project.pinfo['processing']['graph_data'][t])
                 if t == 'cats' or t == 'links':
                     for k, v in self.project.pinfo['processing']['graph_data'][t].items():
-                        tmp_edges = tmp_edges.append(v['edges'])
-                        tmp_events = tmp_events.append(v['events'])
+                        tmp_edges.append(v['edges'])
+                        tmp_events.append(v['events'])
             if len(tmp_nodes) > 1:
                 print('Handling multiple page info files needs to beimplemented')
             elif len(tmp_nodes) == 1:
