@@ -12,15 +12,6 @@ from pyspark.sql.functions import *
 # import collections
 
 
-# TODO For dealing with link data a different approach needs to be implemented. Idea outlined:
-# First iterate over all files and split them into chunks of x (maybe 1000) source pages
-# It needs to be taken care of that all date for one page ends up in just one file.
-# Then calculate events for all files.
-# store their destination in a tmp list
-# iterate over all results and create a list of all edges and nodes
-# generate nodes and edges results based on that list!
-
-
 # Example call: GraphDataGenerator(myProject, 'cat_data').generate_graph_data()
 class GraphDataGenerator(SparkProcessorParsed):
     def __init__(self, project):  # , link_data_type, fixed='fixed_none', errors='errors_removed'
@@ -111,20 +102,20 @@ class GraphDataGenerator(SparkProcessorParsed):
                         self.project.pinfo['processing']['graph_data']['links'][link] = \
                         self.generate(edge_type, link, resolve_authors=resolve_authors)
                         self.project.save_project()
-
-                    '''
-                    if self.project.pinfo['processing']['graph_data']['links'][link] == 'started':
-                        self.project.pinfo['processing']['graph_data']['links'][link] = 'init'
-                        self.project.save_project()
-                        all_done = False
-                        print('Handling errors needs to be implemented')
-                    '''
                 except:
                     print('Generating links failed for: ' + str(link))
 
         print('All files done:')
         print(all_done)
         print('postprocessing needs to be implemented required')
+
+
+
+        # TODO Handling results needs to be implemented
+        # combine edges to one file
+        # leave nodes
+        # leave events files
+
 
 
         '''
