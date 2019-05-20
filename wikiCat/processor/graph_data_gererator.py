@@ -68,10 +68,10 @@ class GraphDataGenerator(SparkProcessorParsed):
 
         if create_cats:
             edge_type = 'cats'
-            results_basename = 'cats'
+            #results_basename = 'cats'
             all_done = True
             for cat in self.project.pinfo['processing']['graph_data']['cats'].keys():
-                print(self.project.pinfo['processing']['graph_data']['cats'][cat])
+                #print(self.project.pinfo['processing']['graph_data']['cats'][cat])
                 try:
                     if self.project.pinfo['processing']['graph_data']['cats'][cat] == 'init':
                         self.project.pinfo['processing']['graph_data']['cats'][cat] = 'started'
@@ -117,6 +117,48 @@ class GraphDataGenerator(SparkProcessorParsed):
         # leave events files
 
 
+        tmp_edges = []
+        tmp_events = []
+        tmp_nodes = []
+
+        if all_done:
+            for t in self.project.pinfo['processing']['graph_data'].keys():
+                if t == 'page_info':
+                    tmp_nodes = tmp_nodes.append(self.project.pinfo['processing']['graph_data'][t])
+                if t == 'cats' or t == 'links':
+                    for k, v in self.project.pinfo['processing']['graph_data'][t].items():
+                        tmp_edges = tmp_edges.append(v['edges'])
+                        tmp_events = tmp_events.append(v['events'])
+            if len(tmp_nodes) > 1:
+                print('Handling multiple page info files needs to beimplemented')
+            elif len(tmp_nodes) == 1:
+                tmp_nodes = tmp_nodes[0]
+
+
+            '''
+            self.append_data(tmp_edges, 'edges.csv')
+
+            results = {
+                'nodes': tmp_nodes,
+                'edges': 'edges.csv',
+                'events': tmp_events,
+                'description': 'Graph data created from parsed data.'
+            }
+
+            self.register_graph_results('graph', results)
+            '''
+
+            print(tmp_events)
+            print(tmp_edges)
+            print(tmp_nodes)
+
+
+        #
+        #'cats'
+        #'links'
+        #   'edges'
+        #   'events'
+
 
         '''
         # needs to be reworked
@@ -134,6 +176,10 @@ class GraphDataGenerator(SparkProcessorParsed):
         
         '''
 
+
+
+
+
     def handle_results(self, results):
         for key, value in results.items():
             self.append_data(value['nodes'], 'nodes.csv')
@@ -146,7 +192,7 @@ class GraphDataGenerator(SparkProcessorParsed):
             src_file = os.path.join(self.project.pinfo['path']['graph'], src_file)
             data_new = pd.read_csv(src_file, header=None, delimiter='\t', na_filter=False)
             data_new.to_csv(dest_file, sep='\t', index=False, header=False, mode='a')
-            os.remove(src_file)
+            #os.remove(src_file)
 
     def generate_page_info(self):
         # Create a SparkSession
