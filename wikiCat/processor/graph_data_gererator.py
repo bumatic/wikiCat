@@ -112,11 +112,11 @@ class GraphDataGenerator(SparkProcessorParsed):
         # leave nodes
         # leave events files
 
-
         tmp_edges = []
         tmp_events = []
         tmp_nodes = []
 
+        all_done = self.check_status(self.project.pinfo['processing']['graph_data'])
         if all_done:
             for t in self.project.pinfo['processing']['graph_data'].keys():
                 if t == 'page_info':
@@ -129,9 +129,6 @@ class GraphDataGenerator(SparkProcessorParsed):
                 print('Handling multiple page info files needs to beimplemented')
             elif len(tmp_nodes) == 1:
                 tmp_nodes = tmp_nodes[0]
-
-
-
             self.append_data(tmp_edges, 'edges.csv')
 
             results = {
@@ -142,30 +139,22 @@ class GraphDataGenerator(SparkProcessorParsed):
             }
 
             self.register_graph_results('graph', results)
+            self.project.pinfo.pop('processing')
+            self.project.save_project()
 
-
-            #print(tmp_events)
-            #print(tmp_edges)
-            #print(tmp_nodes)
-
-
-        #
-        #'cats'
-        #'links'
-        #   'edges'
-        #   'events'
-
-
-
-
-
-
-
-    def handle_results(self, results):
-        for key, value in results.items():
-            self.append_data(value['nodes'], 'nodes.csv')
-            self.append_data(value['edges'], 'edges.csv')
-            self.append_data(value['events'], 'events.csv')
+    def check_status(self, data):
+        all_done = True
+        for k, v in data.items():
+            if k == 'page_info':
+                if v == 'init' or v == 'started':
+                    all_done = False
+                    return all_done
+            if k == 'cats' or k == 'links':
+                for fid, elem in v.items():
+                    if elem == 'init' or elem == 'started':
+                        all_done = False
+                        return all_done
+        return all_done
 
     def append_data(self, src_files, dest_file):
         dest_file = os.path.join(self.project.pinfo['path']['graph'], dest_file)
