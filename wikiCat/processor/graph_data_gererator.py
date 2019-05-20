@@ -156,7 +156,6 @@ class GraphDataGenerator(SparkProcessorParsed):
         #   'events'
 
 
-        # needs to be reworked
 
 
 
