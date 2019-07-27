@@ -2,6 +2,7 @@ from wikiCat.processor.spark_processor_graph import SparkProcessorGraph
 import findspark
 findspark.init()
 from pyspark.sql import SparkSession
+from pyspark import SparkConf, SparkContext
 from datetime import datetime
 import os
 
