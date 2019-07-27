@@ -59,15 +59,7 @@ class SparkProcessorParsed(SparkProcessor):
     # Function fo parse author information into a DataFrame
     # Returns DataFrame with the Columns: author ID, author NAME
     @staticmethod
-    def mapper_author_info(line):
-        fields = line.split('\t')
-        try:
-            author_id = int(float(str(fields[0])))
-        except ValueError as e:
-            print("error", e, "for data ", fields)
-            author_id = -2
-        author_name = str(fields[1])
-        return Row(author_id=author_id, author_name=author_name)
+    w
 
     @staticmethod
     def handle_spark_results(path, file):

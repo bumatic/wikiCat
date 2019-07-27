@@ -333,9 +333,9 @@ class Project:
         processor = GraphDataGenerator(self)
         processor.generate_graph_data(data_type, override=override)
 
-    def calculate_cscores(self):
+    def calculate_cscores(self, scope="all"):
         processor = ControvercyScore(self)
-        processor.calculate()
+        processor.calculate(scope=scope)
 
     def generate_gt_graph(self):
         self.graph.generate_gt_graph()

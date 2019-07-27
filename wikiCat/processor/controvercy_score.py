@@ -3,7 +3,7 @@ findspark.init()
 from pyspark.sql import Row
 from pyspark.sql import SparkSession
 from pyspark import SparkConf, SparkContext
-from pyspark.sql.functions import collect_list, avg, max
+from pyspark.sql.functions import collect_list, avg, max, stddev, mean
 from wikiCat.processor.pandas_processor_graph import PandasProcessorGraph
 from wikiCat.processor.spark_processor_graph import SparkProcessorGraph
 from dateutil import parser
@@ -42,10 +42,30 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
             results.append([ts_list[i], source, target, cscore])
         return results
 
-    def calculate(self):
-        self.calculate_event_score()
-        self.calculate_avg_edge_score()
-        self.calculate_avg_node_score()
+    def calculate(self, scope):
+        events = False
+        nodes = False
+        edges = False
+        if scope == "all":
+            events = True
+            nodes = True
+            edges = True
+        if scope == "events":
+            events = True
+        if scope == "edges":
+            events = True
+        if scope == "nodes":
+            nodes = True
+
+        if events:
+            print('Calculating cscores for events started.')
+            self.calculate_event_score()
+        if edges:
+            print('Calculating cscores for edges started.')
+            self.calculate_avg_edge_score()
+        if nodes:
+            print('Calculating cscores for nodes started.')
+            self.calculate_avg_node_score()
 
     def calculate_event_score(self):
         print('============================')
@@ -57,8 +77,8 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
         spark = SparkSession\
             .builder\
             .appName("Calculate_Controvercy_Score_Edges")\
-            .config("spark.driver.memory", "40g")\
-            .config("spark.driver.maxResultSize", "40g")\
+            .config("spark.driver.memory", "80g")\
+            .config("spark.driver.maxResultSize", "80g")\
             .getOrCreate()
 
 
@@ -136,8 +156,8 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
         spark = SparkSession \
             .builder \
             .appName("Calculate_Controvercy_Score_Edges") \
-            .config("spark.driver.memory", "40g") \
-            .config("spark.driver.maxResultSize", "40g") \
+            .config("spark.driver.memory", "80g") \
+            .config("spark.driver.maxResultSize", "80g") \
             .getOrCreate()
 
 
@@ -170,11 +190,13 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
 
 
 
-        avg_node_cscores_df = node_cscores_all.groupby('node').agg(avg('cscore').alias('avg_cscore'))
-        avg_node_cscores_df.createOrReplaceTempView("cscore_nodes")
+        avg_node_cscores_df = node_cscores_all.groupby('node').agg(avg('cscore').alias('avg_cscore'), mean('cscore').alias('mean_cscore'), max('cscore').alias('max_cscore'), stddev('cscore').alias('stddev_cscore'))
+        nodes = avg_node_cscores_df
 
-        nodes = spark.sql("SELECT n.id, n.title, n.ns, c.avg_cscore as cscore "
-                          "FROM nodes n LEFT OUTER JOIN cscore_nodes c ON n.id = c.node")
+        #avg_node_cscores_df = node_cscores_all.groupby('node').agg(avg('cscore').alias('avg_cscore'))
+        #avg_node_cscores_df.createOrReplaceTempView("cscore_nodes")
+        #nodes = spark.sql("SELECT n.id, n.title, n.ns, c.avg_cscore as cscore "
+        #                  "FROM nodes n LEFT OUTER JOIN cscore_nodes c ON n.id = c.node")
 
         nodes.write.format('com.databricks.spark.csv').option('header', 'false').option('delimiter', '\t').save(spark_results_path)
 
@@ -213,8 +235,8 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
         spark = SparkSession\
             .builder\
             .appName("Calculate_Controvercy_Score_Edges")\
-            .config("spark.driver.memory", "40g")\
-            .config("spark.driver.maxResultSize", "40g")\
+            .config("spark.driver.memory", "80g")\
+            .config("spark.driver.maxResultSize", "80g")\
             .getOrCreate()
 
         edges_source = spark.sparkContext.textFile(os.path.join(self.data_path, self.edges_files[0]))
@@ -241,11 +263,16 @@ class ControvercyScore(PandasProcessorGraph, SparkProcessorGraph):
             else:
                 events_all = events_all.union(events_df)
 
-        avg_edge_cscores_df = events_all.groupby('source', 'target').agg(avg('cscore').alias('avg_cscore'))
-        avg_edge_cscores_df.createOrReplaceTempView("cscore_edges")
-        edges = spark.sql("SELECT e.source, e.target, e.etype, c.avg_cscore as cscore "
-                          "FROM edges e LEFT OUTER JOIN cscore_edges c "
-                          "ON e.source = c.source AND e.target = c.target")
+
+        avg_edge_cscores_df = events_all.groupby('source', 'target').agg(avg('cscore').alias('avg_cscore'), mean('cscore').alias('mean_cscore'), max('cscore').alias('max_cscore'), stddev('cscore').alias('stddev_cscore'))
+        edges = avg_edge_cscores_df
+
+        #avg_edge_cscores_df = events_all.groupby('source', 'target').agg(avg('cscore').alias('avg_cscore'))
+        #avg_edge_cscores_df.createOrReplaceTempView("cscore_edges")
+        #edges = spark.sql("SELECT e.source, e.target, e.etype, c.avg_cscore as cscore "
+        #                  "FROM edges e LEFT OUTER JOIN cscore_edges c "
+        #                  "ON e.source = c.source AND e.target = c.target")
+
         edges.write.format('com.databricks.spark.csv').option('header', 'false').option('delimiter', '\t').save(spark_results_path)
 
         self.assemble_spark_results(spark_results_path, tmp_results_file)

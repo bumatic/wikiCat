@@ -70,6 +70,16 @@ class SparkProcessor(Processor):
             ns = fields[2]
             cscore = fields[3]
             return Row(id=id, title=title, ns=ns, cscore=cscore)
+        elif len(fields) == 7:
+            id = fields[0]
+            title = fields[1]
+            ns = fields[2]
+            avg_cscore = fields[3]
+            mean_cscore = fields[4]
+            max_cscore = fields[5]
+            stddev_cscore = fields[6]
+            return Row(id=id, title=title, ns=ns, avg_cscore=avg_cscore, mean_cscore=mean_cscore, max_cscore=max_cscore,
+                       stddev_cscore=stddev_cscore)
 
     @staticmethod
     def mapper_edges(line):
@@ -85,6 +95,16 @@ class SparkProcessor(Processor):
             etype = fields[2]
             cscore = fields[3]
             return Row(source=source, target=target, etype=etype, cscore=cscore)
+        elif len(fields) == 7:
+            id = fields[0]
+            title = fields[1]
+            ns = fields[2]
+            avg_cscore = fields[3]
+            mean_cscore = fields[4]
+            max_cscore = fields[5]
+            stddev_cscore = fields[6]
+            return Row(id=id, title=title, ns=ns, avg_cscore=avg_cscore, mean_cscore=mean_cscore, max_cscore=max_cscore,
+                       stddev_cscore=stddev_cscore)
 
     @staticmethod
     def mapper_tmp_cscore_events(line):

@@ -107,11 +107,6 @@ class GraphDataGenerator(SparkProcessorParsed):
 
         print('All files done:' + str(all_done))
 
-        # TODO Handling results needs to be implemented
-        # combine edges to one file
-        # leave nodes
-        # leave events files
-
         tmp_edges = []
         tmp_events = []
         tmp_nodes = []
