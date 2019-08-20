@@ -356,7 +356,7 @@ class Project:
 
     def create_separate_subgraph(self, title=None, seed=None, cats=True, subcats=1, supercats=1,
                         links=False, inlinks=1, outlinks=1):
-        self.graph.create_seperate_subgraph(title=title, seed=seed, cats=cats, subcats=subcats,
+        self.graph.create_separate_subgraph(title=title, seed=seed, cats=cats, subcats=subcats,
                                             supercats=supercats,
                                             links=links, inlinks=inlinks, outlinks=outlinks)
 
