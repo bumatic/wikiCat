@@ -24,7 +24,7 @@ class GraphSelector(SparkProcessorGraph): #PandasProcessorGraph
                                                                      'dump_date(date)'
 
         SparkProcessorGraph.__init__(self, self.project)
-        self.graph_path = #self.graph.curr_data_path
+        self.graph_path = self.graph.curr_data_path
         self.source_location = self.graph.source_location
         self.base_path = os.path.split(self.graph_path)[0]
         self.start_date = parser.parse(self.project.pinfo['start_date']).timestamp()
