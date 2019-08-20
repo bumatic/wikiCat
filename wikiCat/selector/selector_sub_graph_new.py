@@ -46,7 +46,7 @@ class SeparateSubGraph(GraphSelector):
         GraphSelector.__init__(self, project)
 
     def create(self, title=None, seed=None, cats=True, subcats=2, supercats=0, links=False, inlinks=2, outlinks=2):
-
+        results_path = os.path.join(str(title))
         if self.check_results_path(results_path):
             return False
 
@@ -207,9 +207,9 @@ class SeparateSubGraph(GraphSelector):
 
 
         # Create results path and filenames
-        results_path = os.path.join(str(title))
+
         #results_path = os.path.join(self.base_path, str(title))
-        self.check_results_path(results_path)
+
         edge_results_file = str(title) + '_edges.csv'
         events_results_file = str(title) + '_events.csv'
 
