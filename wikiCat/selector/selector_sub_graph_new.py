@@ -100,11 +100,11 @@ class SeparateSubGraph(GraphSelector):
                             nodes = tmp_nodes
                             nodes = [str(i) for i in nodes] #cast items as str. otherwise results array does not work for spark
                             seed = seed + list(set(nodes))
-                            print(nodes)
-                            print(seed)
+                            #print(nodes)
+                            #print(seed)
                     except:
-                        print('failed')
-                        print(tmp_results.select(col('source')).distinct().count())
+                        #print('failed')
+                        #print(tmp_results.select(col('source')).distinct().count())
             if supercats is not None:
                 nodes = seed
                 self.results['cats']['supercats'] = supercats
@@ -133,8 +133,8 @@ class SeparateSubGraph(GraphSelector):
                         nodes = tmp_nodes
                         nodes = [str(i) for i in nodes] #cast items as str. otherwise results array does not work for spark
                         seed = seed + list(set(nodes))
-                        print(nodes)
-                        print(seed)
+                        #print(nodes)
+                        #print(seed)
         if links:
             self.results['links'] = {}
             link_edges_df = all_edges_df.where(all_edges_df.etype == 'link')
@@ -157,8 +157,8 @@ class SeparateSubGraph(GraphSelector):
                     nodes = tmp_nodes
                     nodes = [str(i) for i in nodes] #cast items as str. otherwise results array does not work for spark
                     seed = seed + list(set(nodes))
-                    print(nodes)
-                    print(seed)
+                    #print(nodes)
+                    #print(seed)
             if outlinks is not None:
                 nodes = seed
                 self.results['links']['outlinks'] = outlinks
@@ -177,8 +177,8 @@ class SeparateSubGraph(GraphSelector):
                     nodes = tmp_nodes
                     nodes = [str(i) for i in nodes] #cast items as str. otherwise results array does not work for spark
                     seed = seed + list(set(nodes))
-                    print(nodes)
-                    print(seed)
+                    #print(nodes)
+                    #print(seed)
 
         edge_results_df.createOrReplaceTempView("edge_results")
         #edge_results_df = spark.sql('SELECT source, target, etype, cscore FROM edge_results').distinct()
