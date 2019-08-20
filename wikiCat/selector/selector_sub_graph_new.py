@@ -180,7 +180,7 @@ class SeparateSubGraph(GraphSelector):
             # Process events based on edge_results_df
             edge_results_df.createOrReplaceTempView("edge_results")
             events_df.createOrReplaceTempView("events")
-            events_tmp_results_df = spark.sql('SELECT ev.revision, ev.source, ev.target, ev.event, ev.cscore '
+            events_tmp_results_df = spark.sql('SELECT ev.revision, ev.source, ev.target, ev.event ' #, ev.cscore 
                                               'FROM events ev JOIN edge_results ed ON ev.source = ed.source '
                                               'AND ev.target = ed.target')
             if i == 0:
