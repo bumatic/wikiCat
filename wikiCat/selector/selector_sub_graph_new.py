@@ -56,8 +56,8 @@ class SeparateSubGraph(GraphSelector):
         spark = SparkSession(sc).builder.appName("Create SubGraph").getOrCreate()
 
         # Register dataframe for edges
-        for i in range(len(self.graph.source_edges)):
-            edges_source = spark.sparkContext.textFile(os.path.join(self.graph.source_edges_location, self.graph.source_edges[i]))
+        for i in range(len(self.data['edges'])):
+            edges_source = spark.sparkContext.textFile(os.path.join(self.graph_path, self.data['edges'][i]))
             edges = edges_source.map(self.mapper_edges)
             edges_df = spark.createDataFrame(edges).cache()
             if i == 0:
@@ -171,9 +171,9 @@ class SeparateSubGraph(GraphSelector):
                                       'AND ev.target = ed.target')
         '''
 
-        for i in range(len(self.graph.source_events)):
+        for i in range(len(self.data['events'])):
             events_source = spark.sparkContext.textFile(
-                os.path.join(self.graph.source_events_location, self.graph.source_events[i]))
+                os.path.join(self.graph_path, self.data['events'][i]))
             events = events_source.map(self.mapper_events)
             events_df = spark.createDataFrame(events).cache()
 
