@@ -111,7 +111,6 @@ class SeparateSubGraph(GraphSelector):
                 for i in range(supercats):
                     print('supercats iteration ' + str(i+1))
                     tmp_results_source = cat_edges_df[cat_edges_df.source.isin(nodes)]
-                    tmp_results.show()
                     #Todo including members of supercategories results in very large graphs. Maybe there is anothter way of integrating those. For now I take it out.
                     tmp_results = tmp_results_source
                     '''
@@ -131,7 +130,7 @@ class SeparateSubGraph(GraphSelector):
                     if tmp_results_source.select(col('target')).distinct().count() > 0:
                         tmp_nodes = tmp_results_source.select(col('target')).distinct().rdd.collect()
                         tmp_nodes = [item for sublist in tmp_nodes for item in sublist]
-                        nodes = tmp_nodes
+                        nodes = nodes + tmp_nodes
                         nodes = [str(i) for i in nodes] #cast items as str. otherwise results array does not work for spark
         if links:
             self.results['links'] = {}
@@ -152,7 +151,7 @@ class SeparateSubGraph(GraphSelector):
                         edge_results_df = edge_results_df.union(tmp_results).distinct()
                     print('Collect and process new seed nodes: ' + str(tmp_results.select(col('target')).distinct().count()))
                     tmp_nodes = [item for sublist in tmp_nodes for item in sublist]
-                    nodes = tmp_nodes
+                    nodes = nodes + tmp_nodes
                     nodes = [str(i) for i in nodes] #cast items as str. otherwise results array does not work for spark
             if outlinks is not None:
                 self.results['links']['outlinks'] = outlinks
@@ -167,7 +166,7 @@ class SeparateSubGraph(GraphSelector):
                         edge_results_df = edge_results_df.union(tmp_results).distinct()
                     print('Collect and process new seed nodes: ' + str(tmp_results.select(col('target')).distinct().count()))
                     tmp_nodes = [item for sublist in tmp_nodes for item in sublist]
-                    nodes = tmp_nodes
+                    nodes = nodes + tmp_nodes
                     nodes = [str(i) for i in nodes] #cast items as str. otherwise results array does not work for spark
 
         edge_results_df.createOrReplaceTempView("edge_results")
