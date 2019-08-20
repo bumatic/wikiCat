@@ -58,9 +58,19 @@ class SeparateSubGraph(GraphSelector):
         # Create a SparkSession
         # Note: In case its run on Windows and generates errors use (tmp Folder mus exist):
         # spark = SparkSession.builder.config("spark.sql.warehouse.dir", "file:///C:/temp").appName("Postprocessing").getOrCreate()
-        conf = SparkConf().setMaster("local[*]").setAppName("Subgraph")
-        sc = SparkContext(conf=conf)
-        spark = SparkSession(sc).builder.appName("Create SubGraph").getOrCreate()
+
+        spark = SparkSession \
+            .builder \
+            .appName("Generate_Graph_Data") \
+            .config("spark.driver.memory", "60g") \
+            .config("spark.driver.maxResultSize", "60g") \
+            .getOrCreate()
+
+        print(SparkConf().getAll())
+
+        #conf = SparkConf().setMaster("local[*]").setAppName("Subgraph")
+        #sc = SparkContext(conf=conf)
+        #spark = SparkSession(sc).builder.appName("Create SubGraph").getOrCreate()
 
         # Register dataframe for edges
         for i in range(len(self.data['edges'])):
