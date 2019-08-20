@@ -98,8 +98,10 @@ class SeparateSubGraph(GraphSelector):
                             tmp_nodes = [item for sublist in tmp_nodes for item in sublist]
                             result_nodes = list(set(result_nodes + tmp_nodes))
                             nodes = tmp_nodes
-                            print(nodes)
                             nodes = [str(i) for i in nodes] #cast items as str. otherwise results array does not work for spark
+                            seed = seed + list(set(nodes))
+                            print(nodes)
+                            print(seed)
                     except:
                         print('failed')
                         print(tmp_results.select(col('source')).distinct().count())
@@ -129,8 +131,10 @@ class SeparateSubGraph(GraphSelector):
                         tmp_nodes = [item for sublist in tmp_nodes for item in sublist]
                         result_nodes = list(set(result_nodes + tmp_nodes))
                         nodes = tmp_nodes
-                        print(nodes)
                         nodes = [str(i) for i in nodes] #cast items as str. otherwise results array does not work for spark
+                        seed = seed + list(set(nodes))
+                        print(nodes)
+                        print(seed)
         if links:
             self.results['links'] = {}
             link_edges_df = all_edges_df.where(all_edges_df.etype == 'link')
@@ -151,8 +155,10 @@ class SeparateSubGraph(GraphSelector):
                     tmp_nodes = [item for sublist in tmp_nodes for item in sublist]
                     result_nodes = list(set(result_nodes + tmp_nodes))
                     nodes = tmp_nodes
-                    print(nodes)
                     nodes = [str(i) for i in nodes] #cast items as str. otherwise results array does not work for spark
+                    seed = seed + list(set(nodes))
+                    print(nodes)
+                    print(seed)
             if outlinks is not None:
                 nodes = seed
                 self.results['links']['outlinks'] = outlinks
@@ -169,8 +175,10 @@ class SeparateSubGraph(GraphSelector):
                     tmp_nodes = [item for sublist in tmp_nodes for item in sublist]
                     result_nodes = list(set(result_nodes + tmp_nodes))
                     nodes = tmp_nodes
-                    print(nodes)
                     nodes = [str(i) for i in nodes] #cast items as str. otherwise results array does not work for spark
+                    seed = seed + list(set(nodes))
+                    print(nodes)
+                    print(seed)
 
         edge_results_df.createOrReplaceTempView("edge_results")
         #edge_results_df = spark.sql('SELECT source, target, etype, cscore FROM edge_results').distinct()
