@@ -16,7 +16,6 @@ class GraphSelector(SparkProcessorGraph): #PandasProcessorGraph
         self.project = project
         self.graph = self.project.graph
         self.data = self.project.pinfo['data']['graph'] #self.project.pinfo['gt_graph']
-        print(self.project.pinfo['data']['graph'])
         assert 'start_date' in self.project.pinfo.keys(), 'Error. The project has no start date. Please generate' \
                                                           'it with wikiCat.wikiproject.Project.find_start_date()'
         assert 'dump_date' in self.project.pinfo.keys() is not None, 'Error. The project has no dump date. Please set ' \
@@ -133,24 +132,28 @@ class SeparateSubGraph(GraphSelector):
             if inlinks is not None:
                 self.results['links']['inlinks'] = inlinks
                 for i in range(inlinks):
+                    print('inlinks iteration ' + str(i + 1))
                     tmp_results = link_edges_df[link_edges_df.target.isin(nodes)]
                     tmp_nodes = tmp_results.select(col('source')).rdd.collect()
                     if edge_results_df is None:
                         edge_results_df = tmp_results
                     else:
                         edge_results_df = edge_results_df.union(tmp_results).distinct()
+                    print('Collect and process new seed nodes: ' + str(tmp_results.select(col('target')).distinct().count()))
                     tmp_nodes = [item for sublist in tmp_nodes for item in sublist]
                     nodes = tmp_nodes
                     nodes = [str(i) for i in nodes] #cast items as str. otherwise results array does not work for spark
             if outlinks is not None:
                 self.results['links']['outlinks'] = outlinks
                 for i in range(outlinks):
+                    print('outlinks iteration ' + str(i + 1))
                     tmp_results = link_edges_df[link_edges_df.source.isin(nodes)]
                     tmp_nodes = tmp_results.select(col('target')).rdd.collect()
                     if edge_results_df is None:
                         edge_results_df = tmp_results
                     else:
                         edge_results_df = edge_results_df.union(tmp_results).distinct()
+                    print('Collect and process new seed nodes: ' + str(tmp_results.select(col('target')).distinct().count()))
                     tmp_nodes = [item for sublist in tmp_nodes for item in sublist]
                     nodes = tmp_nodes
                     nodes = [str(i) for i in nodes] #cast items as str. otherwise results array does not work for spark
