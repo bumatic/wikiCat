@@ -99,9 +99,9 @@ class SeparateSubGraph(GraphSelector):
                         if tmp_results.select(col('source')).distinct().count() > 0:
                             tmp_nodes = tmp_results.select(col('source')).distinct().rdd.collect()
                             tmp_nodes = [item for sublist in tmp_nodes for item in sublist]
-                            print(nodes)
                             print(tmp_nodes)
-                            nodes = tmp_nodes
+                            nodes = nodes + tmp_nodes
+                            print(nodes)
                             nodes = [str(i) for i in nodes] #cast items as str. otherwise results array does not work for spark
                     except:
                         print('failed')
