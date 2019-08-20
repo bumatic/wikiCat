@@ -103,8 +103,8 @@ class SeparateSubGraph(GraphSelector):
                             #print(nodes)
                             #print(seed)
                     except:
-                        #print('failed')
-                        #print(tmp_results.select(col('source')).distinct().count())
+                        print('failed')
+                        print(tmp_results.select(col('source')).distinct().count())
             if supercats is not None:
                 nodes = seed
                 self.results['cats']['supercats'] = supercats
