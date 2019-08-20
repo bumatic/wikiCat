@@ -92,7 +92,7 @@ class SeparateSubGraph(GraphSelector):
                     else:
                         edge_results_df = edge_results_df.union(tmp_results).distinct()
                     print('Collect and process new seed nodes: ' + str(tmp_results.select(col('source')).distinct().count()))
-                    #print('Collect and process new seed nodes: ' + str(tmp_results.select(col('target')).distinct().count()))
+                    
                     try:
                         #TODO Implement error handling for end of tree in the other selects as well.
                         if tmp_results.select(col('source')).distinct().count() > 0:
