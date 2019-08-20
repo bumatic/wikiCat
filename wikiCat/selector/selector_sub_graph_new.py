@@ -32,14 +32,14 @@ class GraphSelector(SparkProcessorGraph): #PandasProcessorGraph
         self.results = {}
         #self.gt_wiki_id_map_path, self.gt_wiki_id_map_file = self.find_gt_wiki_id_map()
 
-        def check_results_path(self, folder):
-            if not os.path.isdir(folder):
-                os.makedirs(folder)
-                return None
-            elif not os.listdir(folder) == []:
-                print(
-                    'Non-empty directory for the Selector with this title already exists. Either delete the directory or use a different name.')
-                return True
+    def check_results_path(self, folder):
+        if not os.path.isdir(folder):
+            os.makedirs(folder)
+            return None
+        elif not os.listdir(folder) == []:
+            print(
+                'Non-empty directory for the Selector with this title already exists. Either delete the directory or use a different name.')
+            return True
 
 
 class SeparateSubGraph(GraphSelector):
