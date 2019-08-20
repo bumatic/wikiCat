@@ -92,7 +92,7 @@ class SeparateSubGraph(GraphSelector):
                     else:
                         edge_results_df = edge_results_df.union(tmp_results).distinct()
                     print('Collect and process new seed nodes: ' + str(tmp_results.select(col('source')).distinct().count()))
-                    
+
                     try:
                         #TODO Implement error handling for end of tree in the other selects as well.
                         if tmp_results.select(col('source')).distinct().count() > 0:
@@ -132,12 +132,14 @@ class SeparateSubGraph(GraphSelector):
         if links:
             self.results['links'] = {}
             #nodes = seed ??????????
+            print(nodes)
             link_edges_df = all_edges_df.where(all_edges_df.etype == 'links')
             if inlinks is not None:
                 self.results['links']['inlinks'] = inlinks
                 for i in range(inlinks):
                     print('inlinks iteration ' + str(i + 1))
                     tmp_results = link_edges_df[link_edges_df.target.isin(nodes)]
+                    tmp_results.show()
                     tmp_nodes = tmp_results.select(col('source')).rdd.collect()
                     if edge_results_df is None:
                         edge_results_df = tmp_results
