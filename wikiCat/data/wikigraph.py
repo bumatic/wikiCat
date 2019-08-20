@@ -2,6 +2,7 @@ from wikiCat.data.data import Data
 from wikiCat.processor.gt_graph_generator import GtGraphGenerator
 from wikiCat.processor.gt_sub_graph_processor import SubGraphProcessor
 from wikiCat.selector.selector_sub_graph import SubGraph
+from wikiCat.selector.selector_sub_graph_new import SeparateSubGraph
 from wikiCat.selector.selector_snapshots import Snapshots
 from wikiCat.selector.selector_cscore import SelectorCscore
 from wikiCat.processor.oldest_revision import OldestRevision
@@ -121,6 +122,14 @@ class WikiGraph(Data):
                                       links=links, inlinks=inlinks, outlinks=outlinks)
         self.set_working_graph(key=title)
         SubGraphProcessor(self.project).create_gt_subgraph()
+
+    def create_seperate_subgraph(self, title=None, seed=None, cats=True, subcats=1, supercats=1,
+                                 links=False, inlinks=2, outlinks=2):
+        SeparateSubGraph(self.project).create(title=title, seed=seed, cats=cats, subcats=subcats,
+                                              supercats=supercats, links=links, inlinks=inlinks,
+                                              outlinks=outlinks)
+        #self.set_working_graph(key=title)
+        #SubGraphProcessor(self.project).create_gt_subgraph()
 
     def create_gt_subgraph(self, title=None):
         self.set_working_graph(key=title)
