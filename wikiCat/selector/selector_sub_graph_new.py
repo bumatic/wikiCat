@@ -1,4 +1,6 @@
 import os
+from dateutil import parser
+from datetime import datetime
 from wikiCat.selector.selector import Selector, SparkProcessorGraph
 import findspark
 findspark.init()
@@ -213,7 +215,7 @@ class SeparateSubGraph(GraphSelector):
         self.data[str(title)] = self.results
         self.graph.update_graph_data(self.data)
         '''
-        
+
         # todo in every spark script put sc.stop() at the end in order to enable chaining the processing steps.
         # without it one gets an error that only one sparkcontext can be created.
         sc.stop()
