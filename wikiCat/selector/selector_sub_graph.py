@@ -1,5 +1,5 @@
 import os
-from wikiCat.selector.selector import Selector
+from wikiCat.selector.selector import Selector, SparkProcessorGraph
 import findspark
 findspark.init()
 from pyspark.sql import SparkSession
@@ -7,9 +7,13 @@ from pyspark import SparkConf, SparkContext
 from pyspark.sql.functions import col
 
 
-class SubGraph(Selector):
+#class SubGraph(Selector):
+#    def __init__(self, project):
+#        Selector.__init__(self, project)
+
+class SubGraph(SparkProcessorGraph):
     def __init__(self, project):
-        Selector.__init__(self, project)
+        SparkProcessorGraph.__init__(self, project)
 
     def create(self, title=None, seed=None, cats=True, subcats=2, supercats=0, links=False, inlinks=2, outlinks=2):
 
