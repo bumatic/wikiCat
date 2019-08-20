@@ -12,9 +12,7 @@ class GraphSelector(SparkProcessorGraph): #PandasProcessorGraph
         #self.graph = graph
         #self.data = self.graph.data
         self.project = project
-        print(self.project)
         self.graph = self.project.graph
-        print(self.project.graph)
         self.data = self.project.pinfo['data']['graph'] #self.project.pinfo['gt_graph']
         print(self.project.pinfo['data']['graph'])
         assert 'start_date' in self.project.pinfo.keys(), 'Error. The project has no start date. Please generate' \
@@ -24,13 +22,13 @@ class GraphSelector(SparkProcessorGraph): #PandasProcessorGraph
                                                                      'dump_date(date)'
 
         SparkProcessorGraph.__init__(self, self.project)
-        self.graph_path = self.graph.curr_data_path
-        self.source_location = self.graph.source_location
+        self.graph_path = self.project.pinfo['path']['graph']
+        self.source_location = self.project.pinfo['path']['graph']
         self.base_path = os.path.split(self.graph_path)[0]
         self.start_date = parser.parse(self.project.pinfo['start_date']).timestamp()
         self.end_date = parser.parse(self.project.pinfo['dump_date']).timestamp()
         self.results = {}
-        self.gt_wiki_id_map_path, self.gt_wiki_id_map_file = self.find_gt_wiki_id_map()
+        #self.gt_wiki_id_map_path, self.gt_wiki_id_map_file = self.find_gt_wiki_id_map()
 
 
 class SeparateSubGraph(GraphSelector):
@@ -191,10 +189,11 @@ class SeparateSubGraph(GraphSelector):
 
 
         # Create results path and filenames
-        results_path = os.path.join(self.base_path, str(title))
+        results_path = os.path.join(str(title))
+        #results_path = os.path.join(self.base_path, str(title))
         self.check_results_path(results_path)
-        edge_results_file = str(title) + '_' + self.graph.source_edges[0]
-        events_results_file = str(title) + '_' + self.graph.source_events[0]
+        edge_results_file = str(title) + '_edges.csv'
+        events_results_file = str(title) + '_events.csv'
 
         # Collect results and write to file
         edge_results = edge_results_df.rdd.collect()
@@ -202,6 +201,7 @@ class SeparateSubGraph(GraphSelector):
         events_results = events_results_df.rdd.collect()
         self.write_list(os.path.join(results_path, events_results_file), events_results)
 
+        '''
         # Assemble results data and register to project
         self.results['source_edges'] = [edge_results_file]
         self.results['source_events'] = [events_results_file]
@@ -209,10 +209,11 @@ class SeparateSubGraph(GraphSelector):
         self.results['type'] = 'subgraph'
         self.results['derived_from'] = self.graph.curr_working_graph
         self.results['seeds'] = seed
-
+        
         self.data[str(title)] = self.results
         self.graph.update_graph_data(self.data)
-
+        '''
+        
         # todo in every spark script put sc.stop() at the end in order to enable chaining the processing steps.
         # without it one gets an error that only one sparkcontext can be created.
         sc.stop()
