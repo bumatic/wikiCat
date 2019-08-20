@@ -136,6 +136,7 @@ class SeparateSubGraph(GraphSelector):
             #nodes = seed ??????????
             print(nodes)
             link_edges_df = all_edges_df.where(all_edges_df.etype == 'link')
+            link_edges_df.show()
             if inlinks is not None:
                 self.results['links']['inlinks'] = inlinks
                 for i in range(inlinks):
