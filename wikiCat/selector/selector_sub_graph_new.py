@@ -157,8 +157,8 @@ class SeparateSubGraph(GraphSelector):
                 for i in range(outlinks):
                     print('outlinks iteration ' + str(i + 1))
                     tmp_results = link_edges_df[link_edges_df.source.isin(nodes)]
-                    tmp_nodes = tmp_results.select(col('target')).rdd.collect()
                     tmp_results.show()
+                    tmp_nodes = tmp_results.select(col('target')).rdd.collect()
                     if edge_results_df is None:
                         edge_results_df = tmp_results
                     else:
