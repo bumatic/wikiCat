@@ -87,6 +87,7 @@ class SeparateSubGraph(GraphSelector):
                 for i in range(subcats):
                     print('subcats iteration ' + str(i+1))
                     tmp_results = cat_edges_df[cat_edges_df.target.isin(nodes)]
+                    tmp_results.show()
                     if edge_results_df is None:
                         edge_results_df = tmp_results
                     else:
@@ -108,6 +109,7 @@ class SeparateSubGraph(GraphSelector):
                 for i in range(supercats):
                     print('supercats iteration ' + str(i+1))
                     tmp_results_source = cat_edges_df[cat_edges_df.source.isin(nodes)]
+                    tmp_results.show()
                     #Todo including members of supercategories results in very large graphs. Maybe there is anothter way of integrating those. For now I take it out.
                     tmp_results = tmp_results_source
                     '''
