@@ -47,6 +47,9 @@ class SeparateSubGraph(GraphSelector):
 
     def create(self, title=None, seed=None, cats=True, subcats=2, supercats=0, links=False, inlinks=2, outlinks=2):
 
+        if self.check_results_path(results_path):
+            return False
+
         assert title is not None, 'Error. You need to pass a title of the subgraph.'
         #TODO adapt assertions
         #assert include == 'cat' or include == 'link' or include == 'both', 'Error. Pass either cat, link or both for include'
