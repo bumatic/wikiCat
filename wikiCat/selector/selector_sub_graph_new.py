@@ -94,7 +94,7 @@ class SeparateSubGraph(GraphSelector):
                 for i in range(subcats):
                     print('subcats iteration ' + str(i+1))
                     tmp_results = cat_edges_df[cat_edges_df.target.isin(nodes)]
-                    #tmp_results.show()
+                    tmp_results.show()
                     if edge_results_df is None:
                         edge_results_df = tmp_results
                     else:
@@ -152,14 +152,14 @@ class SeparateSubGraph(GraphSelector):
         if links:
             self.results['links'] = {}
             link_edges_df = all_edges_df.where(all_edges_df.etype == 'link')
-            #link_edges_df.show()
+            link_edges_df.show()
             if inlinks is not None:
                 nodes = seed
                 self.results['links']['inlinks'] = inlinks
                 for i in range(inlinks):
                     print('inlinks iteration ' + str(i + 1))
                     tmp_results = link_edges_df[link_edges_df.target.isin(nodes)]
-                    #tmp_results.show()
+                    tmp_results.show()
                     tmp_nodes = tmp_results.select(col('source')).rdd.collect()
                     if edge_results_df is None:
                         edge_results_df = tmp_results
@@ -185,7 +185,7 @@ class SeparateSubGraph(GraphSelector):
                 for i in range(outlinks):
                     print('outlinks iteration ' + str(i + 1))
                     tmp_results = link_edges_df[link_edges_df.source.isin(nodes)]
-                    #tmp_results.show()
+                    tmp_results.show()
                     tmp_nodes = tmp_results.select(col('target')).rdd.collect()
                     if edge_results_df is None:
                         edge_results_df = tmp_results
