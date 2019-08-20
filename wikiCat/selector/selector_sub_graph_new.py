@@ -61,7 +61,7 @@ class SeparateSubGraph(GraphSelector):
 
         spark = SparkSession \
             .builder \
-            .appName("Generate_Graph_Data") \
+            .appName("Generate_Separate_Subgraph_Data") \
             .config("spark.driver.memory", "60g") \
             .config("spark.driver.maxResultSize", "60g") \
             .getOrCreate()
