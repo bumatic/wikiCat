@@ -11,11 +11,9 @@ from pyspark.sql.functions import col
 
 class GraphSelector(SparkProcessorGraph): #PandasProcessorGraph
     def __init__(self, project):
-        #self.graph = graph
-        #self.data = self.graph.data
         self.project = project
         self.graph = self.project.graph
-        self.data = self.project.pinfo['data']['graph'] #self.project.pinfo['gt_graph']
+        self.data = self.project.pinfo['data']['graph']
         assert 'start_date' in self.project.pinfo.keys(), 'Error. The project has no start date. Please generate' \
                                                           'it with wikiCat.wikiproject.Project.find_start_date()'
         assert 'dump_date' in self.project.pinfo.keys() is not None, 'Error. The project has no dump date. Please set ' \
@@ -29,7 +27,6 @@ class GraphSelector(SparkProcessorGraph): #PandasProcessorGraph
         self.start_date = parser.parse(self.project.pinfo['start_date']).timestamp()
         self.end_date = parser.parse(self.project.pinfo['dump_date']).timestamp()
         self.results = {}
-        #self.gt_wiki_id_map_path, self.gt_wiki_id_map_file = self.find_gt_wiki_id_map()
 
     def check_results_path(self, folder):
         if not os.path.isdir(folder):
@@ -52,7 +49,6 @@ class SeparateSubGraph(GraphSelector):
 
         assert title is not None, 'Error. You need to pass a title of the subgraph.'
         #TODO adapt assertions
-        #assert include == 'cat' or include == 'link' or include == 'both', 'Error. Pass either cat, link or both for include'
         assert seed is not None, 'Error. One or more seed IDs need to be passed for creating a sub graph.'
         assert type(seed) is list, 'Error. The seeds need to be passed as a list.'
 
@@ -78,6 +74,7 @@ class SeparateSubGraph(GraphSelector):
 
         # Process edges and generate edge_results_df
         edge_results_df = None
+        result_nodes = seed
         if cats:
             self.results['cats'] = {}
             nodes = seed
@@ -87,7 +84,7 @@ class SeparateSubGraph(GraphSelector):
                 for i in range(subcats):
                     print('subcats iteration ' + str(i+1))
                     tmp_results = cat_edges_df[cat_edges_df.target.isin(nodes)]
-                    tmp_results.show()
+                    #tmp_results.show()
                     if edge_results_df is None:
                         edge_results_df = tmp_results
                     else:
@@ -99,28 +96,28 @@ class SeparateSubGraph(GraphSelector):
                         if tmp_results.select(col('source')).distinct().count() > 0:
                             tmp_nodes = tmp_results.select(col('source')).distinct().rdd.collect()
                             tmp_nodes = [item for sublist in tmp_nodes for item in sublist]
-                            print(tmp_nodes)
-                            nodes = nodes + tmp_nodes
+                            result_nodes = list(set(result_nodes + tmp_nodes))
+                            nodes = tmp_nodes
                             print(nodes)
                             nodes = [str(i) for i in nodes] #cast items as str. otherwise results array does not work for spark
                     except:
                         print('failed')
                         print(tmp_results.select(col('source')).distinct().count())
             if supercats is not None:
+                nodes = seed
                 self.results['cats']['supercats'] = supercats
                 for i in range(supercats):
                     print('supercats iteration ' + str(i+1))
                     tmp_results_source = cat_edges_df[cat_edges_df.source.isin(nodes)]
                     #Todo including members of supercategories results in very large graphs. Maybe there is anothter way of integrating those. For now I take it out.
-                    tmp_results = tmp_results_source
-                    '''
+                    #tmp_results = tmp_results_source
+
                     if i == 0:
                         #For the first iteration only follow sources
                         tmp_results = tmp_results_source
                     else:
                         tmp_results_target = cat_edges_df[cat_edges_df.target.isin(nodes)]
                         tmp_results = tmp_results_source.union(tmp_results_target).distinct()
-                    '''
 
                     if edge_results_df is None:
                         edge_results_df = tmp_results
@@ -130,20 +127,21 @@ class SeparateSubGraph(GraphSelector):
                     if tmp_results_source.select(col('target')).distinct().count() > 0:
                         tmp_nodes = tmp_results_source.select(col('target')).distinct().rdd.collect()
                         tmp_nodes = [item for sublist in tmp_nodes for item in sublist]
-                        nodes = nodes + tmp_nodes
+                        result_nodes = list(set(result_nodes + tmp_nodes))
+                        nodes = tmp_nodes
+                        print(nodes)
                         nodes = [str(i) for i in nodes] #cast items as str. otherwise results array does not work for spark
         if links:
             self.results['links'] = {}
-            #nodes = seed ??????????
-            print(nodes)
             link_edges_df = all_edges_df.where(all_edges_df.etype == 'link')
-            link_edges_df.show()
+            #link_edges_df.show()
             if inlinks is not None:
+                nodes = seed
                 self.results['links']['inlinks'] = inlinks
                 for i in range(inlinks):
                     print('inlinks iteration ' + str(i + 1))
                     tmp_results = link_edges_df[link_edges_df.target.isin(nodes)]
-                    tmp_results.show()
+                    #tmp_results.show()
                     tmp_nodes = tmp_results.select(col('source')).rdd.collect()
                     if edge_results_df is None:
                         edge_results_df = tmp_results
@@ -151,14 +149,17 @@ class SeparateSubGraph(GraphSelector):
                         edge_results_df = edge_results_df.union(tmp_results).distinct()
                     print('Collect and process new seed nodes: ' + str(tmp_results.select(col('target')).distinct().count()))
                     tmp_nodes = [item for sublist in tmp_nodes for item in sublist]
-                    nodes = nodes + tmp_nodes
+                    result_nodes = list(set(result_nodes + tmp_nodes))
+                    nodes = tmp_nodes
+                    print(nodes)
                     nodes = [str(i) for i in nodes] #cast items as str. otherwise results array does not work for spark
             if outlinks is not None:
+                nodes = seed
                 self.results['links']['outlinks'] = outlinks
                 for i in range(outlinks):
                     print('outlinks iteration ' + str(i + 1))
                     tmp_results = link_edges_df[link_edges_df.source.isin(nodes)]
-                    tmp_results.show()
+                    #tmp_results.show()
                     tmp_nodes = tmp_results.select(col('target')).rdd.collect()
                     if edge_results_df is None:
                         edge_results_df = tmp_results
@@ -166,7 +167,9 @@ class SeparateSubGraph(GraphSelector):
                         edge_results_df = edge_results_df.union(tmp_results).distinct()
                     print('Collect and process new seed nodes: ' + str(tmp_results.select(col('target')).distinct().count()))
                     tmp_nodes = [item for sublist in tmp_nodes for item in sublist]
-                    nodes = nodes + tmp_nodes
+                    result_nodes = list(set(result_nodes + tmp_nodes))
+                    nodes = tmp_nodes
+                    print(nodes)
                     nodes = [str(i) for i in nodes] #cast items as str. otherwise results array does not work for spark
 
         edge_results_df.createOrReplaceTempView("edge_results")
