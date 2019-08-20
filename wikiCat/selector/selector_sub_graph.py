@@ -6,7 +6,7 @@ from pyspark.sql import SparkSession
 from pyspark import SparkConf, SparkContext
 from pyspark.sql.functions import col
 
-
+'''
 class GraphSelector(SparkProcessorGraph): #PandasProcessorGraph
     def __init__(self, project):
         #self.graph = graph
@@ -28,11 +28,11 @@ class GraphSelector(SparkProcessorGraph): #PandasProcessorGraph
         self.end_date = parser.parse(self.project.pinfo['dump_date']).timestamp()
         self.results = {}
         self.gt_wiki_id_map_path, self.gt_wiki_id_map_file = self.find_gt_wiki_id_map()
+'''
 
-
-class SubGraph(GraphSelector):
+class SubGraph(Selector):
     def __init__(self, project):
-        GraphSelector.__init__(self, project)
+        Selector.__init__(self, project)
 
     def create(self, title=None, seed=None, cats=True, subcats=2, supercats=0, links=False, inlinks=2, outlinks=2):
 
