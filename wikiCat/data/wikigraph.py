@@ -123,7 +123,7 @@ class WikiGraph(Data):
         self.set_working_graph(key=title)
         SubGraphProcessor(self.project).create_gt_subgraph()
 
-    def create_seperate_subgraph(self, title=None, seed=None, cats=True, subcats=1, supercats=1,
+    def create_separate_subgraph(self, title=None, seed=None, cats=True, subcats=1, supercats=1,
                                  links=False, inlinks=2, outlinks=2):
         SeparateSubGraph(self.project).create(title=title, seed=seed, cats=cats, subcats=subcats,
                                               supercats=supercats, links=links, inlinks=inlinks,

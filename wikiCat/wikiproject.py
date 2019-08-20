@@ -354,10 +354,11 @@ class Project:
         self.graph.create_subgraph(title=title, seed=seed, cats=cats, subcats=subcats, supercats=supercats,
                                    links=links, inlinks=inlinks, outlinks=outlinks)
 
-    def create_subgraph_new(self, title=None, seed=None, cats=True, subcats=1, supercats=1,
+    def create_separate_subgraph(self, title=None, seed=None, cats=True, subcats=1, supercats=1,
                         links=False, inlinks=1, outlinks=1):
-        self.graph.create_subgraph_new(title=title, seed=seed, cats=cats, subcats=subcats, supercats=supercats,
-                                       links=links, inlinks=inlinks, outlinks=outlinks)
+        self.graph.create_seperate_subgraph(title=title, seed=seed, cats=cats, subcats=subcats,
+                                            supercats=supercats,
+                                            links=links, inlinks=inlinks, outlinks=outlinks)
 
     def create_gt_subgraph(self, title=None):
         self.graph.create_gt_subgraph(title=title)
