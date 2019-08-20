@@ -93,6 +93,7 @@ class SeparateSubGraph(GraphSelector):
                         edge_results_df = edge_results_df.union(tmp_results).distinct()
                     print(type(tmp_results))
                     print(tmp_results)
+                    print(tmp_results.show())
                     #print('Collect and process new seed nodes: ' + str(tmp_results.select(col('source')).distinct().count()))
                     #print('Collect and process new seed nodes: ' + str(tmp_results.select(col('target')).distinct().count()))
                     try:
