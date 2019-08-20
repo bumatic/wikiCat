@@ -136,15 +136,19 @@ class SeparateSubGraph(GraphSelector):
                     else:
                         edge_results_df = edge_results_df.union(tmp_results).distinct()
                     print('Collect and process new seed nodes: ' + str(tmp_results.select(col('target')).distinct().count()))
-                    if tmp_results_source.select(col('target')).distinct().count() > 0:
-                        tmp_nodes = tmp_results_source.select(col('target')).distinct().rdd.collect()
-                        tmp_nodes = [item for sublist in tmp_nodes for item in sublist]
-                        result_nodes = list(set(result_nodes + tmp_nodes))
-                        nodes = tmp_nodes
-                        nodes = [str(i) for i in nodes] #cast items as str. otherwise results array does not work for spark
-                        seed = seed + list(set(nodes))
-                        #print(nodes)
-                        #print(seed)
+                    try:
+                        if tmp_results_source.select(col('target')).distinct().count() > 0:
+                            tmp_nodes = tmp_results_source.select(col('target')).distinct().rdd.collect()
+                            tmp_nodes = [item for sublist in tmp_nodes for item in sublist]
+                            result_nodes = list(set(result_nodes + tmp_nodes))
+                            nodes = tmp_nodes
+                            nodes = [str(i) for i in nodes] #cast items as str. otherwise results array does not work for spark
+                            seed = seed + list(set(nodes))
+                            #print(nodes)
+                            #print(seed)
+                    except:
+                        print('failed')
+                        print(tmp_results.select(col('source')).distinct().count())
         if links:
             self.results['links'] = {}
             link_edges_df = all_edges_df.where(all_edges_df.etype == 'link')
@@ -162,13 +166,19 @@ class SeparateSubGraph(GraphSelector):
                     else:
                         edge_results_df = edge_results_df.union(tmp_results).distinct()
                     print('Collect and process new seed nodes: ' + str(tmp_results.select(col('target')).distinct().count()))
-                    tmp_nodes = [item for sublist in tmp_nodes for item in sublist]
-                    result_nodes = list(set(result_nodes + tmp_nodes))
-                    nodes = tmp_nodes
-                    nodes = [str(i) for i in nodes] #cast items as str. otherwise results array does not work for spark
-                    seed = seed + list(set(nodes))
-                    #print(nodes)
-                    #print(seed)
+                    try:
+                        if tmp_results_source.select(col('source')).distinct().count() > 0:
+                            tmp_nodes = tmp_results_source.select(col('source')).distinct().rdd.collect()
+                            tmp_nodes = [item for sublist in tmp_nodes for item in sublist]
+                            result_nodes = list(set(result_nodes + tmp_nodes))
+                            nodes = tmp_nodes
+                            nodes = [str(i) for i in nodes] #cast items as str. otherwise results array does not work for spark
+                            seed = seed + list(set(nodes))
+                            #print(nodes)
+                            #print(seed)
+                    except:
+                        print('failed')
+                        print(tmp_results.select(col('source')).distinct().count())
             if outlinks is not None:
                 nodes = seed
                 self.results['links']['outlinks'] = outlinks
@@ -182,13 +192,19 @@ class SeparateSubGraph(GraphSelector):
                     else:
                         edge_results_df = edge_results_df.union(tmp_results).distinct()
                     print('Collect and process new seed nodes: ' + str(tmp_results.select(col('target')).distinct().count()))
-                    tmp_nodes = [item for sublist in tmp_nodes for item in sublist]
-                    result_nodes = list(set(result_nodes + tmp_nodes))
-                    nodes = tmp_nodes
-                    nodes = [str(i) for i in nodes] #cast items as str. otherwise results array does not work for spark
-                    seed = seed + list(set(nodes))
-                    #print(nodes)
-                    #print(seed)
+                    try:
+                        if tmp_results_source.select(col('target')).distinct().count() > 0:
+                            tmp_nodes = tmp_results_source.select(col('target')).distinct().rdd.collect()
+                            tmp_nodes = [item for sublist in tmp_nodes for item in sublist]
+                            result_nodes = list(set(result_nodes + tmp_nodes))
+                            nodes = tmp_nodes
+                            nodes = [str(i) for i in nodes] #cast items as str. otherwise results array does not work for spark
+                            seed = seed + list(set(nodes))
+                            #print(nodes)
+                            #print(seed)
+                    except:
+                        print('failed')
+                        print(tmp_results.select(col('source')).distinct().count())
 
         edge_results_df.createOrReplaceTempView("edge_results")
         #edge_results_df = spark.sql('SELECT source, target, etype, cscore FROM edge_results').distinct()
