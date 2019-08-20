@@ -87,13 +87,12 @@ class SeparateSubGraph(GraphSelector):
                 for i in range(subcats):
                     print('subcats iteration ' + str(i+1))
                     tmp_results = cat_edges_df[cat_edges_df.target.isin(nodes)]
+                    return tmp_results
                     if edge_results_df is None:
                         edge_results_df = tmp_results
                     else:
                         edge_results_df = edge_results_df.union(tmp_results).distinct()
                     print(type(tmp_results))
-                    print(tmp_results)
-                    return tmp_results
                     print(tmp_results)
                     #print('Collect and process new seed nodes: ' + str(tmp_results.select(col('source')).distinct().count()))
                     #print('Collect and process new seed nodes: ' + str(tmp_results.select(col('target')).distinct().count()))
