@@ -15,8 +15,6 @@ mp.create_static_viz('main', 'SFDP', snapshots='snapshots_month_2004_2005', draw
 
 
 
-
-
 '''
 mp.remove_subgraph('bitcoin_2super')
 mp.graph.set_working_graph(key='main')

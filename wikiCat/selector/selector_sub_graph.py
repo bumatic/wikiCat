@@ -11,7 +11,7 @@ class SubGraph(Selector):
     def __init__(self, project):
         Selector.__init__(self, project)
 
-    def create(self, title=None, seed=None, cats=True, subcats=2, supercats=2, links=False, inlinks=2, outlinks=2):
+    def create(self, title=None, seed=None, cats=True, subcats=2, supercats=0, links=False, inlinks=2, outlinks=2):
 
         assert title is not None, 'Error. You need to pass a title of the subgraph.'
         #TODO adapt assertions
@@ -93,7 +93,7 @@ class SubGraph(Selector):
                         nodes = [str(i) for i in nodes] #cast items as str. otherwise results array does not work for spark
         if links:
             self.results['links'] = {}
-            nodes = seed
+            #nodes = seed ??????????
             link_edges_df = all_edges_df.where(all_edges_df.etype == 'links')
             if inlinks is not None:
                 self.results['links']['inlinks'] = inlinks
@@ -123,6 +123,9 @@ class SubGraph(Selector):
         edge_results_df.createOrReplaceTempView("edge_results")
         edge_results_df = spark.sql('SELECT source, target, etype, cscore FROM edge_results').distinct()
 
+
+        '''
+        #Todo: Working original. Needs to be reworked for large amount of event data.
         # Register events dataframe
         for i in range(len(self.graph.source_events)):
             events_source = spark.sparkContext.textFile(os.path.join(self.graph.source_events_location, self.graph.source_events[i]))
@@ -140,6 +143,26 @@ class SubGraph(Selector):
         events_results_df = spark.sql('SELECT ev.revision, ev.source, ev.target, ev.event, ev.cscore '
                                       'FROM events ev JOIN edge_results ed ON ev.source = ed.source '
                                       'AND ev.target = ed.target')
+        '''
+
+        for i in range(len(self.graph.source_events)):
+            events_source = spark.sparkContext.textFile(
+                os.path.join(self.graph.source_events_location, self.graph.source_events[i]))
+            events = events_source.map(self.mapper_events)
+            events_df = spark.createDataFrame(events).cache()
+
+            # Process events based on edge_results_df
+            edge_results_df.createOrReplaceTempView("edge_results")
+            events_df.createOrReplaceTempView("events")
+            events_tmp_results_df = spark.sql('SELECT ev.revision, ev.source, ev.target, ev.event, ev.cscore '
+                                              'FROM events ev JOIN edge_results ed ON ev.source = ed.source '
+                                              'AND ev.target = ed.target')
+            if i == 0:
+                events_results_df = events_tmp_results_df
+            else:
+                events_results_df = events_results_df.union(events_tmp_results_df)
+
+
 
         # Create results path and filenames
         results_path = os.path.join(self.base_path, str(title))
@@ -164,8 +187,8 @@ class SubGraph(Selector):
         self.data[str(title)] = self.results
         self.graph.update_graph_data(self.data)
 
-        # todo in every spark skript put sc.stop() at the end in order to enable chaining the processing steps.
+        # todo in every spark script put sc.stop() at the end in order to enable chaining the processing steps.
         # without it one gets an error that only one sparkcontext can be created.
         sc.stop()
-        print('end subgraph creation')
+        print('Subgraph creation finished.')
         return True
