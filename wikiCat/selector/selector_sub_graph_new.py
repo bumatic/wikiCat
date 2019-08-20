@@ -147,7 +147,8 @@ class SeparateSubGraph(GraphSelector):
                     nodes = [str(i) for i in nodes] #cast items as str. otherwise results array does not work for spark
 
         edge_results_df.createOrReplaceTempView("edge_results")
-        edge_results_df = spark.sql('SELECT source, target, etype, cscore FROM edge_results').distinct()
+        #edge_results_df = spark.sql('SELECT source, target, etype, cscore FROM edge_results').distinct()
+        edge_results_df = spark.sql('SELECT source, target, etype FROM edge_results').distinct()
 
 
         '''
