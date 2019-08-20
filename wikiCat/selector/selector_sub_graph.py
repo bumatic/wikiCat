@@ -7,13 +7,32 @@ from pyspark import SparkConf, SparkContext
 from pyspark.sql.functions import col
 
 
-#class SubGraph(Selector):
-#    def __init__(self, project):
-#        Selector.__init__(self, project)
-
-class SubGraph(SparkProcessorGraph):
+class GraphSelector(SparkProcessorGraph): #PandasProcessorGraph
     def __init__(self, project):
-        SparkProcessorGraph.__init__(self, project)
+        #self.graph = graph
+        #self.data = self.graph.data
+        self.project = project
+        self.graph = self.project.graph
+        self.data = self.project.pinfo['gt_graph']
+        assert 'start_date' in self.project.pinfo.keys(), 'Error. The project has no start date. Please generate' \
+                                                          'it with wikiCat.wikiproject.Project.find_start_date()'
+        assert 'dump_date' in self.project.pinfo.keys() is not None, 'Error. The project has no dump date. Please set ' \
+                                                                     'it with wikiCat.wikiproject.Project.set_' \
+                                                                     'dump_date(date)'
+
+        SparkProcessorGraph.__init__(self, self.project)
+        self.graph_path = self.graph.curr_data_path
+        self.source_location = self.graph.source_location
+        self.base_path = os.path.split(self.graph_path)[0]
+        self.start_date = parser.parse(self.project.pinfo['start_date']).timestamp()
+        self.end_date = parser.parse(self.project.pinfo['dump_date']).timestamp()
+        self.results = {}
+        self.gt_wiki_id_map_path, self.gt_wiki_id_map_file = self.find_gt_wiki_id_map()
+
+
+class SubGraph(GraphSelector):
+    def __init__(self, project):
+        GraphSelector.__init__(self, project)
 
     def create(self, title=None, seed=None, cats=True, subcats=2, supercats=0, links=False, inlinks=2, outlinks=2):
 
