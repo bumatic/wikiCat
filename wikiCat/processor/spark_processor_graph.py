@@ -14,3 +14,4 @@ class SparkProcessorGraph(SparkProcessor):
         #self.data_status = 'graph__' + self.fixed + '__' + self.errors
 
 
+
