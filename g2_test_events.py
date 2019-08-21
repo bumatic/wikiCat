@@ -55,6 +55,7 @@ for i in range(len(data['events'])):
     events_source = spark.sparkContext.textFile(
         os.path.join(graph_path, data['events'][i]))
 
+    print('begin')
     print(events_source)
     print('============================================================')
 
@@ -63,3 +64,8 @@ for i in range(len(data['events'])):
     events_df = spark.createDataFrame(events).cache()
 
     events_df.show()
+
+
+    print('============================================================')
+    print(events_source)
+    print('end')
