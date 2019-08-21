@@ -226,7 +226,9 @@ class SeparateSubGraph(GraphSelector):
             events = events_source.map(self.mapper_events)
 
             events_df = spark.createDataFrame(events).cache()
+            events_df.show()
 
+            '''
             # Process events based on edge_results_df
             edge_results_df.createOrReplaceTempView("edge_results")
             events_df.createOrReplaceTempView("events")
@@ -237,6 +239,7 @@ class SeparateSubGraph(GraphSelector):
                 events_results_df = events_tmp_results_df
             else:
                 events_results_df = events_results_df.union(events_tmp_results_df)
+            '''
 
 
 
