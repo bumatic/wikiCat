@@ -68,7 +68,7 @@ class SeparateSubGraph(GraphSelector):
 
         print(SparkConf().getAll())
 
-        '''
+
 
         # Register dataframe for edges
         for i in range(len(self.data['edges'])):
@@ -215,7 +215,10 @@ class SeparateSubGraph(GraphSelector):
         #edge_results_df = spark.sql('SELECT source, target, etype, cscore FROM edge_results').distinct()
         edge_results_df = spark.sql('SELECT source, target, etype FROM edge_results').distinct()
 
-        '''
+
+        print('EDGE RESULTS DF')
+        print('===============')
+        edge_results_df.show()
 
 
         for i in range(len(self.data['events'])):
@@ -228,7 +231,7 @@ class SeparateSubGraph(GraphSelector):
             events_df = spark.createDataFrame(events).cache()
             events_df.show()
 
-            '''
+
             # Process events based on edge_results_df
             edge_results_df.createOrReplaceTempView("edge_results")
             events_df.createOrReplaceTempView("events")
@@ -239,7 +242,7 @@ class SeparateSubGraph(GraphSelector):
                 events_results_df = events_tmp_results_df
             else:
                 events_results_df = events_results_df.union(events_tmp_results_df)
-            '''
+
 
 
 
