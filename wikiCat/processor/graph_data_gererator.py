@@ -484,7 +484,8 @@ class GraphDataGenerator(SparkProcessorParsed):
                 print('author info')
                 author_info_df.show()
                 logger.info('author info')
-                logger.info(author_info_df.show())
+                log_data = pd.DataFrame(author_info_df.head(10), columns=author_info_df.columns)
+                logger.info(log_data)
 
             resolved_authors_df = spark.sql(
                 'SELECT r.rev_id, r.rev_date, a.author_name as rev_author '
@@ -494,7 +495,8 @@ class GraphDataGenerator(SparkProcessorParsed):
                 print('revision info')
                 revision_info_df.show()
                 logger.info('revision info')
-                logger.info(revision_info_df.show())
+                log_data = pd.DataFrame(revision_info_df.head(10), columns=revision_info_df.columns)
+                logger.info(log_data)
 
             revision_info_df.createOrReplaceTempView("revision")
 
@@ -560,7 +562,8 @@ class GraphDataGenerator(SparkProcessorParsed):
             print('4.1 page revisions df')
             page_revisions_df.show()
             logger.info('4.1 page revisions df')
-            logger.info(page_revisions_df.show())
+            log_data = pd.DataFrame(page_revisions_df.head(10), columns=page_revisions_df.columns)
+            logger.info(log_data)
 
         page_revisions_df.createOrReplaceTempView('page_revisions')
 
@@ -583,7 +586,8 @@ class GraphDataGenerator(SparkProcessorParsed):
             print('4')
             negative_edges_df.show()
             logger.info('4')
-            logger.info(negative_edges_df.show())
+            log_data = pd.DataFrame(negative_edges_df.head(10), columns=negative_edges_df.columns)
+            logger.info(log_data)
 
         negative_edges_df.createOrReplaceTempView('negative_edges')
 
@@ -598,7 +602,8 @@ class GraphDataGenerator(SparkProcessorParsed):
             print('5.1')
             durations_df.show()
             logger.info('5.1')
-            logger.info(durations_df.show())
+            log_data = pd.DataFrame(durations_df.head(10), columns=durations_df.columns)
+            logger.info(log_data)
 
         durations_df.createOrReplaceTempView("durations")
 
@@ -610,7 +615,8 @@ class GraphDataGenerator(SparkProcessorParsed):
             print('5.2')
             durations_df.show()
             logger.info('5.2')
-            logger.info(durations_df.show())
+            log_data = pd.DataFrame(durations_df.head(10), columns=durations_df.columns)
+            logger.info(log_data)
 
         durations_df.createOrReplaceTempView("durations")
 
@@ -622,7 +628,8 @@ class GraphDataGenerator(SparkProcessorParsed):
             print('5.3')
             durations_df.show()
             logger.info('5.2')
-            logger.info(durations_df.show())
+            log_data = pd.DataFrame(durations_df.head(10), columns=durations_df.columns)
+            logger.info(log_data)
 
         durations_df.createOrReplaceTempView("durations")
 
@@ -633,7 +640,8 @@ class GraphDataGenerator(SparkProcessorParsed):
             print('print 6.1')
             durations_df.show()
             logger.info('6.1')
-            logger.info(durations_df.show())
+            log_data = pd.DataFrame(durations_df.head(10), columns=durations_df.columns)
+            logger.info(log_data)
 
         durations_df.createOrReplaceTempView("durations")
 
@@ -644,7 +652,8 @@ class GraphDataGenerator(SparkProcessorParsed):
             print('6.2')
             durations_df.show()
             logger.info('6.2')
-            logger.info(durations_df.show())
+            log_data = pd.DataFrame(durations_df.head(10), columns=durations_df.columns)
+            logger.info(log_data)
 
         durations_df.createOrReplaceTempView("durations")
 
@@ -658,8 +667,10 @@ class GraphDataGenerator(SparkProcessorParsed):
             start_events_df.show()
             end_events_df.show()
             logger.info('7 - start, end')
-            logger.info(start_events_df.show())
-            logger.info(end_events_df.show())
+            log_data = pd.DataFrame(start_events_df.head(10), columns=start_events_df.columns)
+            logger.info(log_data)
+            log_data = pd.DataFrame(end_events_df.head(10), columns=end_events_df.columns)
+            logger.info(log_data)
 
         end_events_df.createOrReplaceTempView("end_events")
 
@@ -670,7 +681,8 @@ class GraphDataGenerator(SparkProcessorParsed):
             print('8')
             events_df.show()
             logger.info('8')
-            logger.info(events_df.show())
+            log_data = pd.DataFrame(events_df.head(10), columns=events_df.columns)
+            logger.info(log_data)
 
         events_df.createOrReplaceTempView("events")
 
@@ -682,7 +694,8 @@ class GraphDataGenerator(SparkProcessorParsed):
             print('9')
             events_df.show()
             logger.info('9')
-            logger.info(events_df.show())
+            log_data = pd.DataFrame(events_df.head(10), columns=events_df.columns)
+            logger.info(log_data)
 
         events_df.write.format('com.databricks.spark.csv').option('header', 'false').option('delimiter', '\t')\
             .save(events_results_path)
