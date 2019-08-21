@@ -572,7 +572,8 @@ class GraphDataGenerator(SparkProcessorParsed):
             print('4.2 all possibilities')
             all_possibilities_df.show()
             logger.info('4.2 all possibilities')
-            logger.info(all_possibilities_df.show())
+            log_data = pd.DataFrame(all_possibilities_df.head(10), columns=all_possibilities_df.columns)
+            logger.info(log_data)
 
         # 4. CREATE TABLE WITH ENTRIES FOR WHEN A EDGE DID NOT EXIST AT THE TIME OF A REVISION
         # BY SUBTRACTING EXISTING EDGES FROM ALL_POSSIBILITIES
