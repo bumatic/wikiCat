@@ -55,17 +55,19 @@ for i in range(len(data['events'])):
     events_source = spark.sparkContext.textFile(
         os.path.join(graph_path, data['events'][i]))
 
-    print('begin')
-    print(events_source)
-    print('============================================================')
+    #print('begin')
+    #print(events_source)
+    #print('============================================================')
 
-    events = events_source.map(mapper_events)
+    try:
+        events = events_source.map(mapper_events)
+        events_df = spark.createDataFrame(events).cache()
+        #events_df.show()
+    except:
+        print('error for file:')
+        print(events_source)
 
-    events_df = spark.createDataFrame(events).cache()
 
-    events_df.show()
-
-
-    print('============================================================')
-    print(events_source)
-    print('end')
+    #print('============================================================')
+    #print(events_source)
+    #print('end')
