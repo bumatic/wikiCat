@@ -237,7 +237,7 @@ class SeparateSubGraph(GraphSelector):
             events_tmp_results_df = spark.sql('SELECT ev.revision, ev.source, ev.target, ev.event ' #, ev.cscore 
                                               'FROM events ev JOIN edge_results ed ON ev.source = ed.source '
                                               'AND ev.target = ed.target')
-            print('TMP EVENT RESULTS DF FOR: ' + events_source)
+            print('TMP EVENT RESULTS DF FOR: ' + str(events_source))
             print('==========================================================')
             events_tmp_results_df.show()
 
