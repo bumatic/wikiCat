@@ -499,11 +499,11 @@ class GraphDataGenerator(SparkProcessorParsed):
 
 
         # Results files
-        edges_results_path = os.path.join(self.results_path, results_basename + '_edges/')
+        edges_results_path = os.path.join('manual_graph_data_generation')
         print(edges_results_path)
         edges_results_file = os.path.join(self.results_path, results_basename + '_edges.csv')
         print(edges_results_file)
-        events_results_path = os.path.join(self.results_path, results_basename + '_events/')
+        events_results_path = os.path.join('manual_graph_data_generation')
         print(events_results_path)
         events_results_file = os.path.join(self.results_path, results_basename + '_events.csv')
         print(events_results_file)
