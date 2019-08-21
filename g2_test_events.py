@@ -7,8 +7,9 @@ from wikiCat.selector.selector import Selector, SparkProcessorGraph
 
 import findspark
 findspark.init()
-from pyspark.sql import SparkSession
+from pyspark.sql import SparkSession, Row
 from pyspark import SparkConf, SparkContext
+
 from pyspark.sql.functions import col
 
 
