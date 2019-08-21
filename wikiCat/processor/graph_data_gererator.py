@@ -433,7 +433,6 @@ class GraphDataGenerator(SparkProcessorParsed):
         print(self.data_path)
         print(self.results_path)
 
-        '''
         spark = SparkSession \
             .builder \
             .appName("Generate_Graph_Data") \
@@ -660,7 +659,7 @@ class GraphDataGenerator(SparkProcessorParsed):
         #spark.stop()
         del spark
         return results
-        '''
+
 
 
     def generate_backup(self, edge_type, results_basename, page_data, data_type):
