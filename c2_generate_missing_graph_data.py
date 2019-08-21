@@ -19,8 +19,8 @@ print(processing)
 
 processor = GraphDataGenerator(mp)
 
-for k in processing['links'].keys():
-    if processing['links'][k] == 'init':
+for k in processing['graph_data']['links'].keys():
+    if processing['graph_data']['links'][k] == 'init':
         processor.generate_manual('links', k, resolve_authors=False)
 
 '''
