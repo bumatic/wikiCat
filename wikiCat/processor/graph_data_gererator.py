@@ -425,6 +425,16 @@ class GraphDataGenerator(SparkProcessorParsed):
 
 
     def generate_manual(self, edge_type, page_data, resolve_authors=False):
+        import logging
+        self.debugging = True
+        logger_file = 'generate_manual.log'
+        logging.basicConfig(filename=logger_file,
+                            filemode='a',
+                            format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
+                            datefmt='%H:%M:%S',
+                            level=logging.INFO)
+        logger = logging.getLogger('Generate Manual Logger')
+
         # Create a SparkSession
         # Note: In case its run on Windows and generates errors use (tmp Folder mus exist):
         # spark = SparkSession.builder.config("spark.sql.warehouse.dir", "file:///C:/temp")
@@ -473,6 +483,8 @@ class GraphDataGenerator(SparkProcessorParsed):
             if self.debugging:
                 print('author info')
                 author_info_df.show()
+                logger.info('author info')
+                logger.info(author_info_df.show())
 
             resolved_authors_df = spark.sql(
                 'SELECT r.rev_id, r.rev_date, a.author_name as rev_author '
@@ -481,6 +493,9 @@ class GraphDataGenerator(SparkProcessorParsed):
             if self.debugging:
                 print('revision info')
                 revision_info_df.show()
+                logger.info('revision info')
+                logger.info(revision_info_df.show())
+
             revision_info_df.createOrReplaceTempView("revision")
 
 
@@ -544,6 +559,9 @@ class GraphDataGenerator(SparkProcessorParsed):
         if self.debugging:
             print('4.1 page revisions df')
             page_revisions_df.show()
+            logger.info('4.1 page revisions df')
+            logger.info(page_revisions_df.show())
+
         page_revisions_df.createOrReplaceTempView('page_revisions')
 
         # 3.2 CREATE TABLE WITH ALL POSSIBLE COMBINATIONS of SOURCE & REV with TARGETS
@@ -553,6 +571,8 @@ class GraphDataGenerator(SparkProcessorParsed):
         if self.debugging:
             print('4.2 all possibilities')
             all_possibilities_df.show()
+            logger.info('4.2 all possibilities')
+            logger.info(all_possibilities_df.show())
 
         # 4. CREATE TABLE WITH ENTRIES FOR WHEN A EDGE DID NOT EXIST AT THE TIME OF A REVISION
         # BY SUBTRACTING EXISTING EDGES FROM ALL_POSSIBILITIES
@@ -561,6 +581,8 @@ class GraphDataGenerator(SparkProcessorParsed):
         if self.debugging:
             print('4')
             negative_edges_df.show()
+            logger.info('4')
+            logger.info(negative_edges_df.show())
 
         negative_edges_df.createOrReplaceTempView('negative_edges')
 
@@ -574,6 +596,8 @@ class GraphDataGenerator(SparkProcessorParsed):
         if self.debugging:
             print('5.1')
             durations_df.show()
+            logger.info('5.1')
+            logger.info(durations_df.show())
 
         durations_df.createOrReplaceTempView("durations")
 
@@ -584,6 +608,8 @@ class GraphDataGenerator(SparkProcessorParsed):
         if self.debugging:
             print('5.2')
             durations_df.show()
+            logger.info('5.2')
+            logger.info(durations_df.show())
 
         durations_df.createOrReplaceTempView("durations")
 
@@ -594,6 +620,8 @@ class GraphDataGenerator(SparkProcessorParsed):
         if self.debugging:
             print('5.3')
             durations_df.show()
+            logger.info('5.2')
+            logger.info(durations_df.show())
 
         durations_df.createOrReplaceTempView("durations")
 
@@ -603,6 +631,8 @@ class GraphDataGenerator(SparkProcessorParsed):
         if self.debugging:
             print('print 6.1')
             durations_df.show()
+            logger.info('6.1')
+            logger.info(durations_df.show())
 
         durations_df.createOrReplaceTempView("durations")
 
@@ -612,6 +642,8 @@ class GraphDataGenerator(SparkProcessorParsed):
         if self.debugging:
             print('6.2')
             durations_df.show()
+            logger.info('6.2')
+            logger.info(durations_df.show())
 
         durations_df.createOrReplaceTempView("durations")
 
@@ -624,6 +656,9 @@ class GraphDataGenerator(SparkProcessorParsed):
             print('7 - start, end')
             start_events_df.show()
             end_events_df.show()
+            logger.info('7 - start, end')
+            logger.info(start_events_df.show())
+            logger.info(end_events_df.show())
 
         end_events_df.createOrReplaceTempView("end_events")
 
@@ -633,6 +668,8 @@ class GraphDataGenerator(SparkProcessorParsed):
         if self.debugging:
             print('8')
             events_df.show()
+            logger.info('8')
+            logger.info(events_df.show())
 
         events_df.createOrReplaceTempView("events")
 
@@ -643,6 +680,8 @@ class GraphDataGenerator(SparkProcessorParsed):
         if self.debugging:
             print('9')
             events_df.show()
+            logger.info('9')
+            logger.info(events_df.show())
 
         events_df.write.format('com.databricks.spark.csv').option('header', 'false').option('delimiter', '\t')\
             .save(events_results_path)
