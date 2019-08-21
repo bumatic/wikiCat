@@ -17,7 +17,7 @@ processing = {
 
 print(processing)
 
-processor = GraphDataGenerator()
+processor = GraphDataGenerator(mp)
 
 for k in processing['links'].keys():
     if processing['links'][k] == 'init':
