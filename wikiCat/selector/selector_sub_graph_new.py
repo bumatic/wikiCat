@@ -224,7 +224,7 @@ class SeparateSubGraph(GraphSelector):
         for i in range(len(self.data['events'])):
             events_source = spark.sparkContext.textFile(
                 os.path.join(self.graph_path, self.data['events'][i]))
-            print(events_source)
+
 
             events = events_source.map(self.mapper_events)
 
@@ -237,14 +237,20 @@ class SeparateSubGraph(GraphSelector):
             events_tmp_results_df = spark.sql('SELECT ev.revision, ev.source, ev.target, ev.event ' #, ev.cscore 
                                               'FROM events ev JOIN edge_results ed ON ev.source = ed.source '
                                               'AND ev.target = ed.target')
-            if i == 0:
-                events_results_df = events_tmp_results_df
-            else:
-                events_results_df = events_results_df.union(events_tmp_results_df)
 
-            events_results_df.show()
+            events_tmp_results_df.show()
 
+            try:
+                if i == 0:
+                    events_results_df = events_tmp_results_df
+                else:
+                    events_results_df = events_results_df.union(events_tmp_results_df)
 
+                #events_results_df.show()
+            except:
+                print('Failed for events source')
+                print(events_source)
+                events_tmp_results_df.show()
 
         # Create results path and filenames
 
