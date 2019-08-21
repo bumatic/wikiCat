@@ -499,13 +499,13 @@ class GraphDataGenerator(SparkProcessorParsed):
 
 
         # Results files
-        edges_results_path = os.path.join('manual_graph_data_generation')
+        edges_results_path = os.path.join('manual_graph_data_generation', 'edges')
         print(edges_results_path)
-        edges_results_file = os.path.join(self.results_path, results_basename + '_edges.csv')
+        edges_results_file = os.path.join('manual_graph_data_generation', results_basename + '_edges.csv')
         print(edges_results_file)
-        events_results_path = os.path.join('manual_graph_data_generation')
+        events_results_path = os.path.join('manual_graph_data_generation', 'events')
         print(events_results_path)
-        events_results_file = os.path.join(self.results_path, results_basename + '_events.csv')
+        events_results_file = os.path.join('manual_graph_data_generation', results_basename + '_events.csv')
         print(events_results_file)
 
         '''
@@ -656,9 +656,8 @@ class GraphDataGenerator(SparkProcessorParsed):
         }
         #spark.stop()
         del spark
-        '''
         return results
-
+        '''
 
     def generate_backup(self, edge_type, results_basename, page_data, data_type):
         # Create a SparkSession
