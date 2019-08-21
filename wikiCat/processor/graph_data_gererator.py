@@ -430,6 +430,9 @@ class GraphDataGenerator(SparkProcessorParsed):
         # spark = SparkSession.builder.config("spark.sql.warehouse.dir", "file:///C:/temp")
         # .appName("Postprocessing").getOrCreate()
 
+        print(self.data_path)
+        print(self.results_path)
+
         '''
         spark = SparkSession \
             .builder \
@@ -487,7 +490,7 @@ class GraphDataGenerator(SparkProcessorParsed):
             compressed = True
         if compressed:
             subprocess.call(['7z', 'e', os.path.join(self.data_path, page_data), '-o'+self.data_path, '-y'])
-        '''
+
         if edge_type == 'cats':
             f = 'cats.csv'
             results_basename = 'cats'
@@ -499,16 +502,16 @@ class GraphDataGenerator(SparkProcessorParsed):
 
 
         # Results files
-        edges_results_path = os.path.join('manual_graph_data_generation', 'edges')
+        edges_results_path = os.path.join('manual_graph_data_generation', results_basename + '_edges')
         print(edges_results_path)
         edges_results_file = os.path.join('manual_graph_data_generation', results_basename + '_edges.csv')
         print(edges_results_file)
-        events_results_path = os.path.join('manual_graph_data_generation', 'events')
+        events_results_path = os.path.join('manual_graph_data_generation', results_basename + '_events')
         print(events_results_path)
         events_results_file = os.path.join('manual_graph_data_generation', results_basename + '_events.csv')
         print(events_results_file)
 
-        '''
+        
         # Infer the schema, and register the DataFrames as tables.
         page_data_source = spark.sparkContext.textFile(os.path.join(self.data_path, f))
         page_data = page_data_source.map(self.mapper_page_data)
@@ -658,6 +661,7 @@ class GraphDataGenerator(SparkProcessorParsed):
         del spark
         return results
         '''
+
 
     def generate_backup(self, edge_type, results_basename, page_data, data_type):
         # Create a SparkSession
