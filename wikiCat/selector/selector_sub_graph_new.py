@@ -68,9 +68,7 @@ class SeparateSubGraph(GraphSelector):
 
         print(SparkConf().getAll())
 
-        #conf = SparkConf().setMaster("local[*]").setAppName("Subgraph")
-        #sc = SparkContext(conf=conf)
-        #spark = SparkSession(sc).builder.appName("Create SubGraph").getOrCreate()
+        '''
 
         # Register dataframe for edges
         for i in range(len(self.data['edges'])):
@@ -217,32 +215,16 @@ class SeparateSubGraph(GraphSelector):
         #edge_results_df = spark.sql('SELECT source, target, etype, cscore FROM edge_results').distinct()
         edge_results_df = spark.sql('SELECT source, target, etype FROM edge_results').distinct()
 
-
         '''
-        #Todo: Working original. Needs to be reworked for large amount of event data.
-        # Register events dataframe
-        for i in range(len(self.graph.source_events)):
-            events_source = spark.sparkContext.textFile(os.path.join(self.graph.source_events_location, self.graph.source_events[i]))
-            events = events_source.map(self.mapper_events)
-            events_df = spark.createDataFrame(events).cache()
-            if i == 0:
-                all_events_df = events_df
-            else:
-                all_events_df = all_events_df.union(events_df)
 
-        print('Create events results')
-        # Process events based on edge_results_df
-        edge_results_df.createOrReplaceTempView("edge_results")
-        all_events_df.createOrReplaceTempView("events")
-        events_results_df = spark.sql('SELECT ev.revision, ev.source, ev.target, ev.event, ev.cscore '
-                                      'FROM events ev JOIN edge_results ed ON ev.source = ed.source '
-                                      'AND ev.target = ed.target')
-        '''
 
         for i in range(len(self.data['events'])):
             events_source = spark.sparkContext.textFile(
                 os.path.join(self.graph_path, self.data['events'][i]))
+            print(events_source)
+
             events = events_source.map(self.mapper_events)
+
             events_df = spark.createDataFrame(events).cache()
 
             # Process events based on edge_results_df
@@ -271,18 +253,6 @@ class SeparateSubGraph(GraphSelector):
         events_results = events_results_df.rdd.collect()
         self.write_list(os.path.join(results_path, events_results_file), events_results)
 
-        '''
-        # Assemble results data and register to project
-        self.results['source_edges'] = [edge_results_file]
-        self.results['source_events'] = [events_results_file]
-        self.results['location'] = results_path
-        self.results['type'] = 'subgraph'
-        self.results['derived_from'] = self.graph.curr_working_graph
-        self.results['seeds'] = seed
-        
-        self.data[str(title)] = self.results
-        self.graph.update_graph_data(self.data)
-        '''
 
         # todo in every spark script put sc.stop() at the end in order to enable chaining the processing steps.
         # without it one gets an error that only one sparkcontext can be created.
