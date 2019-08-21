@@ -262,6 +262,6 @@ class SeparateSubGraph(GraphSelector):
 
         # todo in every spark script put sc.stop() at the end in order to enable chaining the processing steps.
         # without it one gets an error that only one sparkcontext can be created.
-        sc.stop()
+        spark.stop()
         print('Subgraph creation finished.')
         return True
