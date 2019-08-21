@@ -88,7 +88,11 @@ class SeparateSubGraph(GraphSelector):
         if cats:
             self.results['cats'] = {}
             nodes = seed
+            print('nodes')
+            print(nodes)
             cat_edges_df = all_edges_df.where(all_edges_df.etype == 'cat')
+            print('cat edges')
+            cat_edges_df.show()
             if subcats is not None:
                 self.results['cats']['subcats'] = subcats
                 for i in range(subcats):
