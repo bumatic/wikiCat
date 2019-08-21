@@ -504,11 +504,11 @@ class GraphDataGenerator(SparkProcessorParsed):
         if not os.path.exists('manual_graph_data_generation'):
             os.mkdir('manual_graph_data_generation')
 
-        edges_results_path = os.path.join('manual_graph_data_generation', results_basename + '_edges')
+        edges_results_path = os.path.join('manual_graph_data_generation', results_basename + '_edges/')
         print(edges_results_path)
         edges_results_file = os.path.join('manual_graph_data_generation', results_basename + '_edges.csv')
         print(edges_results_file)
-        events_results_path = os.path.join('manual_graph_data_generation', results_basename + '_events')
+        events_results_path = os.path.join('manual_graph_data_generation', results_basename + '_events/')
         print(events_results_path)
         events_results_file = os.path.join('manual_graph_data_generation', results_basename + '_events.csv')
         print(events_results_file)
