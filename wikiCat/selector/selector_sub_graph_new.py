@@ -82,6 +82,8 @@ class SeparateSubGraph(GraphSelector):
             else:
                 all_edges_df = all_edges_df.union(edges_df)
 
+        all_edges_df.show()
+
         # Process edges and generate edge_results_df
         edge_results_df = None
         result_nodes = seed
@@ -99,6 +101,7 @@ class SeparateSubGraph(GraphSelector):
                     print('subcats iteration ' + str(i+1))
                     tmp_results = cat_edges_df[cat_edges_df.target.isin(nodes)]
                     tmp_results.show()
+                    
                     if edge_results_df is None:
                         edge_results_df = tmp_results
                     else:
