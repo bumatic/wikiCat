@@ -71,3 +71,13 @@ for i in range(len(data['events'])):
     #print('============================================================')
     #print(events_source)
     #print('end')
+
+
+'''
+Results:
+project/01_data/02_data_graph/enwiki-20180701-pages-meta-history10.xml-p2505803p2535938_links_events.csv MapPartitionsRDD[162] at textFile at <unknown>:0
+error for file:
+project/01_data/02_data_graph/enwiki-20180701-pages-meta-history13.xml-p5096987p5137296_links_events.csv MapPartitionsRDD[508] at textFile at <unknown>:0
+
+These two event files are empty
+'''
