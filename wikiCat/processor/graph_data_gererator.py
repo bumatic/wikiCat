@@ -481,11 +481,13 @@ class GraphDataGenerator(SparkProcessorParsed):
                 revision_info_df.show()
             revision_info_df.createOrReplaceTempView("revision")
 
+
         compressed = False
         if page_data[-2:] == '7z':
             compressed = True
         if compressed:
             subprocess.call(['7z', 'e', os.path.join(self.data_path, page_data), '-o'+self.data_path, '-y'])
+        '''
         if edge_type == 'cats':
             f = 'cats.csv'
             results_basename = 'cats'
@@ -494,7 +496,7 @@ class GraphDataGenerator(SparkProcessorParsed):
             results_basename = page_data[:-7]
 
         print('Processing file:' + str(results_basename))
-        '''
+
 
         # Results files
         edges_results_path = os.path.join(self.results_path, results_basename + '_edges/')
