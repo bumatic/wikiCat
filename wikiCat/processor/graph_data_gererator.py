@@ -686,16 +686,20 @@ class GraphDataGenerator(SparkProcessorParsed):
 
         events_df.createOrReplaceTempView("events")
 
+        '''
+        # REMOVED FOR DEBUGGING TEST: 
+        
         # 9. RESOLVE REVISION_ID TO TIMES, SORT BY TIME, AND STORE
         events_df = spark.sql('SELECT r.rev_date as revision, e.source, e.target, e.event, r.rev_author as author '
                               'FROM events e JOIN revision r ON e.revision = r.rev_id').distinct().sort('revision')
-
+        
         if self.debugging:
             print('9')
             events_df.show()
             logger.info('9')
             log_data = pd.DataFrame(events_df.head(10), columns=events_df.columns)
             logger.info(log_data)
+        '''
 
         events_df.write.format('com.databricks.spark.csv').option('header', 'false').option('delimiter', '\t')\
             .save(events_results_path)
