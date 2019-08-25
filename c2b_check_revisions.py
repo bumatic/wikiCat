@@ -5,7 +5,7 @@ event_data_file = os.path.join('manual_graph_data_generation', 'enwiki-20180701-
 event_data = pd.read_csv(event_data_file, delimiter='\t', names=['source', 'target', 'rev_id', 'event'])
 
 
-chunksize = 1000000
+chunksize = 10000000
 rev_data_file = os.path.join('project', '01_data', '01_parsed', 'revisions.csv')
 rev_data = pd.read_csv(rev_data_file, delimiter='\t', names=['page_id', 'rev_id', 'ts', 'author_id'], chunksize=chunksize)
 
