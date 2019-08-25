@@ -34,7 +34,7 @@ def retrieve_revisions_json (input_array, lang, directory):
         outfile.write('{"results": [')
         first = True
         for ids in tqdm(id_request_array, desc='Retrieve revisions'):
-            for response in query({'list': 'allrevisions', 'limit': 'max', 'arvprops': 'ids|timestamp|userid|user', 'prop': 'links|categories', 'pageids' : ids[0]}, lang):
+            for response in query({'list': 'allrevisions', 'limit': 'max', 'arvprops': 'ids|timestamp|userid|user', 'prop': 'links|categories', 'pageids' : ids}, lang):
                 if first:
                     json.dump(response, outfile)
                     first = False
