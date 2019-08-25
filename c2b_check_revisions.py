@@ -9,7 +9,7 @@ event_data_file = os.path.join('manual_graph_data_generation', 'enwiki-20180701-
 event_data = pd.read_csv(event_data_file, delimiter='\t', names=['source', 'target', 'rev_id', 'event'])
 
 print('Number of unique sources')
-print(len(event_data.source(drop_duplicates())))
+print(len(event_data.source.drop_duplicates()))
 
 
 def query(request, lang):
