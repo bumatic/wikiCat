@@ -431,7 +431,7 @@ class GraphDataGenerator(SparkProcessorParsed):
         logging.basicConfig(filename=logger_file,
                             filemode='a',
                             format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
-                            datefmt='%H:%M:%S',
+                            datefmt='%Y-%m-%d %H:%M:%S',
                             level=logging.INFO)
         logger = logging.getLogger('Generate Manual Logger')
 
