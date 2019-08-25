@@ -5,6 +5,13 @@ import json
 from tqdm import tqdm
 
 
+event_data_file = os.path.join('manual_graph_data_generation', 'enwiki-20180701-pages-meta-history10.xml-p2505803p2535938_links_events.csv')
+event_data = pd.read_csv(event_data_file, delimiter='\t', names=['source', 'target', 'rev_id', 'event'])
+
+print('Number of unique sources')
+print(len(event_data.source(drop_duplicates())))
+
+
 def query(request, lang):
     request['action'] = 'query'
     request['format'] = 'json'
@@ -53,8 +60,7 @@ retrieve_revisions_json([2513427], 'en', '')
 
 #https://en.wikipedia.org/w/api.php?action=query&list=allrevisions&pageids=2513427|2517159&arvprop=ids|timestamp|userid|user&arvlimit=max
 
-#event_data_file = os.path.join('manual_graph_data_generation', 'enwiki-20180701-pages-meta-history10.xml-p2505803p2535938_links_events.csv')
-#event_data = pd.read_csv(event_data_file, delimiter='\t', names=['source', 'target', 'rev_id', 'event'])
+
 
 
 
