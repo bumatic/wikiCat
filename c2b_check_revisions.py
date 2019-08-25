@@ -34,7 +34,10 @@ def retrieve_revisions_json (input_array, lang, directory):
         outfile.write('{"results": [')
         first = True
         for ids in tqdm(id_request_array, desc='Retrieve revisions'):
-            for response in query({'list': 'allrevisions', 'limit': 'max', 'arvprops': 'ids|timestamp|userid|user', 'prop': 'links|categories', 'pageids' : ids}, lang):
+            for response in query({'list': 'allrevisions',
+                                   'arvlimit': 'max',
+                                   'arvprop': 'ids|timestamp|userid|user',
+                                   'pageids' : ids}, lang):
                 if first:
                     json.dump(response, outfile)
                     first = False
@@ -48,7 +51,7 @@ def retrieve_revisions_json (input_array, lang, directory):
 retrieve_revisions_json([2513427], 'en', '')
 
 
-#https://en.wikipedia.org/w/api.php?action=query&list=allrevisions&pageids=2513427|2517159&arvprop=ids|timestamp|userid|user&limit=200
+#https://en.wikipedia.org/w/api.php?action=query&list=allrevisions&pageids=2513427|2517159&arvprop=ids|timestamp|userid|user&arvlimit=max
 
 #event_data_file = os.path.join('manual_graph_data_generation', 'enwiki-20180701-pages-meta-history10.xml-p2505803p2535938_links_events.csv')
 #event_data = pd.read_csv(event_data_file, delimiter='\t', names=['source', 'target', 'rev_id', 'event'])
