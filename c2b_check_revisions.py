@@ -17,7 +17,7 @@ rev_data = pd.read_csv(rev_data_file, delimiter='\t', names=['page_id', 'rev_id'
 
 for chunk in rev_data:
     #print(event_data.merge(chunk, left_on='rev_id', right_on='rev_id'))
-    print(chunk[chunk['page_id'] == 2513427 | chunk['page_id'] == '2513427'])
+    print(chunk[chunk['page_id'] == 2513427])
 
 
 '''
