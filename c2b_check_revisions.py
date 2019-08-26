@@ -5,13 +5,22 @@ import json
 from tqdm import tqdm
 
 
-event_data_file = os.path.join('manual_graph_data_generation', 'enwiki-20180701-pages-meta-history10.xml-p2505803p2535938_links_events.csv')
-event_data = pd.read_csv(event_data_file, delimiter='\t', names=['source', 'target', 'rev_id', 'event'])
+#event_data_file = os.path.join('manual_graph_data_generation', 'enwiki-20180701-pages-meta-history10.xml-p2505803p2535938_links_events.csv')
+#event_data = pd.read_csv(event_data_file, delimiter='\t', names=['source', 'target', 'rev_id', 'event'])
+#print('Number of unique sources')
+#print(len(event_data.source.drop_duplicates()))
 
-print('Number of unique sources')
-print(len(event_data.source.drop_duplicates()))
+
+chunksize = 10000000
+rev_data_file = os.path.join('project', '01_data', '01_parsed', 'revisions.csv')
+rev_data = pd.read_csv(rev_data_file, delimiter='\t', names=['page_id', 'rev_id', 'ts', 'author_id'], chunksize=chunksize)
+
+for chunk in rev_data:
+    #print(event_data.merge(chunk, left_on='rev_id', right_on='rev_id'))
+    print(rev_data[rev_data['page_id'] == 2513427 | rev_data['page_id'] == '2513427'])
 
 
+'''
 def query(request, lang):
     request['action'] = 'query'
     request['format'] = 'json'
@@ -56,17 +65,11 @@ def retrieve_revisions_json (input_array, lang, directory):
 
 
 retrieve_revisions_json([2513427], 'en', '')
-
-
 #https://en.wikipedia.org/w/api.php?action=query&list=allrevisions&pageids=2513427|2517159&arvprop=ids|timestamp|userid|user&arvlimit=max
+'''
 
 
 
 
 
-#chunksize = 10000000
-#rev_data_file = os.path.join('project', '01_data', '01_parsed', 'revisions.csv')
-#rev_data = pd.read_csv(rev_data_file, delimiter='\t', names=['page_id', 'rev_id', 'ts', 'author_id'], chunksize=chunksize)
 
-#for chunk in rev_data:
-#    print(event_data.merge(chunk, left_on='rev_id', right_on='rev_id'))
