@@ -25,11 +25,14 @@ print(len(event_data.merge(rev_data, left_on='rev_id', right_on='rev_id')))
 print(len(event_data[event_data.rev_id.isin(rev_data.rev_id)]))
 
 
-print(len(rev_data[rev_data.rev_id.isin(event_data.rev_id)]))
-print(rev_data[rev_data.rev_id.isin(event_data.rev_id)].head())
+
+rev_data_new = rev_data[rev_data.rev_id.isin(event_data.rev_id)]
+print(len(rev_data_new))
+print(rev_data_new.head())
+
+rev_data_new.to_csv(os.path.join('manual_graph_data_generation', 'revisions_new_final.csv'), sep='\t', index=None, header=None)
 
 
-#rev_new_2 = rev_data[rev_data.rev_id.isin(rel_rev.rev_id)]
 
 
 
