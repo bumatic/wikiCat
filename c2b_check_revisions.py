@@ -7,6 +7,19 @@ from tqdm import tqdm
 
 event_data_file = os.path.join('manual_graph_data_generation', 'enwiki-20180701-pages-meta-history10.xml-p2505803p2535938_links_events.csv')
 event_data = pd.read_csv(event_data_file, delimiter='\t', names=['source', 'target', 'rev_id', 'event'])
+
+
+print('Benchmark number: 959197')
+
+
+rev_data = pd.read_csv(os.path.join('manual_graph_data_generation', 'revisions_new_final.csv'), sep='\t', names=['page_id', 'rev_id', 'ts', 'author_id'])
+print(len(event_data[event_data.rev_id.isin(rev_data.rev_id)]))
+
+print(len(event_data[~event_data.rev_id.isin(rev_data.rev_id)]))
+
+print(event_data[~event_data.rev_id.isin(rev_data.rev_id)])
+
+'''
 print('Number of unique sources')
 print(len(event_data.source.drop_duplicates()))
 
@@ -35,7 +48,7 @@ rev_data_new.to_csv(os.path.join('manual_graph_data_generation', 'revisions_new_
 print(len(rev_data2))
 print(len(rev_data_new))
 
-
+'''
 
 
 
