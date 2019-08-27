@@ -20,4 +20,6 @@ print(len(rev_new))
 rev_new.to_csv('revisions_reduced_new.csv', index=None, sep='\t', header=None)
 
 
-
+rev_new_2 = rev_data[rev_data.rev_id.isin(rel_rev.rev_id)]
+rev_new_2.to_csv(os.path.join('manual_graph_data_generation', 'revisions_reduced_new2.csv'), index=None, sep='\t', header=None)
+print(len(rev_new_2))
