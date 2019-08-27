@@ -17,10 +17,12 @@ print(len(event_data))
 rev_data_file = os.path.join('manual_graph_data_generation', 'revisions_reduced_new.csv')
 rev_data = pd.read_csv(rev_data_file, delimiter='\t', names=['page_id', 'rev_id', 'ts', 'author_id'])
 print(len(event_data.merge(rev_data, left_on='rev_id', right_on='rev_id')))
+print(len(event_data[event_data.rev_id.isin(rev_data.rev_id)]))
 
 rev_data_file = os.path.join('manual_graph_data_generation', 'revisions_parsed_new.csv')
 rev_data = pd.read_csv(rev_data_file, delimiter='\t', names=['page_id', 'rev_id', 'ts', 'author_id'])
 print(len(event_data.merge(rev_data, left_on='rev_id', right_on='rev_id')))
+print(len(event_data[event_data.rev_id.isin(rev_data.rev_id)]))
 
 
 
