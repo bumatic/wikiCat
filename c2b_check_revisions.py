@@ -13,13 +13,13 @@ print(len(event_data.source.drop_duplicates()))
 #event_data = event_data.drop_duplicates('rev_id')
 #print(len(event_data))
 
-rev_data_file = os.path.join('manual_graph_data_generation', 'revisions_parsed_new.csv')
-rev_data = pd.read_csv(rev_data_file, delimiter='\t', names=['page_id', 'rev_id', 'ts', 'author_id'])
-print(len(event_data.merge(rev_data, left_on='rev_id', right_on='rev_id')))
-print(len(event_data[event_data.rev_id.isin(rev_data.rev_id)]))
-
 
 rev_data_file = os.path.join('manual_graph_data_generation', 'revisions_reduced_new.csv')
+rev_data2 = pd.read_csv(rev_data_file, delimiter='\t', names=['page_id', 'rev_id', 'ts', 'author_id'])
+print(len(event_data.merge(rev_data2, left_on='rev_id', right_on='rev_id')))
+print(len(event_data[event_data.rev_id.isin(rev_data2.rev_id)]))
+
+rev_data_file = os.path.join('manual_graph_data_generation', 'revisions_parsed_new.csv')
 rev_data = pd.read_csv(rev_data_file, delimiter='\t', names=['page_id', 'rev_id', 'ts', 'author_id'])
 print(len(event_data.merge(rev_data, left_on='rev_id', right_on='rev_id')))
 print(len(event_data[event_data.rev_id.isin(rev_data.rev_id)]))
@@ -32,7 +32,7 @@ print(rev_data_new.head())
 rev_data_new.to_csv(os.path.join('manual_graph_data_generation', 'revisions_new_final.csv'), sep='\t', index=None, header=None)
 
 
-print(len(rev_data))
+print(len(rev_data2))
 print(len(rev_data_new))
 
 
