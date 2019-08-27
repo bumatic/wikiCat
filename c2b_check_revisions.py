@@ -33,7 +33,8 @@ print(rev_data_new.head())
 rev_data_new.to_csv(os.path.join('manual_graph_data_generation', 'revisions_new_final.csv'), sep='\t', index=None, header=None)
 
 
-
+print(len(rev_data))
+print(len(rev_data_new))
 
 
 
