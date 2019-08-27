@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+import numpy as np
 import requests
 import json
 from tqdm import tqdm
@@ -8,16 +9,32 @@ from tqdm import tqdm
 event_data_file = os.path.join('manual_graph_data_generation', 'enwiki-20180701-pages-meta-history10.xml-p2505803p2535938_links_events.csv')
 event_data = pd.read_csv(event_data_file, delimiter='\t', names=['source', 'target', 'rev_id', 'event'])
 
+print('number of total events')
+print(len(event_data))
 
-print('Benchmark number: 959197')
+print('events with no rev id')
+print(len(event_data[event_data.rev_id == np.nan]))
+
+print('events with rev id')
+event_data = event_data[event_data.rev_id != np.nan]
+print(len(event_data))
+
+print('cast dtype of rev id')
+event_data.rev_id.astype('int32')
+print(event_data.dtypes)
+
+uevents = event_data.drop_duplicates('rev_id')
+print('unique events')
+print(len(uevents))
 
 
-rev_data = pd.read_csv(os.path.join('manual_graph_data_generation', 'revisions_new_final.csv'), sep='\t', names=['page_id', 'rev_id', 'ts', 'author_id'])
-print(len(event_data[event_data.rev_id.isin(rev_data.rev_id)]))
 
-print(len(event_data[~event_data.rev_id.isin(rev_data.rev_id)]))
+#print('Benchmark number: 959197')
 
-print(event_data[~event_data.rev_id.isin(rev_data.rev_id)])
+#rev_data = pd.read_csv(os.path.join('manual_graph_data_generation', 'revisions_new_final.csv'), sep='\t', names=['page_id', 'rev_id', 'ts', 'author_id'])
+#print(len(event_data[event_data.rev_id.isin(rev_data.rev_id)]))
+#print(len(event_data[~event_data.rev_id.isin(rev_data.rev_id)]))
+#print(event_data[~event_data.rev_id.isin(rev_data.rev_id)])
 
 '''
 print('Number of unique sources')
