@@ -5,10 +5,10 @@ import json
 from tqdm import tqdm
 
 
-#event_data_file = os.path.join('manual_graph_data_generation', 'enwiki-20180701-pages-meta-history10.xml-p2505803p2535938_links_events.csv')
-#event_data = pd.read_csv(event_data_file, delimiter='\t', names=['source', 'target', 'rev_id', 'event'])
-#print('Number of unique sources')
-#print(len(event_data.source.drop_duplicates()))
+event_data_file = os.path.join('manual_graph_data_generation', 'enwiki-20180701-pages-meta-history10.xml-p2505803p2535938_links_events.csv')
+event_data = pd.read_csv(event_data_file, delimiter='\t', names=['source', 'target', 'rev_id', 'event'])
+print('Number of unique sources')
+print(len(event_data.source.drop_duplicates()))
 
 
 chunksize = 10000000
