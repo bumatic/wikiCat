@@ -2,14 +2,13 @@ from wikiCat.wikiproject import Project
 from wikiCat.processor.graph_data_gererator import GraphDataGenerator
 mp = Project()
 
-
+# "enwiki-20180701-pages-meta-history10.xml-p2505803p2535938_links.csv.7z": "done",
 
 processing = {
     "graph_data": {
         "page_info": "done",
         "cats": {},
         "links": {
-            "enwiki-20180701-pages-meta-history10.xml-p2505803p2535938_links.csv.7z": "init",
             "enwiki-20180701-pages-meta-history13.xml-p5096987p5137296_links.csv.7z": "init"
         }
     }
