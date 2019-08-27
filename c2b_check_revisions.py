@@ -20,7 +20,7 @@ event_data = event_data[~event_data.rev_id.isna()]
 print(len(event_data))
 
 print('cast dtype of rev id')
-event_data.rev_id.astype('int32')
+event_data.rev_id = event_data.rev_id.astype('int64')
 print(event_data.dtypes)
 
 uevents = event_data.drop_duplicates('rev_id')
@@ -28,13 +28,22 @@ print('unique events')
 print(len(uevents))
 
 
+rev_data = pd.read_csv(os.path.join('manual_graph_data_generation', 'revisions_new_final.csv'), sep='\t', names=['page_id', 'rev_id', 'ts', 'author_id'])
+print('unique events resolved')
+print(len(uevents[uevents.rev_id.isin(rev_data.rev_id)]))
+
+print('total events resolved')
+print(len(event_data[event_data.rev_id.isin(rev_data.rev_id)]))
+
+print('total events not resolved')
+print(len(event_data[~event_data.rev_id.isin(rev_data.rev_id)]))
+print(event_data[~event_data.rev_id.isin(rev_data.rev_id)])
+
+
+
 
 #print('Benchmark number: 959197')
 
-#rev_data = pd.read_csv(os.path.join('manual_graph_data_generation', 'revisions_new_final.csv'), sep='\t', names=['page_id', 'rev_id', 'ts', 'author_id'])
-#print(len(event_data[event_data.rev_id.isin(rev_data.rev_id)]))
-#print(len(event_data[~event_data.rev_id.isin(rev_data.rev_id)]))
-#print(event_data[~event_data.rev_id.isin(rev_data.rev_id)])
 
 '''
 print('Number of unique sources')
