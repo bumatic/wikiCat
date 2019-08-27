@@ -10,8 +10,8 @@ event_data = pd.read_csv(event_data_file, delimiter='\t', names=['source', 'targ
 print('Number of unique sources')
 print(len(event_data.source.drop_duplicates()))
 
-event_data = event_data.drop_duplicates('rev_id')
-print(len(event_data))
+#event_data = event_data.drop_duplicates('rev_id')
+#print(len(event_data))
 
 
 rev_data_file = os.path.join('manual_graph_data_generation', 'revisions_reduced_new.csv')
@@ -25,7 +25,8 @@ print(len(event_data.merge(rev_data, left_on='rev_id', right_on='rev_id')))
 print(len(event_data[event_data.rev_id.isin(rev_data.rev_id)]))
 
 
-
+print(len(rev_data[rev_data.rev_id.isin(event_data.rev_id)]))
+print(rev_data[rev_data.rev_id.isin(event_data.rev_id)].head())
 
 
 #rev_new_2 = rev_data[rev_data.rev_id.isin(rel_rev.rev_id)]
