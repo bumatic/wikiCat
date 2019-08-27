@@ -13,10 +13,10 @@ print('number of total events')
 print(len(event_data))
 
 print('events with no rev id')
-print(len(event_data[event_data.rev_id == np.nan]))
+print(len(event_data[event_data.rev_id.isna()]))
 
 print('events with rev id')
-event_data = event_data[event_data.rev_id != np.nan]
+event_data = event_data[~event_data.rev_id.isna()]
 print(len(event_data))
 
 print('cast dtype of rev id')
